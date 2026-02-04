@@ -1,0 +1,22 @@
+.env
+
+# IDEs
+.idea/
+*.iml
+
+# venv
+.venv/
+venv/
+
+# Python
+__pycache__/
+*.py[cod]
+
+# Data / outputs
+data/
+*.csv
+*.fasta
+*.fa
+*.dat
+*.npz
+*.html
