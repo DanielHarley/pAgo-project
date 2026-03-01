@@ -6,7 +6,7 @@ from Bio import Entrez
 def ncbi_protein_id_extract(
         *,
         ncbi_email: str,
-        ncbi_api: Optional[str],
+        ncbi_api_key: Optional[str],
         query: str,
 ) -> List[str]:
 
@@ -15,18 +15,21 @@ def ncbi_protein_id_extract(
 
         Args:
             ncbi_email: Required by NCBI usage policies / best practice.
-            ncbi_api: Optional NCBI API key. If provided, higher request rate allowed.
+            ncbi_api_key: Optional NCBI API key. If provided, higher request rate allowed.
             query: Entrez search term.
 
         Returns:
             List[str]: Protein IDs.
         """
 
-    if ncbi_email is None:
+    if not ncbi_email:
         raise ValueError(
             "No NCBI email credential found. Please add .env file with NCBI_EMAIL. NCBI_API_KEY is optional.")
     else:
         print("NCBI credentials found.")
+
+    Entrez.email = ncbi_email
+    Entrez.api_key = ncbi_api_key
 
     ret_max = 1000
     ret_start = 0
@@ -40,7 +43,7 @@ def ncbi_protein_id_extract(
 
     protein_id_list: List[str] = []
 
-    request_delay = 0.1 if ncbi_api else 0.34
+    request_delay = 0.1 if ncbi_api_key else 0.34
 
     max_retries = 5
 
