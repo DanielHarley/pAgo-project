@@ -3,13 +3,13 @@ import time
 from typing import List, Optional
 from Bio import Entrez
 
+
 def ncbi_protein_id_extract(
         *,
         ncbi_email: str,
         ncbi_api_key: Optional[str],
         query: str,
 ) -> List[str]:
-
     """
         Extract NCBI protein IDs from an Entrez search query (batched).
 
@@ -34,36 +34,58 @@ def ncbi_protein_id_extract(
     ret_max = 1000
     ret_start = 0
 
-    handle = Entrez.esearch(db='protein', term=query, retmax=0, retstart=ret_start)
-    result = Entrez.read(handle)
+    # First esearch: save dataset in History Server (run snapshot)
+
+    handle = Entrez.esearch(
+        db='protein',
+        term=query,
+        retmax=0,
+        idtype='acc',
+        usehistory='y',
+    )
+    page = Entrez.read(handle)
     handle.close()
 
-    protein_id_count = int(result['Count'])
-    print(f"Found {protein_id_count} protein IDs.")
+    protein_id_count = int(page['Count'])
+    print(f'Found {protein_id_count} protein IDs.')
+
+    webenv = page['WebEnv']
+    query_key = page['QueryKey']
+
+    print(f'History session: WebEnv={webenv}, QueryKey={query_key}.')
 
     protein_id_list: List[str] = []
 
     request_delay = 0.1 if ncbi_api_key else 0.34
-
     max_retries = 5
 
+    # Consistent pagination with WebEnv and query_key
     while ret_start < protein_id_count:
 
         for attempt in range(max_retries):
 
             try:
-                handle = Entrez.esearch(db='protein', term=query, retmax=ret_max, retstart=ret_start)
-                result = Entrez.read(handle)
+                handle = Entrez.esearch(
+                    db='protein',
+                    term=query,
+                    idtype='acc',
+                    usehistory='y',
+                    retmax=ret_max,
+                    retstart=ret_start,
+                    WebEnv=webenv,
+                    query_key=query_key,
+                )
+                page = Entrez.read(handle)
                 handle.close()
 
-                protein_ids_this_batch = result['IdList']
+                protein_ids_this_batch = page['IdList']
                 protein_id_list.extend(protein_ids_this_batch)
 
                 ret_start += ret_max
 
                 if protein_id_count > 0:
                     progress = min(ret_start / protein_id_count, 1.0)
-                    print(f"Extracted {len(protein_id_list)} protein IDs ({progress:.2%}).")
+                    print(f'Extracted {len(protein_id_list)} protein IDs ({progress:.2%}).')
 
                 jitter = random.uniform(0.01, 0.05)
                 time.sleep(request_delay + jitter)
