@@ -14,9 +14,9 @@ from src.pago_pipeline.storage import sha256_of_lines
 
 
 @dataclass(frozen=True)
-class NCBIProteinIdFetchResult:
+class NCBIProteinUidFetchResult:
     """
-    Immutable payload representing one NCBI protein-ID retrieval event.
+    Immutable payload representing one NCBI protein-UID retrieval event.
 
     This object is designed to become the basis of a reproducible local snapshot.
     """
@@ -26,12 +26,12 @@ class NCBIProteinIdFetchResult:
     identifier_type: str
     retrieved_at_utc: str
     ncbi_reported_result_count: int
-    protein_ids: List[str]
-    raw_protein_id_count: int
-    normalized_protein_id_count: int
-    deduplicate_ids: bool
-    sort_ids: bool
-    protein_ids_sha256: str
+    protein_uids: List[str]
+    raw_protein_uid_count: int
+    normalized_protein_uid_count: int
+    deduplicate_uids: bool
+    sort_uids: bool
+    protein_uids_sha256: str
     page_size: int
     request_delay_seconds: float
     max_retry_attempts: int
@@ -41,56 +41,56 @@ class NCBIProteinIdFetchResult:
     biopython_version: str
 
 
-def _normalize_protein_id_list(
+def _normalize_protein_uid_list(
     *,
-    protein_ids: List[str],
-    deduplicate_ids: bool,
-    sort_ids: bool,
+    protein_uids: List[str],
+    deduplicate_uids: bool,
+    sort_uids: bool,
 ) -> List[str]:
     """
-    Normalize protein IDs by:
+    Normalize protein UIDs by:
     - casting to str
     - stripping surrounding whitespace
     - removing empty values
     - optionally deduplicating while preserving first occurrence order
     - optionally sorting canonically
     """
-    normalized_protein_ids = [
-        str(protein_id).strip()
-        for protein_id in protein_ids
-        if str(protein_id).strip()
+    normalized_protein_uids = [
+        str(protein_uid).strip()
+        for protein_uid in protein_uids
+        if str(protein_uid).strip()
     ]
 
-    if deduplicate_ids:
-        unique_protein_ids: List[str] = []
-        seen_protein_ids = set()
+    if deduplicate_uids:
+        unique_protein_uids: List[str] = []
+        seen_protein_uids = set()
 
-        for protein_id in normalized_protein_ids:
-            if protein_id not in seen_protein_ids:
-                seen_protein_ids.add(protein_id)
-                unique_protein_ids.append(protein_id)
+        for protein_uid in normalized_protein_uids:
+            if protein_uid not in seen_protein_uids:
+                seen_protein_uids.add(protein_uid)
+                unique_protein_uids.append(protein_uid)
 
-        normalized_protein_ids = unique_protein_ids
+        normalized_protein_uids = unique_protein_uids
 
-    if sort_ids:
-        normalized_protein_ids = sorted(normalized_protein_ids)
+    if sort_uids:
+        normalized_protein_uids = sorted(normalized_protein_uids)
 
-    return normalized_protein_ids
+    return normalized_protein_uids
 
 
-def fetch_ncbi_protein_id_snapshot(
+def fetch_ncbi_protein_uid_snapshot(
     *,
     ncbi_email: str,
     ncbi_api_key: Optional[str],
     query: str,
-    deduplicate_ids: bool = True,
-    sort_ids: bool = True,
+    deduplicate_uids: bool = True,
+    sort_uids: bool = True,
     page_size: int = 1000,
     max_retry_attempts: int = 5,
     request_delay_seconds: Optional[float] = None,
-) -> NCBIProteinIdFetchResult:
+) -> NCBIProteinUidFetchResult:
     """
-    Retrieve protein IDs from NCBI Entrez and return a snapshot-ready payload.
+    Retrieve protein UIDs from NCBI Entrez and return a snapshot-ready payload.
 
     Important:
     - This function does NOT provide long-term reproducibility by itself.
@@ -104,12 +104,12 @@ def fetch_ncbi_protein_id_snapshot(
             Optional NCBI API key. If provided, a higher request rate is allowed.
         query:
             Entrez search term.
-        deduplicate_ids:
-            Whether to deduplicate IDs in the returned payload.
-        sort_ids:
-            Whether to sort IDs canonically in the returned payload.
+        deduplicate_uids:
+            Whether to deduplicate UIDs in the returned payload.
+        sort_uids:
+            Whether to sort UIDs canonically in the returned payload.
         page_size:
-            Number of protein IDs requested per paginated Entrez call.
+            Number of protein UIDs requested per paginated Entrez call.
         max_retry_attempts:
             Maximum retry attempts for each failed paginated request.
         request_delay_seconds:
@@ -119,8 +119,8 @@ def fetch_ncbi_protein_id_snapshot(
             - 0.34 seconds otherwise
 
     Returns:
-        NCBIProteinIdFetchResult:
-            Snapshot-ready result including IDs and retrieval metadata.
+        NCBIProteinUidFetchResult:
+            Snapshot-ready result including UIDs and retrieval metadata.
     """
     if not ncbi_email:
         raise ValueError(
@@ -141,10 +141,13 @@ def fetch_ncbi_protein_id_snapshot(
     Entrez.api_key = ncbi_api_key
 
     database_name = "protein"
-    identifier_type = "acc"
+    identifier_type = "uid"
 
+    resolved_request_delay_seconds: float
     if request_delay_seconds is None:
-        request_delay_seconds = 0.10 if ncbi_api_key else 0.34
+        resolved_request_delay_seconds = 0.10 if ncbi_api_key else 0.34
+    else:
+        resolved_request_delay_seconds = request_delay_seconds
 
     retrieved_at_utc = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
@@ -152,7 +155,6 @@ def fetch_ncbi_protein_id_snapshot(
         db=database_name,
         term=query,
         retmax=0,
-        idtype=identifier_type,
         usehistory="y",
     )
     try:
@@ -165,16 +167,25 @@ def fetch_ncbi_protein_id_snapshot(
     history_web_env = initial_search_response.get("WebEnv")
     history_query_key = initial_search_response.get("QueryKey")
 
-    print(f"Found {ncbi_reported_result_count} protein IDs.")
+    print(f"Found {ncbi_reported_result_count} protein UIDs.")
     print(
         f"History session: WebEnv={history_web_env}, "
         f"QueryKey={history_query_key}."
     )
 
     if ncbi_reported_result_count == 0:
-        print("NCBI returned zero protein IDs for the provided query.")
+        print("NCBI returned zero protein UIDs for the provided query.")
 
-    raw_protein_ids: List[str] = []
+    if ncbi_reported_result_count > 0 and (
+        not history_web_env or not history_query_key
+    ):
+        raise RuntimeError(
+            "NCBI search history metadata is required to fetch "
+            "protein UIDs, but WebEnv/query_key was missing "
+            "from the ESearch response."
+        )
+
+    raw_protein_uids: List[str] = []
     page_start_index = 0
 
     while page_start_index < ncbi_reported_result_count:
@@ -183,56 +194,53 @@ def fetch_ncbi_protein_id_snapshot(
                 paginated_search_handle = Entrez.esearch(
                     db=database_name,
                     term=query,
-                    idtype=identifier_type,
                     usehistory="y",
                     retmax=page_size,
                     retstart=page_start_index,
-                    WebEnv=history_web_env,
-                    query_key=history_query_key,
                 )
                 try:
-                    search_response = Entrez.read(paginated_search_handle)
+                    paginated_search_response = Entrez.read(paginated_search_handle)
                 finally:
                     paginated_search_handle.close()
 
-                if "IdList" not in search_response:
+                if "IdList" not in paginated_search_response:
                     raise RuntimeError("NCBI response missing 'IdList'.")
 
-                current_batch_protein_ids = search_response["IdList"]
+                current_batch_protein_uids = paginated_search_response["IdList"]
 
-                if not current_batch_protein_ids:
+                if not current_batch_protein_uids:
                     raise RuntimeError(
                         "NCBI returned an empty IdList before the reported "
                         "result set was fully paginated."
                     )
 
-                raw_protein_ids.extend(current_batch_protein_ids)
-                page_start_index += len(current_batch_protein_ids)
+                raw_protein_uids.extend(current_batch_protein_uids)
+                page_start_index += len(current_batch_protein_uids)
 
                 retrieval_progress = min(
                     page_start_index / ncbi_reported_result_count,
                     1.0,
                 )
                 print(
-                    f"Extracted {len(raw_protein_ids)} protein IDs "
+                    f"Extracted {len(raw_protein_uids)} protein UIDs "
                     f"({retrieval_progress:.2%})."
                 )
 
                 jitter_seconds = random.uniform(0.01, 0.05)
-                time.sleep(request_delay_seconds + jitter_seconds)
+                time.sleep(resolved_request_delay_seconds + jitter_seconds)
                 break
 
             except Exception as error:
                 if retry_attempt_index == max_retry_attempts - 1:
                     raise RuntimeError(
-                        f"Failed to extract protein IDs after "
+                        f"Failed to extract protein UIDs after "
                         f"{max_retry_attempts} attempts at "
                         f"page_start_index={page_start_index}: {error}"
                     ) from error
 
                 retry_backoff_seconds = (
                     2 ** retry_attempt_index
-                ) * request_delay_seconds
+                ) * resolved_request_delay_seconds
 
                 print(
                     f"Retry {retry_attempt_index + 1}/{max_retry_attempts} "
@@ -240,36 +248,33 @@ def fetch_ncbi_protein_id_snapshot(
                 )
                 time.sleep(retry_backoff_seconds)
 
-    normalized_protein_ids = _normalize_protein_id_list(
-        protein_ids=raw_protein_ids,
-        deduplicate_ids=deduplicate_ids,
-        sort_ids=sort_ids,
+    normalized_protein_uids = _normalize_protein_uid_list(
+        protein_uids=raw_protein_uids,
+        deduplicate_uids=deduplicate_uids,
+        sort_uids=sort_uids,
     )
 
-    # The protein ID list has already been normalized according to the
-    # selected deduplication/sorting policy, so hashing must operate on
-    # the list exactly as received here.
-    protein_ids_sha256 = sha256_of_lines(
-        text_lines=normalized_protein_ids,
+    protein_uids_sha256 = sha256_of_lines(
+        text_lines=normalized_protein_uids,
         deduplicate_lines_preserving_order=False,
         sort_lines=False,
     )
 
-    fetch_result = NCBIProteinIdFetchResult(
+    fetch_result = NCBIProteinUidFetchResult(
         database_name=database_name,
         search_query=query,
         translated_query=translated_query,
         identifier_type=identifier_type,
         retrieved_at_utc=retrieved_at_utc,
         ncbi_reported_result_count=ncbi_reported_result_count,
-        protein_ids=normalized_protein_ids,
-        raw_protein_id_count=len(raw_protein_ids),
-        normalized_protein_id_count=len(normalized_protein_ids),
-        deduplicate_ids=deduplicate_ids,
-        sort_ids=sort_ids,
-        protein_ids_sha256=protein_ids_sha256,
+        protein_uids=normalized_protein_uids,
+        raw_protein_uid_count=len(raw_protein_uids),
+        normalized_protein_uid_count=len(normalized_protein_uids),
+        deduplicate_uids=deduplicate_uids,
+        sort_uids=sort_uids,
+        protein_uids_sha256=protein_uids_sha256,
         page_size=page_size,
-        request_delay_seconds=request_delay_seconds,
+        request_delay_seconds=resolved_request_delay_seconds,
         max_retry_attempts=max_retry_attempts,
         history_web_env=history_web_env,
         history_query_key=history_query_key,
@@ -277,11 +282,11 @@ def fetch_ncbi_protein_id_snapshot(
         biopython_version=getattr(Bio, "__version__", "unknown"),
     )
 
-    print(f"Final raw ID count: {fetch_result.raw_protein_id_count}")
+    print(f"Final raw UID count: {fetch_result.raw_protein_uid_count}")
     print(
-        "Final normalized ID count: "
-        f"{fetch_result.normalized_protein_id_count}"
+        "Final normalized UID count: "
+        f"{fetch_result.normalized_protein_uid_count}"
     )
-    print(f"Dataset SHA-256: {fetch_result.protein_ids_sha256}")
+    print(f"Dataset SHA-256: {fetch_result.protein_uids_sha256}")
 
     return fetch_result

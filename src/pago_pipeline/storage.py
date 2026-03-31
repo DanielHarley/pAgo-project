@@ -9,6 +9,17 @@ from typing import Any, Iterable, List, Union
 PathLike = Union[str, Path]
 
 
+def _as_path(path_like: PathLike) -> Path:
+    """
+    Convert PathLike input into pathlib.Path explicitly.
+
+    Keeping this conversion in one helper improves readability and helps
+    static type checkers understand that downstream variables are true Path
+    objects rather than Union[str, Path].
+    """
+    return Path(path_like)
+
+
 def _normalize_text_lines(
     *,
     text_lines: Iterable[str],
@@ -61,8 +72,8 @@ def write_text_lines_to_file(
     - optional sorting
     - atomic write (temp -> replace) to avoid partial artifacts
     """
-    output_file_path = Path(output_file_path)
-    output_file_path.parent.mkdir(parents=True, exist_ok=True)
+    resolved_output_file_path = _as_path(output_file_path)
+    resolved_output_file_path.parent.mkdir(parents=True, exist_ok=True)
 
     normalized_nonempty_lines = _normalize_text_lines(
         text_lines=text_lines,
@@ -73,17 +84,17 @@ def write_text_lines_to_file(
     with tempfile.NamedTemporaryFile(
         mode="w",
         delete=False,
-        dir=output_file_path.parent,
+        dir=resolved_output_file_path.parent,
         encoding=encoding,
         newline="\n",
     ) as temporary_file:
-        temporary_file_path = Path(temporary_file.name)
+        resolved_temporary_file_path = Path(temporary_file.name)
 
         for line in normalized_nonempty_lines:
             temporary_file.write(line + line_ending)
 
-    temporary_file_path.replace(output_file_path)
-    return output_file_path
+    resolved_temporary_file_path.replace(resolved_output_file_path)
+    return resolved_output_file_path
 
 
 def read_text_lines_from_file(
@@ -98,9 +109,13 @@ def read_text_lines_from_file(
 
     Useful when you want to reuse a frozen snapshot instead of calling NCBI again.
     """
-    input_file_path = Path(input_file_path)
+    resolved_input_file_path = _as_path(input_file_path)
 
-    with input_file_path.open("r", encoding=encoding, newline=None) as file_handle:
+    with resolved_input_file_path.open(
+        "r",
+        encoding=encoding,
+        newline=None,
+    ) as file_handle:
         lines = file_handle.readlines()
 
     if strip_lines:
@@ -128,17 +143,17 @@ def write_json_atomic(
 
     Appropriate for manifests, metadata, provenance, query parameters, hashes, etc.
     """
-    output_file_path = Path(output_file_path)
-    output_file_path.parent.mkdir(parents=True, exist_ok=True)
+    resolved_output_file_path = _as_path(output_file_path)
+    resolved_output_file_path.parent.mkdir(parents=True, exist_ok=True)
 
     with tempfile.NamedTemporaryFile(
         mode="w",
         delete=False,
-        dir=output_file_path.parent,
+        dir=resolved_output_file_path.parent,
         encoding=encoding,
         newline="\n",
     ) as temporary_file:
-        temporary_file_path = Path(temporary_file.name)
+        resolved_temporary_file_path = Path(temporary_file.name)
 
         json.dump(
             payload,
@@ -149,8 +164,8 @@ def write_json_atomic(
         )
         temporary_file.write("\n")
 
-    temporary_file_path.replace(output_file_path)
-    return output_file_path
+    resolved_temporary_file_path.replace(resolved_output_file_path)
+    return resolved_output_file_path
 
 
 def read_json_file(
@@ -161,9 +176,9 @@ def read_json_file(
     """
     Read and deserialize a JSON file.
     """
-    input_file_path = Path(input_file_path)
+    resolved_input_file_path = _as_path(input_file_path)
 
-    with input_file_path.open("r", encoding=encoding) as file_handle:
+    with resolved_input_file_path.open("r", encoding=encoding) as file_handle:
         return json.load(file_handle)
 
 
@@ -204,10 +219,10 @@ def sha256_of_file(
     """
     Compute SHA-256 from the raw bytes of an existing file.
     """
-    input_file_path = Path(input_file_path)
+    resolved_input_file_path = _as_path(input_file_path)
     hasher = hashlib.sha256()
 
-    with input_file_path.open("rb") as file_handle:
+    with resolved_input_file_path.open("rb") as file_handle:
         while True:
             chunk = file_handle.read(chunk_size)
             if not chunk:
@@ -217,19 +232,19 @@ def sha256_of_file(
     return hasher.hexdigest()
 
 
-def save_ncbi_protein_ids_as_txt(
+def save_ncbi_protein_uids_as_txt(
     *,
-    ncbi_protein_id_list: List[str],
+    ncbi_protein_uid_list: List[str],
     output_txt_file_path: PathLike,
-    deduplicate_ids: bool = True,
-    sort_ids: bool = False,
+    deduplicate_uids: bool = True,
+    sort_uids: bool = False,
 ) -> Path:
     """
-    Domain wrapper: save NCBI protein IDs (one per line) as .txt artifact.
+    Domain wrapper: save NCBI protein UIDs (one per line) as .txt artifact.
     """
     return write_text_lines_to_file(
-        text_lines=ncbi_protein_id_list,
+        text_lines=ncbi_protein_uid_list,
         output_file_path=output_txt_file_path,
-        deduplicate_lines_preserving_order=deduplicate_ids,
-        sort_lines=sort_ids,
+        deduplicate_lines_preserving_order=deduplicate_uids,
+        sort_lines=sort_uids,
     )
