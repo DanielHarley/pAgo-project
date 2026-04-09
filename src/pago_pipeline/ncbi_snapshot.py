@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import shutil
+import tempfile
 from dataclasses import asdict
 from enum import StrEnum
 import xml.etree.ElementTree as ET
@@ -252,6 +253,44 @@ def _build_snapshot_manifest(
     return manifest_payload
 
 
+def _replace_latest_directory(
+    *,
+    latest_directory: PathLike,
+    files_to_copy: list[tuple[PathLike, str]],
+) -> None:
+    """
+    Replace the convenience latest directory from a fully prepared temp copy.
+
+    This avoids exposing a partially populated latest/ directory if copying one
+    of the snapshot artifacts fails midway through the publish step.
+    """
+    resolved_latest_directory = _as_path(latest_directory)
+    resolved_latest_directory.parent.mkdir(parents=True, exist_ok=True)
+
+    temporary_latest_directory = Path(
+        tempfile.mkdtemp(
+            prefix=f"{resolved_latest_directory.name}_tmp_",
+            dir=resolved_latest_directory.parent,
+        )
+    )
+
+    try:
+        for source_file_path, destination_file_name in files_to_copy:
+            shutil.copy2(
+                _as_path(source_file_path),
+                temporary_latest_directory / destination_file_name,
+            )
+
+        if resolved_latest_directory.exists():
+            shutil.rmtree(resolved_latest_directory)
+
+        temporary_latest_directory.replace(resolved_latest_directory)
+    except Exception:
+        if temporary_latest_directory.exists():
+            shutil.rmtree(temporary_latest_directory, ignore_errors=True)
+        raise
+
+
 def _build_xml_snapshot_manifest(
     *,
     fetch_result: NCBIProteinXmlFetchResult,
@@ -327,35 +366,44 @@ def save_ncbi_protein_uid_snapshot(
         resolved_snapshot_root_directory / "snapshots" / snapshot_directory_name
     )
     immutable_snapshot_directory.mkdir(parents=True, exist_ok=False)
+    immutable_snapshot_complete = False
 
-    immutable_snapshot_relative_path = str(
-        Path("snapshots") / snapshot_directory_name
-    )
+    try:
+        immutable_snapshot_relative_path = str(
+            Path("snapshots") / snapshot_directory_name
+        )
 
-    protein_uids_file_path = immutable_snapshot_directory / "protein_uids.txt"
-    manifest_file_path = immutable_snapshot_directory / "manifest.json"
+        protein_uids_file_path = immutable_snapshot_directory / "protein_uids.txt"
+        manifest_file_path = immutable_snapshot_directory / "manifest.json"
 
-    _write_text_lines(
-        text_lines=fetch_result.protein_uids,
-        output_file_path=protein_uids_file_path,
-    )
+        _write_text_lines(
+            text_lines=fetch_result.protein_uids,
+            output_file_path=protein_uids_file_path,
+        )
 
-    manifest_payload = _build_snapshot_manifest(
-        fetch_result=fetch_result,
-        immutable_snapshot_directory_name=snapshot_directory_name,
-        immutable_snapshot_relative_path=immutable_snapshot_relative_path,
-    )
-    write_json_atomic(
-        payload=manifest_payload,
-        output_file_path=manifest_file_path,
-    )
+        manifest_payload = _build_snapshot_manifest(
+            fetch_result=fetch_result,
+            immutable_snapshot_directory_name=snapshot_directory_name,
+            immutable_snapshot_relative_path=immutable_snapshot_relative_path,
+        )
+        write_json_atomic(
+            payload=manifest_payload,
+            output_file_path=manifest_file_path,
+        )
+        immutable_snapshot_complete = True
 
-    if update_latest_directory:
-        latest_directory = resolved_snapshot_root_directory / "latest"
-        latest_directory.mkdir(parents=True, exist_ok=True)
-
-        shutil.copy2(protein_uids_file_path, latest_directory / "protein_uids.txt")
-        shutil.copy2(manifest_file_path, latest_directory / "manifest.json")
+        if update_latest_directory:
+            _replace_latest_directory(
+                latest_directory=resolved_snapshot_root_directory / "latest",
+                files_to_copy=[
+                    (protein_uids_file_path, "protein_uids.txt"),
+                    (manifest_file_path, "manifest.json"),
+                ],
+            )
+    except Exception:
+        if not immutable_snapshot_complete and immutable_snapshot_directory.exists():
+            shutil.rmtree(immutable_snapshot_directory, ignore_errors=True)
+        raise
 
     return immutable_snapshot_directory
 
@@ -412,86 +460,97 @@ def save_ncbi_protein_xml_snapshot(
         resolved_snapshot_root_directory / "snapshots" / snapshot_directory_name
     )
     immutable_snapshot_directory.mkdir(parents=True, exist_ok=False)
+    immutable_snapshot_complete = False
 
-    immutable_snapshot_relative_path = str(
-        Path("snapshots") / snapshot_directory_name
-    )
-
-    protein_uids_file_path = immutable_snapshot_directory / "protein_uids.txt"
-    manifest_file_path = immutable_snapshot_directory / "manifest.json"
-    consolidated_xml_file_name = "protein_records.xml"
-    consolidated_xml_file_path = (
-        immutable_snapshot_directory / consolidated_xml_file_name
-    )
-
-    save_ncbi_protein_uids_as_txt(
-        ncbi_protein_uid_list=protein_uids,
-        output_txt_file_path=protein_uids_file_path,
-        deduplicate_uids=False,
-        sort_uids=False,
-    )
-
-    batch_metadata_records: list[Dict[str, Any]] = []
-    for xml_batch in fetch_result.xml_batches:
-        batch_metadata_records.append(
-            {
-                "batch_index": xml_batch.batch_index,
-                "batch_start_index": xml_batch.batch_start_index,
-                "batch_end_index": xml_batch.batch_end_index,
-                "protein_uid_count": xml_batch.protein_uid_count,
-                "xml_payload_sha256": xml_batch.xml_payload_sha256,
-            }
+    try:
+        immutable_snapshot_relative_path = str(
+            Path("snapshots") / snapshot_directory_name
         )
 
-    consolidated_xml_payload, consolidated_record_count = (
-        _build_consolidated_xml_payload(fetch_result=fetch_result)
-    )
-
-    write_bytes_atomic(
-        binary_payload=consolidated_xml_payload,
-        output_file_path=consolidated_xml_file_path,
-    )
-
-    validated_record_count = _validate_saved_consolidated_xml_snapshot(
-        xml_file_path=consolidated_xml_file_path,
-        expected_record_count=consolidated_record_count,
-    )
-
-    consolidated_xml_file_sha256 = sha256_of_file(
-        input_file_path=consolidated_xml_file_path,
-    )
-
-    manifest_payload = _build_xml_snapshot_manifest(
-        fetch_result=fetch_result,
-        immutable_snapshot_directory_name=snapshot_directory_name,
-        immutable_snapshot_relative_path=immutable_snapshot_relative_path,
-        source_uid_snapshot_manifest=source_uid_snapshot_manifest,
-        source_uid_snapshot_manifest_sha256=source_uid_snapshot_manifest_sha256,
-        consolidated_xml_file_name=consolidated_xml_file_name,
-        consolidated_xml_file_sha256=consolidated_xml_file_sha256,
-        consolidated_record_count=validated_record_count,
-        batch_metadata_records=batch_metadata_records,
-    )
-
-    write_json_atomic(
-        payload=manifest_payload,
-        output_file_path=manifest_file_path,
-    )
-
-    if update_latest_directory:
-        latest_directory = resolved_snapshot_root_directory / "latest"
-
-        if latest_directory.exists():
-            shutil.rmtree(latest_directory)
-
-        latest_directory.mkdir(parents=True, exist_ok=False)
-
-        shutil.copy2(protein_uids_file_path, latest_directory / "protein_uids.txt")
-        shutil.copy2(manifest_file_path, latest_directory / "manifest.json")
-        shutil.copy2(
-            consolidated_xml_file_path,
-            latest_directory / consolidated_xml_file_name,
+        protein_uids_file_path = immutable_snapshot_directory / "protein_uids.txt"
+        manifest_file_path = immutable_snapshot_directory / "manifest.json"
+        consolidated_xml_file_name = "protein_records.xml"
+        consolidated_xml_file_path = (
+            immutable_snapshot_directory / consolidated_xml_file_name
         )
+
+        save_ncbi_protein_uids_as_txt(
+            ncbi_protein_uid_list=protein_uids,
+            output_txt_file_path=protein_uids_file_path,
+            deduplicate_uids=False,
+            sort_uids=False,
+        )
+
+        batch_metadata_records: list[Dict[str, Any]] = []
+        for xml_batch in fetch_result.xml_batches:
+            batch_metadata_records.append(
+                {
+                    "batch_index": xml_batch.batch_index,
+                    "batch_start_index": xml_batch.batch_start_index,
+                    "batch_end_index": xml_batch.batch_end_index,
+                    "protein_uid_count": xml_batch.protein_uid_count,
+                    "xml_payload_sha256": xml_batch.xml_payload_sha256,
+                }
+            )
+
+        consolidated_xml_payload, consolidated_record_count = (
+            _build_consolidated_xml_payload(fetch_result=fetch_result)
+        )
+        expected_record_count = fetch_result.normalized_protein_uid_count
+
+        if consolidated_record_count != expected_record_count:
+            raise RuntimeError(
+                "Consolidated XML snapshot record count does not match the "
+                "expected protein UID count. "
+                f"Expected {expected_record_count}, got "
+                f"{consolidated_record_count}."
+            )
+
+        write_bytes_atomic(
+            binary_payload=consolidated_xml_payload,
+            output_file_path=consolidated_xml_file_path,
+        )
+
+        validated_record_count = _validate_saved_consolidated_xml_snapshot(
+            xml_file_path=consolidated_xml_file_path,
+            expected_record_count=expected_record_count,
+        )
+
+        consolidated_xml_file_sha256 = sha256_of_file(
+            input_file_path=consolidated_xml_file_path,
+        )
+
+        manifest_payload = _build_xml_snapshot_manifest(
+            fetch_result=fetch_result,
+            immutable_snapshot_directory_name=snapshot_directory_name,
+            immutable_snapshot_relative_path=immutable_snapshot_relative_path,
+            source_uid_snapshot_manifest=source_uid_snapshot_manifest,
+            source_uid_snapshot_manifest_sha256=source_uid_snapshot_manifest_sha256,
+            consolidated_xml_file_name=consolidated_xml_file_name,
+            consolidated_xml_file_sha256=consolidated_xml_file_sha256,
+            consolidated_record_count=validated_record_count,
+            batch_metadata_records=batch_metadata_records,
+        )
+
+        write_json_atomic(
+            payload=manifest_payload,
+            output_file_path=manifest_file_path,
+        )
+        immutable_snapshot_complete = True
+
+        if update_latest_directory:
+            _replace_latest_directory(
+                latest_directory=resolved_snapshot_root_directory / "latest",
+                files_to_copy=[
+                    (protein_uids_file_path, "protein_uids.txt"),
+                    (manifest_file_path, "manifest.json"),
+                    (consolidated_xml_file_path, consolidated_xml_file_name),
+                ],
+            )
+    except Exception:
+        if not immutable_snapshot_complete and immutable_snapshot_directory.exists():
+            shutil.rmtree(immutable_snapshot_directory, ignore_errors=True)
+        raise
 
     return immutable_snapshot_directory
 
