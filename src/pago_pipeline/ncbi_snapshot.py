@@ -806,14 +806,8 @@ def resolve_ncbi_protein_xml_snapshot(
     snapshot_mode: SnapshotMode | str,
     snapshot_root_directory: PathLike,
     source_uid_snapshot_root_directory: PathLike,
-    search_query: str,
-    source_uid_snapshot_mode: SnapshotMode | str = SnapshotMode.reuse_latest_or_create,
-    deduplicate_uids: bool = True,
-    sort_uids: bool = True,
-    uid_page_size: int = 1000,
     xml_batch_size: int = 100,
     max_retry_attempts: int = 5,
-    uid_request_delay_seconds: Optional[float] = None,
     xml_request_delay_seconds: Optional[float] = None,
     ncbi_email: Optional[str] = None,
     ncbi_api_key: Optional[str] = None,
@@ -822,8 +816,9 @@ def resolve_ncbi_protein_xml_snapshot(
     """
     Resolve the active raw XML snapshot payload according to the requested mode.
 
-    If snapshot creation is needed, the XML retrieval is performed from an upstream
-    frozen UID snapshot.
+    If snapshot creation is needed, the XML retrieval is performed strictly from an
+    already-frozen upstream UID snapshot. This function does not create the source
+    UID snapshot; that upstream step must have been run previously.
     """
     resolved_snapshot_mode = _coerce_snapshot_mode(snapshot_mode)
     resolved_snapshot_root_directory = _as_path(snapshot_root_directory)
@@ -888,24 +883,23 @@ def resolve_ncbi_protein_xml_snapshot(
             "'create_new', 'reuse_latest', 'reuse_latest_or_create'."
         )
 
+    try:
+        source_uid_snapshot_payload = resolve_ncbi_protein_uid_snapshot(
+            snapshot_mode=SnapshotMode.reuse_latest,
+            snapshot_root_directory=source_uid_snapshot_root_directory,
+            search_query="upstream UID snapshot",
+        )
+    except FileNotFoundError as exc:
+        raise FileNotFoundError(
+            "No reusable source UID snapshot was found for the XML workflow. "
+            "Create the upstream protein UID snapshot before running the XML "
+            "snapshot step."
+        ) from exc
+
     if not ncbi_email:
         raise ValueError(
             "ncbi_email is required when snapshot creation from NCBI is needed."
         )
-
-    source_uid_snapshot_payload = resolve_ncbi_protein_uid_snapshot(
-        snapshot_mode=source_uid_snapshot_mode,
-        snapshot_root_directory=source_uid_snapshot_root_directory,
-        search_query=search_query,
-        deduplicate_uids=deduplicate_uids,
-        sort_uids=sort_uids,
-        page_size=uid_page_size,
-        max_retry_attempts=max_retry_attempts,
-        request_delay_seconds=uid_request_delay_seconds,
-        ncbi_email=ncbi_email,
-        ncbi_api_key=ncbi_api_key,
-        update_latest_directory=update_latest_directory,
-    )
 
     protein_uids = source_uid_snapshot_payload["protein_uids"]
     source_uid_snapshot_manifest = source_uid_snapshot_payload["manifest"]
