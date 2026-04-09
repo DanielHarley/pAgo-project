@@ -139,6 +139,60 @@ def _build_consolidated_xml_payload(
     return consolidated_xml_payload, total_record_count
 
 
+def _validate_saved_consolidated_xml_snapshot(
+    *,
+    xml_file_path: PathLike,
+    expected_root_tag: str = "GBSet",
+    expected_record_tag: str = "GBSeq",
+    expected_record_count: Optional[int] = None,
+) -> int:
+    """
+    Parse a saved consolidated XML snapshot and validate basic structural invariants.
+
+    Returns:
+        int:
+            Number of direct child records found under the root element.
+    """
+    resolved_xml_file_path = _as_path(xml_file_path)
+
+    try:
+        parsed_tree = ET.parse(resolved_xml_file_path)
+    except ET.ParseError as error:
+        raise RuntimeError(
+            f"Saved consolidated XML snapshot is not well-formed: {error}"
+        ) from error
+
+    root_element = parsed_tree.getroot()
+    if root_element.tag != expected_root_tag:
+        raise RuntimeError(
+            "Saved consolidated XML snapshot root tag mismatch. "
+            f"Expected {expected_root_tag}, got {root_element.tag}."
+        )
+
+    child_elements = list(root_element)
+    record_count = len(child_elements)
+
+    invalid_child_tags = sorted(
+        {child.tag for child in child_elements if child.tag != expected_record_tag}
+    )
+    if invalid_child_tags:
+        raise RuntimeError(
+            "Saved consolidated XML snapshot contains unexpected child tags "
+            f"under {expected_root_tag}: {invalid_child_tags}."
+        )
+
+    if (
+        expected_record_count is not None
+        and record_count != expected_record_count
+    ):
+        raise RuntimeError(
+            "Saved consolidated XML snapshot record count mismatch. "
+            f"Expected {expected_record_count}, got {record_count}."
+        )
+
+    return record_count
+
+
 def build_snapshot_directory_name(
     *,
     retrieved_at_utc: str,
@@ -398,6 +452,11 @@ def save_ncbi_protein_xml_snapshot(
         output_file_path=consolidated_xml_file_path,
     )
 
+    validated_record_count = _validate_saved_consolidated_xml_snapshot(
+        xml_file_path=consolidated_xml_file_path,
+        expected_record_count=consolidated_record_count,
+    )
+
     consolidated_xml_file_sha256 = sha256_of_file(
         input_file_path=consolidated_xml_file_path,
     )
@@ -410,7 +469,7 @@ def save_ncbi_protein_xml_snapshot(
         source_uid_snapshot_manifest_sha256=source_uid_snapshot_manifest_sha256,
         consolidated_xml_file_name=consolidated_xml_file_name,
         consolidated_xml_file_sha256=consolidated_xml_file_sha256,
-        consolidated_record_count=consolidated_record_count,
+        consolidated_record_count=validated_record_count,
         batch_metadata_records=batch_metadata_records,
     )
 
