@@ -20,6 +20,7 @@ from src.pago_pipeline.storage import (
     read_text_lines_from_file,
     save_ncbi_protein_uids_as_txt,
     sha256_of_file,
+    sha256_of_lines,
     write_bytes_atomic,
     write_json_atomic,
 )
@@ -603,6 +604,117 @@ def load_snapshot_by_directory(
     }
 
 
+def _validate_loaded_xml_snapshot_payload(
+    *,
+    snapshot_directory: PathLike,
+    manifest_payload: Dict[str, Any],
+    protein_uids: list[str],
+) -> Path:
+    """
+    Validate a saved XML snapshot before it is reused as pipeline input.
+    """
+    resolved_snapshot_directory = _as_path(snapshot_directory)
+
+    artifact_type = manifest_payload.get("artifact_type")
+    if artifact_type != "ncbi_protein_xml_snapshot":
+        raise RuntimeError(
+            "Saved XML snapshot manifest artifact_type mismatch. "
+            f"Expected 'ncbi_protein_xml_snapshot', got {artifact_type!r}."
+        )
+
+    xml_file_name = manifest_payload.get("xml_file_name")
+    if not isinstance(xml_file_name, str) or not xml_file_name.strip():
+        raise RuntimeError(
+            "Saved XML snapshot manifest must define a non-empty xml_file_name."
+        )
+
+    resolved_xml_file_path = resolved_snapshot_directory / xml_file_name
+    if not resolved_xml_file_path.exists():
+        raise FileNotFoundError(
+            f"Saved XML snapshot file not found: {resolved_xml_file_path}."
+        )
+
+    expected_uid_count = manifest_payload.get("normalized_protein_uid_count")
+    if expected_uid_count is not None:
+        if not isinstance(expected_uid_count, int):
+            raise RuntimeError(
+                "Saved XML snapshot manifest normalized_protein_uid_count "
+                "must be an integer."
+            )
+
+        if len(protein_uids) != expected_uid_count:
+            raise RuntimeError(
+                "Saved XML snapshot protein UID count mismatch. "
+                f"Expected {expected_uid_count}, got {len(protein_uids)}."
+            )
+
+    expected_uid_sha256 = manifest_payload.get("protein_uids_sha256")
+    if expected_uid_sha256 is not None:
+        actual_uid_sha256 = sha256_of_lines(
+            text_lines=protein_uids,
+            deduplicate_lines_preserving_order=False,
+            sort_lines=False,
+        )
+        if actual_uid_sha256 != expected_uid_sha256:
+            raise RuntimeError(
+                "Saved XML snapshot protein UID hash mismatch. "
+                f"Expected {expected_uid_sha256}, got {actual_uid_sha256}."
+            )
+
+    expected_record_count = manifest_payload.get("consolidated_record_count")
+    if expected_record_count is not None and not isinstance(expected_record_count, int):
+        raise RuntimeError(
+            "Saved XML snapshot manifest consolidated_record_count must be an integer."
+        )
+
+    validated_record_count = _validate_saved_consolidated_xml_snapshot(
+        xml_file_path=resolved_xml_file_path,
+        expected_record_count=expected_record_count,
+    )
+
+    if (
+        expected_uid_count is not None
+        and validated_record_count != expected_uid_count
+    ):
+        raise RuntimeError(
+            "Saved XML snapshot record count does not match the saved protein "
+            "UID count. "
+            f"Expected {expected_uid_count}, got {validated_record_count}."
+        )
+
+    expected_xml_file_sha256 = manifest_payload.get("xml_file_sha256")
+    if expected_xml_file_sha256 is not None:
+        actual_xml_file_sha256 = sha256_of_file(
+            input_file_path=resolved_xml_file_path,
+        )
+        if actual_xml_file_sha256 != expected_xml_file_sha256:
+            raise RuntimeError(
+                "Saved XML snapshot file hash mismatch. "
+                f"Expected {expected_xml_file_sha256}, got {actual_xml_file_sha256}."
+            )
+
+    return resolved_xml_file_path
+
+
+def load_xml_snapshot_by_directory(
+    *,
+    snapshot_directory: PathLike,
+) -> Dict[str, Any]:
+    """
+    Load and validate an XML snapshot directory before reuse.
+    """
+    snapshot_payload = load_snapshot_by_directory(
+        snapshot_directory=snapshot_directory,
+    )
+    xml_file_path = _validate_loaded_xml_snapshot_payload(
+        snapshot_directory=snapshot_directory,
+        manifest_payload=snapshot_payload["manifest"],
+        protein_uids=snapshot_payload["protein_uids"],
+    )
+    snapshot_payload["xml_file_path"] = xml_file_path
+    return snapshot_payload
+
+
 def load_latest_snapshot(
     *,
     snapshot_root_directory: PathLike,
@@ -614,6 +726,19 @@ def load_latest_snapshot(
     latest_directory = resolved_snapshot_root_directory / "latest"
 
     return load_snapshot_by_directory(snapshot_directory=latest_directory)
+
+
+def load_latest_xml_snapshot(
+    *,
+    snapshot_root_directory: PathLike,
+) -> Dict[str, Any]:
+    """
+    Load and validate the convenience latest XML snapshot copy.
+    """
+    resolved_snapshot_root_directory = _as_path(snapshot_root_directory)
+    latest_directory = resolved_snapshot_root_directory / "latest"
+
+    return load_xml_snapshot_by_directory(snapshot_directory=latest_directory)
 
 
 def get_latest_snapshot_manifest_path(
@@ -929,7 +1054,7 @@ def resolve_ncbi_protein_xml_snapshot(
                 f"snapshot_mode='create_new' to create it."
             )
 
-        return load_latest_snapshot(
+        return load_latest_xml_snapshot(
             snapshot_root_directory=resolved_snapshot_root_directory,
         )
 
@@ -938,7 +1063,7 @@ def resolve_ncbi_protein_xml_snapshot(
         and latest_is_available
     ):
         print("Latest XML snapshot is available. Reusing frozen snapshot.")
-        return load_latest_snapshot(
+        return load_latest_xml_snapshot(
             snapshot_root_directory=resolved_snapshot_root_directory,
         )
 
@@ -992,6 +1117,6 @@ def resolve_ncbi_protein_xml_snapshot(
         update_latest_directory=update_latest_directory,
     )
 
-    return load_snapshot_by_directory(
+    return load_xml_snapshot_by_directory(
         snapshot_directory=saved_snapshot_directory,
     )
