@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+import re
 import shutil
 import tempfile
 from dataclasses import asdict
@@ -8,6 +9,7 @@ from enum import StrEnum
 import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Any, Dict, Optional, Union
+from collections import Counter
 
 from src.pago_pipeline.ncbi_api import (
     NCBIProteinUidFetchResult,
@@ -193,6 +195,101 @@ def _validate_saved_consolidated_xml_snapshot(
         )
 
     return record_count
+
+
+def _extract_ncbi_protein_uid_from_gbseq_element(
+    *,
+    gbseq_element: ET.Element,
+) -> str:
+    """
+    Extract one protein UID from a GBSeq record using its GBSeqid fields.
+    """
+    uid_candidates: set[str] = set()
+
+    for gbseqid_element in gbseq_element.findall(".//GBSeqid"):
+        gbseqid_text = (gbseqid_element.text or "").strip()
+        if not gbseqid_text:
+            continue
+
+        uid_match = re.fullmatch(r"gi\|(\d+)\|?", gbseqid_text)
+        if uid_match is not None:
+            uid_candidates.add(uid_match.group(1))
+
+    if not uid_candidates:
+        raise RuntimeError(
+            "Failed to extract a protein UID from GBSeqid fields in one XML record."
+        )
+
+    if len(uid_candidates) != 1:
+        raise RuntimeError(
+            "Found multiple conflicting protein UID candidates in one XML record: "
+            f"{sorted(uid_candidates)}."
+        )
+
+    return next(iter(uid_candidates))
+
+
+def _validate_xml_record_uids(
+    *,
+    xml_file_path: PathLike,
+    expected_protein_uids: list[str],
+    expected_root_tag: str = "GBSet",
+    expected_record_tag: str = "GBSeq",
+) -> list[str]:
+    """
+    Validate that the XML record UIDs match the requested protein UIDs.
+    """
+    resolved_xml_file_path = _as_path(xml_file_path)
+
+    try:
+        parsed_tree = ET.parse(resolved_xml_file_path)
+    except ET.ParseError as error:
+        raise RuntimeError(
+            f"Saved consolidated XML snapshot is not well-formed: {error}"
+        ) from error
+
+    root_element = parsed_tree.getroot()
+    if root_element.tag != expected_root_tag:
+        raise RuntimeError(
+            "Saved consolidated XML snapshot root tag mismatch during UID "
+            f"validation. Expected {expected_root_tag}, got {root_element.tag}."
+        )
+
+    child_elements = list(root_element)
+    invalid_child_tags = sorted(
+        {child.tag for child in child_elements if child.tag != expected_record_tag}
+    )
+    if invalid_child_tags:
+        raise RuntimeError(
+            "Saved consolidated XML snapshot contains unexpected child tags "
+            f"during UID validation: {invalid_child_tags}."
+        )
+
+    extracted_protein_uids = [
+        _extract_ncbi_protein_uid_from_gbseq_element(gbseq_element=child_element)
+        for child_element in child_elements
+    ]
+
+    expected_uid_counter = Counter(expected_protein_uids)
+    extracted_uid_counter = Counter(extracted_protein_uids)
+    if extracted_uid_counter != expected_uid_counter:
+        missing_uids = sorted(
+            (
+                expected_uid_counter - extracted_uid_counter
+            ).elements()
+        )
+        unexpected_uids = sorted(
+            (
+                extracted_uid_counter - expected_uid_counter
+            ).elements()
+        )
+        raise RuntimeError(
+            "Saved consolidated XML snapshot record UIDs do not match the "
+            "expected protein UIDs. "
+            f"Missing: {missing_uids[:5]}; Unexpected: {unexpected_uids[:5]}."
+        )
+
+    return extracted_protein_uids
 
 
 def build_snapshot_directory_name(
@@ -516,6 +613,10 @@ def save_ncbi_protein_xml_snapshot(
             xml_file_path=consolidated_xml_file_path,
             expected_record_count=expected_record_count,
         )
+        _validate_xml_record_uids(
+            xml_file_path=consolidated_xml_file_path,
+            expected_protein_uids=protein_uids,
+        )
 
         consolidated_xml_file_sha256 = sha256_of_file(
             input_file_path=consolidated_xml_file_path,
@@ -670,6 +771,10 @@ def _validate_loaded_xml_snapshot_payload(
     validated_record_count = _validate_saved_consolidated_xml_snapshot(
         xml_file_path=resolved_xml_file_path,
         expected_record_count=expected_record_count,
+    )
+    _validate_xml_record_uids(
+        xml_file_path=resolved_xml_file_path,
+        expected_protein_uids=protein_uids,
     )
 
     if (
