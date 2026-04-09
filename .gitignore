@@ -3,6 +3,7 @@
 # IDEs
 .idea/
 *.iml
+.cursor/
 
 # venv
 .venv/
@@ -20,3 +21,6 @@ data/
 *.dat
 *.npz
 *.html
+
+# Tests
+tests/

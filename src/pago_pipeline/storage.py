@@ -168,6 +168,38 @@ def write_json_atomic(
     return resolved_output_file_path
 
 
+def write_bytes_atomic(
+    *,
+    binary_payload: bytes,
+    output_file_path: PathLike,
+) -> Path:
+    """
+    Atomically write raw bytes to disk.
+
+    Atomic write means writing to a temporary file in the same directory
+    and then replacing the final destination. This prevents partially
+    written or corrupted artifacts if execution fails mid-write.
+
+    Raw bytes are useful when you want to persist the exact payload
+    returned by an external source, such as an XML response from NCBI,
+    without reinterpreting encoding or reserializing content.
+    """
+    resolved_output_file_path = _as_path(output_file_path)
+    resolved_output_file_path.parent.mkdir(parents=True, exist_ok=True)
+
+    with tempfile.NamedTemporaryFile(
+        mode="wb",
+        delete=False,
+        dir=resolved_output_file_path.parent,
+    ) as temporary_file:
+        resolved_temporary_file_path = Path(temporary_file.name)
+        temporary_file.write(binary_payload)
+        temporary_file.flush()
+
+    resolved_temporary_file_path.replace(resolved_output_file_path)
+    return resolved_output_file_path
+
+
 def read_json_file(
     *,
     input_file_path: PathLike,
@@ -248,3 +280,4 @@ def save_ncbi_protein_uids_as_txt(
         deduplicate_lines_preserving_order=deduplicate_uids,
         sort_lines=sort_uids,
     )
+
