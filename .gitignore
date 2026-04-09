@@ -21,3 +21,6 @@ data/
 *.dat
 *.npz
 *.html
+
+# Tests
+tests/
