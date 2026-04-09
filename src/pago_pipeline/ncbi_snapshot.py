@@ -706,7 +706,7 @@ def resolve_ncbi_protein_uid_snapshot(
     *,
     snapshot_mode: SnapshotMode | str,
     snapshot_root_directory: PathLike,
-    search_query: str,
+    search_query: Optional[str] = None,
     deduplicate_uids: bool = True,
     sort_uids: bool = True,
     page_size: int = 1000,
@@ -718,6 +718,10 @@ def resolve_ncbi_protein_uid_snapshot(
 ) -> Dict[str, Any]:
     """
     Resolve the active snapshot payload according to the requested mode.
+
+    When snapshot_mode is 'reuse_latest', only snapshot_mode and
+    snapshot_root_directory are required; search_query, ncbi_email,
+    and the other creation-only parameters are ignored.
     """
     resolved_snapshot_mode = _coerce_snapshot_mode(snapshot_mode)
     resolved_snapshot_root_directory = _as_path(snapshot_root_directory)
@@ -777,6 +781,11 @@ def resolve_ncbi_protein_uid_snapshot(
     if not ncbi_email:
         raise ValueError(
             "ncbi_email is required when snapshot creation from NCBI is needed."
+        )
+
+    if not search_query or not search_query.strip():
+        raise ValueError(
+            "search_query is required when snapshot creation from NCBI is needed."
         )
 
     fetch_result = fetch_ncbi_protein_uid_snapshot(
@@ -887,7 +896,6 @@ def resolve_ncbi_protein_xml_snapshot(
         source_uid_snapshot_payload = resolve_ncbi_protein_uid_snapshot(
             snapshot_mode=SnapshotMode.reuse_latest,
             snapshot_root_directory=source_uid_snapshot_root_directory,
-            search_query="upstream UID snapshot",
         )
     except FileNotFoundError as exc:
         raise FileNotFoundError(
