@@ -6,5 +6,6 @@ pandas
 psutil
 python-dotenv
 requests
+scikit-learn
 scipy
 tqdm
