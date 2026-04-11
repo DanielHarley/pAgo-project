@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+import csv
 import json
 import tempfile
 from pathlib import Path
@@ -163,6 +164,57 @@ def write_json_atomic(
             ensure_ascii=ensure_ascii,
         )
         temporary_file.write("\n")
+
+    resolved_temporary_file_path.replace(resolved_output_file_path)
+    return resolved_output_file_path
+
+
+def write_csv_rows_atomic(
+    *,
+    rows: Iterable[dict[str, Any]],
+    output_file_path: PathLike,
+    fieldnames: Iterable[str] | None = None,
+    encoding: str = "utf-8",
+) -> Path:
+    """
+    Atomically write row-oriented CSV output.
+
+    If fieldnames are not provided, they are inferred from the union of keys
+    across all rows while preserving first-seen order.
+    """
+    resolved_output_file_path = _as_path(output_file_path)
+    resolved_output_file_path.parent.mkdir(parents=True, exist_ok=True)
+
+    resolved_rows = list(rows)
+    if fieldnames is None:
+        inferred_fieldnames: list[str] = []
+        seen_fieldnames: set[str] = set()
+        for row in resolved_rows:
+            for key in row.keys():
+                if key not in seen_fieldnames:
+                    inferred_fieldnames.append(key)
+                    seen_fieldnames.add(key)
+        resolved_fieldnames = inferred_fieldnames
+    else:
+        resolved_fieldnames = list(fieldnames)
+
+    with tempfile.NamedTemporaryFile(
+        mode="w",
+        delete=False,
+        dir=resolved_output_file_path.parent,
+        encoding=encoding,
+        newline="",
+        suffix=".csv",
+    ) as temporary_file:
+        resolved_temporary_file_path = Path(temporary_file.name)
+        csv_writer = csv.DictWriter(
+            temporary_file,
+            fieldnames=resolved_fieldnames,
+            extrasaction="ignore",
+        )
+        csv_writer.writeheader()
+        for row in resolved_rows:
+            csv_writer.writerow(row)
 
     resolved_temporary_file_path.replace(resolved_output_file_path)
     return resolved_output_file_path
