@@ -1,0 +1,10 @@
+biopython
+h5py
+joblib
+numpy
+pandas
+psutil
+python-dotenv
+requests
+scipy
+tqdm
