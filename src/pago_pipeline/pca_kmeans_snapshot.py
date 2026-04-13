@@ -955,7 +955,10 @@ def load_pca_kmeans_snapshot_by_directory(
             explained_variance_ratio_file_path,
             mmap_mode="r",
         ),
-        "cluster_assignments": pd.read_csv(cluster_assignments_file_path),
+        "cluster_assignments": pd.read_csv(
+            cluster_assignments_file_path,
+            low_memory=False,
+        ),
         "stability_grid": pd.read_csv(stability_grid_file_path),
         "profiling_log": pd.read_csv(profiling_log_file_path),
         "alignment_report": read_json_file(input_file_path=alignment_report_file_path),
