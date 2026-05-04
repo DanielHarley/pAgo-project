@@ -14,13 +14,15 @@ __pycache__/
 *.py[cod]
 
 # Data / outputs
-data/
+data/*
 *.csv
 *.fasta
 *.fa
 *.dat
 *.npz
 *.html
+!data/01-raw/
+!data/01-raw/**
 
 # Tests
 tests/
