@@ -1,0 +1,35 @@
+project:
+  name: pago-project
+
+python:
+  version: "3.14.0"
+
+ncbi:
+  database: protein
+  dataset_name: piwi_all_fields_bacteria
+  search_query: "PIWI[All Fields] AND Bacteria[Organism]"
+
+snapshots:
+  raw_data_root: data/01-raw
+  uid_snapshot_root: data/01-raw/protein_uid_snapshots
+  xml_snapshot_root: data/01-raw/protein_xml_snapshots
+
+uid_snapshot:
+  mode: reuse_latest_or_create
+  page_size: 1000
+  max_retry_attempts: 5
+  request_delay_seconds: null
+  deduplicate_uids: true
+  sort_uids: true
+
+xml_snapshot:
+  mode: reuse_latest_or_create
+  batch_size: 100
+  max_retry_attempts: 5
+  request_delay_seconds: null
+
+sweep:
+  version: "2.1.3.0"
+  root: scripts/sweep-2.1.3.0
+  versioned_in_repository: false
+  note: "SWeeP is a local external dependency and is not committed because of intellectual property restrictions."
