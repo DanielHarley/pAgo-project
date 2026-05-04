@@ -1,0 +1,13 @@
+biopython
+h5py
+ipykernel
+joblib
+numpy
+pandas
+plotly
+psutil
+python-dotenv
+requests
+scikit-learn
+scipy
+tqdm

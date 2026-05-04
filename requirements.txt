@@ -1,12 +1,2 @@
-biopython
-h5py
-joblib
-numpy
-pandas
-plotly
-psutil
-python-dotenv
-requests
-scikit-learn
-scipy
-tqdm
+# Compatibility entry point. The reproducible environment is pinned in the lockfile.
+-r requirements.lock.txt

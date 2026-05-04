@@ -1,0 +1,2931 @@
+{
+  "artifact_type": "ncbi_protein_xml_snapshot",
+  "batch_count": 414,
+  "batch_size": 100,
+  "batches": [
+    {
+      "batch_end_index": 99,
+      "batch_index": 1,
+      "batch_start_index": 0,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "c50dc7d313f9a45befdacb9fa9840ace1579b80164b0c4a163a53c50522b0b3d"
+    },
+    {
+      "batch_end_index": 199,
+      "batch_index": 2,
+      "batch_start_index": 100,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "c78bb11c8f9579eacffc8da1e22141e53c532c9d2bac2163432121ef9a159406"
+    },
+    {
+      "batch_end_index": 299,
+      "batch_index": 3,
+      "batch_start_index": 200,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "f1c8005d85eab5e0d57e17375aec003faa90031fadffd5165abdce64268b1e6a"
+    },
+    {
+      "batch_end_index": 399,
+      "batch_index": 4,
+      "batch_start_index": 300,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "a271a8493a6752eef683a66b01f06af5d72ed2c9eda8df349cf2992be57bbf4a"
+    },
+    {
+      "batch_end_index": 499,
+      "batch_index": 5,
+      "batch_start_index": 400,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "4704251abfc4fe9c116bb184a96abbd5fd7e47001f64dd8c7cdb95fc2e75b9c1"
+    },
+    {
+      "batch_end_index": 599,
+      "batch_index": 6,
+      "batch_start_index": 500,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "e6d0f9d3f0800afae7c3de50d764346c3e6ce26c232c1c30ea3ca94c3445361a"
+    },
+    {
+      "batch_end_index": 699,
+      "batch_index": 7,
+      "batch_start_index": 600,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "ae62411ba5a741bf3afcf5ed1cc0cd94eeeb99f359dff9701b0ae5047452eb7d"
+    },
+    {
+      "batch_end_index": 799,
+      "batch_index": 8,
+      "batch_start_index": 700,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "69b88b0f82a28736e12e33a88465bf66060d161850eebc09d61ee7d7f26d97b7"
+    },
+    {
+      "batch_end_index": 899,
+      "batch_index": 9,
+      "batch_start_index": 800,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "be408e710bb7a45911c9b92170ca536ba440df740c2d87b76ec9ff946d9628bc"
+    },
+    {
+      "batch_end_index": 999,
+      "batch_index": 10,
+      "batch_start_index": 900,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "8d32b5d7c0b86e914e3ec4dda4d35d0bc88d21e9eb6e4f79516d7748acfd0e5b"
+    },
+    {
+      "batch_end_index": 1099,
+      "batch_index": 11,
+      "batch_start_index": 1000,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "d4c5ba158947c6f5801624ce9e6105aef24e4329e4c968abf276e1cd146944c6"
+    },
+    {
+      "batch_end_index": 1199,
+      "batch_index": 12,
+      "batch_start_index": 1100,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "dd7605cc9a7fe009f176559e3b7cea88278c6d05854b2644e49b79c63b453c98"
+    },
+    {
+      "batch_end_index": 1299,
+      "batch_index": 13,
+      "batch_start_index": 1200,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "cb3741fa61383c0a64a3ea8482b3b62dceae6aa4f3123da1da4ea8dbf6835c73"
+    },
+    {
+      "batch_end_index": 1399,
+      "batch_index": 14,
+      "batch_start_index": 1300,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "cb6e162dfd1fc1e484a0eb017fdbe13d34604fc1037a70e888881d847d3c6f05"
+    },
+    {
+      "batch_end_index": 1499,
+      "batch_index": 15,
+      "batch_start_index": 1400,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "8b9bf873b245a9e8a46e89985148f32b4b3bc99236e5803f2751ff030696bb14"
+    },
+    {
+      "batch_end_index": 1599,
+      "batch_index": 16,
+      "batch_start_index": 1500,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "505ec8305b0f837cace40768f3efd4641530c2ddc90863837b7b0380f047e006"
+    },
+    {
+      "batch_end_index": 1699,
+      "batch_index": 17,
+      "batch_start_index": 1600,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "35e88eb40d09480e9ec7543fa2cf946b1f914ddbc49edd9683320431df239058"
+    },
+    {
+      "batch_end_index": 1799,
+      "batch_index": 18,
+      "batch_start_index": 1700,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "84207cb32e93086caf7ae7a969a49f1d7cea5d42a37b81373fc5ebe565f4ff42"
+    },
+    {
+      "batch_end_index": 1899,
+      "batch_index": 19,
+      "batch_start_index": 1800,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "8b233d49097f3dc313d11e6684874637fcc1709c3ed4784cb0a48447604a97e1"
+    },
+    {
+      "batch_end_index": 1999,
+      "batch_index": 20,
+      "batch_start_index": 1900,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "9ba0dd0ab5716efb1682c454686bd9c1274875c5a99377caf6645e9ce59233a8"
+    },
+    {
+      "batch_end_index": 2099,
+      "batch_index": 21,
+      "batch_start_index": 2000,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "01f43f3232d1ebb1242207c1cc1c882a5228ba6ffb043ba351464a624c9aa41c"
+    },
+    {
+      "batch_end_index": 2199,
+      "batch_index": 22,
+      "batch_start_index": 2100,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "0d8221635ab8da7220609a71eea242149c6313f145d4fef2cd3ed58c3f105c82"
+    },
+    {
+      "batch_end_index": 2299,
+      "batch_index": 23,
+      "batch_start_index": 2200,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "86677b83862ea370d7488018088ab9a85e959788e0a08678837c2bb90cc8382b"
+    },
+    {
+      "batch_end_index": 2399,
+      "batch_index": 24,
+      "batch_start_index": 2300,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "b11f91e1f1357c1f3a40898d9fc5117b4d10b34ab82efb872235d0cef45c5496"
+    },
+    {
+      "batch_end_index": 2499,
+      "batch_index": 25,
+      "batch_start_index": 2400,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "6d48f32807623887aac479879b6fbadbfce7759849b0270268c07011253dcb52"
+    },
+    {
+      "batch_end_index": 2599,
+      "batch_index": 26,
+      "batch_start_index": 2500,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "dbb520c55fb384c96393288d52d74dd0196a0df5fed0c5d5f242dafb4518e08e"
+    },
+    {
+      "batch_end_index": 2699,
+      "batch_index": 27,
+      "batch_start_index": 2600,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "23417dd7b79b8fa5f4f33fa8e9342c7fc547cd8f743cedce86348bb1c0c93b43"
+    },
+    {
+      "batch_end_index": 2799,
+      "batch_index": 28,
+      "batch_start_index": 2700,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "1088ed88b93ede23b85b8cf6ab441d1c37b56d1d33db8425378fde5eddca0fc9"
+    },
+    {
+      "batch_end_index": 2899,
+      "batch_index": 29,
+      "batch_start_index": 2800,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "cc0d5bb11a1230a454ed11b78490986c29d8c6bd93704b3b5e99e886d510cc8b"
+    },
+    {
+      "batch_end_index": 2999,
+      "batch_index": 30,
+      "batch_start_index": 2900,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "6e3fd1a93fabce91ae01c19d6b417c5e7980efd21ce5fb95b7e70dd2751a61e5"
+    },
+    {
+      "batch_end_index": 3099,
+      "batch_index": 31,
+      "batch_start_index": 3000,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "9ec7da5d9e5a2d331af662a49364e0397dfb60ea5f3c02f702526fd78f7aa455"
+    },
+    {
+      "batch_end_index": 3199,
+      "batch_index": 32,
+      "batch_start_index": 3100,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "3860ca72f0d06d679e32385418134d99911095f4d11eef5c938a31178afe96ec"
+    },
+    {
+      "batch_end_index": 3299,
+      "batch_index": 33,
+      "batch_start_index": 3200,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "aae212aefa806f573380b5c73f0fc439491855114d745045d846d17a605bf3c3"
+    },
+    {
+      "batch_end_index": 3399,
+      "batch_index": 34,
+      "batch_start_index": 3300,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "7fb9acc947adb4b633f79f5b9510eb83cd092c57eb7838bedc17398a25f95bc3"
+    },
+    {
+      "batch_end_index": 3499,
+      "batch_index": 35,
+      "batch_start_index": 3400,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "accbbfa6bf8755956c35171820e4bb5d6738fbbd5a25bc1c97de1d889f9cf23f"
+    },
+    {
+      "batch_end_index": 3599,
+      "batch_index": 36,
+      "batch_start_index": 3500,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "5ad2d6b11e635e5a5f4ce0dff2870c9d645dc91f688799d8009cfad18d3737a7"
+    },
+    {
+      "batch_end_index": 3699,
+      "batch_index": 37,
+      "batch_start_index": 3600,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "19b0d1c6365e74303a78d381ef5867af6bb983e4c57ff24b78d20c2ec46c0636"
+    },
+    {
+      "batch_end_index": 3799,
+      "batch_index": 38,
+      "batch_start_index": 3700,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "f501b5c052663c7dc0960ae220dfbac47bef4ae94ec6b0b9dc3b5659a0c2b695"
+    },
+    {
+      "batch_end_index": 3899,
+      "batch_index": 39,
+      "batch_start_index": 3800,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "eedaab0cacbd3d87c73bc9a17e5190e1d717c37c7f45c1aa909647ab1c61bb96"
+    },
+    {
+      "batch_end_index": 3999,
+      "batch_index": 40,
+      "batch_start_index": 3900,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "0e6061a5dc5239d81c84c755900fefcf369e2b9c3535a785e86b1baaccb5969e"
+    },
+    {
+      "batch_end_index": 4099,
+      "batch_index": 41,
+      "batch_start_index": 4000,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "80cad428ec7f1200d73e40c733156194a4b7664a5db18038edc6c41e640431a0"
+    },
+    {
+      "batch_end_index": 4199,
+      "batch_index": 42,
+      "batch_start_index": 4100,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "2c089225b02ade6b463ee598643e7ea7f16917e9cc3d0aec60da8bfb61edc88f"
+    },
+    {
+      "batch_end_index": 4299,
+      "batch_index": 43,
+      "batch_start_index": 4200,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "6353a8c64e5322f56951bbf89fb8dba9da8c9f399bb2af4f80ebfe15c2de3fef"
+    },
+    {
+      "batch_end_index": 4399,
+      "batch_index": 44,
+      "batch_start_index": 4300,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "009e923b3e0e46b5ce1e051c7d32c62a7398b8fb970121b61416b301c45540bb"
+    },
+    {
+      "batch_end_index": 4499,
+      "batch_index": 45,
+      "batch_start_index": 4400,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "38f4137330f823a9ab5c9ffdc9feb2ce9c6be28351050d6c2f16f685dd557a7c"
+    },
+    {
+      "batch_end_index": 4599,
+      "batch_index": 46,
+      "batch_start_index": 4500,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "c8c910bf755853b7e7c32cc3d75e8602ea2cd27808e6a532098d5efd99903590"
+    },
+    {
+      "batch_end_index": 4699,
+      "batch_index": 47,
+      "batch_start_index": 4600,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "b669d2edb0fa81dc33994123091ccb711c73479703f9588bc0c6524a2481218b"
+    },
+    {
+      "batch_end_index": 4799,
+      "batch_index": 48,
+      "batch_start_index": 4700,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "c0aabd9069d3cac4178816267b0dcab67280a3fe4050c0701b5d8d3ae8121f7a"
+    },
+    {
+      "batch_end_index": 4899,
+      "batch_index": 49,
+      "batch_start_index": 4800,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "11d72cd10aa7da3651a44ffe712b67981b57559ed58a56dea6a8cb1a58219c14"
+    },
+    {
+      "batch_end_index": 4999,
+      "batch_index": 50,
+      "batch_start_index": 4900,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "45424e48ea407a180a2890b0022843f8596f65328f8cdac88bbb3e3c36e9dee7"
+    },
+    {
+      "batch_end_index": 5099,
+      "batch_index": 51,
+      "batch_start_index": 5000,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "0375e1ec4081e45390f8da57d6bd017e9f1614e1300867908e422785966c9542"
+    },
+    {
+      "batch_end_index": 5199,
+      "batch_index": 52,
+      "batch_start_index": 5100,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "6c828133c24a50efeb472d90da75a60d81aa1cab7e4fdfb13d8ec2b20bab7b38"
+    },
+    {
+      "batch_end_index": 5299,
+      "batch_index": 53,
+      "batch_start_index": 5200,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "61d359c622aff3d1e111fe1b292ea124dedd6e0c4441df1112d943c3fe13db45"
+    },
+    {
+      "batch_end_index": 5399,
+      "batch_index": 54,
+      "batch_start_index": 5300,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "e24716c984fdad4124da000b404a5953b8d8cd5db5674597be818b1035509cc7"
+    },
+    {
+      "batch_end_index": 5499,
+      "batch_index": 55,
+      "batch_start_index": 5400,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "749c252c0c26e96d41d08f5c6d001211b6a4f718d8242fe086c88b482c7094b5"
+    },
+    {
+      "batch_end_index": 5599,
+      "batch_index": 56,
+      "batch_start_index": 5500,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "48491680ebdec0efa0ef9b5d1d7e25a4f74bc2360f68117049192ed93ea5c0b6"
+    },
+    {
+      "batch_end_index": 5699,
+      "batch_index": 57,
+      "batch_start_index": 5600,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "2c4e50ccf6e014c93c45e368a9247ead1e9e780554bb2b002dbec1674d5e9d1e"
+    },
+    {
+      "batch_end_index": 5799,
+      "batch_index": 58,
+      "batch_start_index": 5700,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "2811c857310af60e9a377cd9b57d4a2d43f235e13be709d568521b3650bf2ac5"
+    },
+    {
+      "batch_end_index": 5899,
+      "batch_index": 59,
+      "batch_start_index": 5800,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "c6b61e11ebbfa775d15ae43231a5cc31afe4e2b527bae736f20796cde5f39bea"
+    },
+    {
+      "batch_end_index": 5999,
+      "batch_index": 60,
+      "batch_start_index": 5900,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "30c5953febe7ca5b658d7028eb52428368e43a0499506e5b04634d1541f3b2d7"
+    },
+    {
+      "batch_end_index": 6099,
+      "batch_index": 61,
+      "batch_start_index": 6000,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "d1f91f43d3eedae7eb27b661d125e7a86538abbe28f2527c79a204286d048858"
+    },
+    {
+      "batch_end_index": 6199,
+      "batch_index": 62,
+      "batch_start_index": 6100,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "15a32114b9f5e89b546be9572e958c764a60ce6ea4f4dd6f56e439e3ef09f046"
+    },
+    {
+      "batch_end_index": 6299,
+      "batch_index": 63,
+      "batch_start_index": 6200,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "facc44db80a477a49c59ca787cecbd5ee9c4f382f475b9f0450dba81b978c3db"
+    },
+    {
+      "batch_end_index": 6399,
+      "batch_index": 64,
+      "batch_start_index": 6300,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "94bc29f85b2d1a4254270eb65450a63c1e7ceb760fe2bb690f8762ef6a9f3396"
+    },
+    {
+      "batch_end_index": 6499,
+      "batch_index": 65,
+      "batch_start_index": 6400,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "52d193cd87d82a6a463faf42397e9f62a6994f961d128e3b75764c9f31246e9b"
+    },
+    {
+      "batch_end_index": 6599,
+      "batch_index": 66,
+      "batch_start_index": 6500,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "0dfb24de534bb0729bf4167467e2de28975282e1dfafd02b193ef06c50660947"
+    },
+    {
+      "batch_end_index": 6699,
+      "batch_index": 67,
+      "batch_start_index": 6600,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "8b5272a36a46226c48cee98465b8a2a1155ef7e6c07f7161c5f212ee55c048c0"
+    },
+    {
+      "batch_end_index": 6799,
+      "batch_index": 68,
+      "batch_start_index": 6700,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "198bf294fa0f661f82fd91896251d5da1e92128fd0c108232923c1b9cca655ea"
+    },
+    {
+      "batch_end_index": 6899,
+      "batch_index": 69,
+      "batch_start_index": 6800,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "c80892ee8bbb286a783ef9d071e9bb963479e719bd2493883fb56eb64b84573d"
+    },
+    {
+      "batch_end_index": 6999,
+      "batch_index": 70,
+      "batch_start_index": 6900,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "fe0b62f156071fecb325682de86e3a1ce81bf6152a73e51f8ac3f0da9b6bc439"
+    },
+    {
+      "batch_end_index": 7099,
+      "batch_index": 71,
+      "batch_start_index": 7000,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "24fe95aa97a727bac86b39f2afc4c5d4575282a78db5a7d204153492c41b92ca"
+    },
+    {
+      "batch_end_index": 7199,
+      "batch_index": 72,
+      "batch_start_index": 7100,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "8eeef5cc46f853d706317012646ad9b6b65a23c465ca01e32b929d4d84ba4665"
+    },
+    {
+      "batch_end_index": 7299,
+      "batch_index": 73,
+      "batch_start_index": 7200,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "38c92a5f12aa92ea26a489dc4aa068ee5d11b45b770a734c387ad43e3d4c5cb5"
+    },
+    {
+      "batch_end_index": 7399,
+      "batch_index": 74,
+      "batch_start_index": 7300,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "8b1ba3421af8a086fc154b46a3dec70ce1dbd9e11a2aeb8800590f2404a186a0"
+    },
+    {
+      "batch_end_index": 7499,
+      "batch_index": 75,
+      "batch_start_index": 7400,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "c01bea9d5dad2920d2fb2827dabd116b6f0401d1beacdc2b908e4ca2ba99f9d4"
+    },
+    {
+      "batch_end_index": 7599,
+      "batch_index": 76,
+      "batch_start_index": 7500,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "e270c76c2ee6ce07c322c2d4aae5e25f4356b25b916b57f594f5eff2125198f9"
+    },
+    {
+      "batch_end_index": 7699,
+      "batch_index": 77,
+      "batch_start_index": 7600,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "ff79450b48a47175a1d16afbaddbcddac3d3732f6dbe34949d821eba1228e414"
+    },
+    {
+      "batch_end_index": 7799,
+      "batch_index": 78,
+      "batch_start_index": 7700,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "2b853891939b865d26db3b9aac2433b0910e905b060282c06ec5018193d1dab7"
+    },
+    {
+      "batch_end_index": 7899,
+      "batch_index": 79,
+      "batch_start_index": 7800,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "ae30e68411ecf0b21f770172bfe38d224c675bf9c76a65f74f6f94fce8499f7a"
+    },
+    {
+      "batch_end_index": 7999,
+      "batch_index": 80,
+      "batch_start_index": 7900,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "789eda1619612fa30be7499dc5a5dc669c3c70edc355f2e36f25100d8e04df7f"
+    },
+    {
+      "batch_end_index": 8099,
+      "batch_index": 81,
+      "batch_start_index": 8000,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "d06bdebfc2c476691e9e976eb08b29fc57c3d5c9d9d700b7b3fd9a4d1085109a"
+    },
+    {
+      "batch_end_index": 8199,
+      "batch_index": 82,
+      "batch_start_index": 8100,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "9d8dc97ba8481c96b492a61bf3afea8fff9861f3787f008126098e66d448957d"
+    },
+    {
+      "batch_end_index": 8299,
+      "batch_index": 83,
+      "batch_start_index": 8200,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "75c60ba7830c85e0b117d38a4bf82eab261d73539466e221f0a411f6ce4bfc73"
+    },
+    {
+      "batch_end_index": 8399,
+      "batch_index": 84,
+      "batch_start_index": 8300,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "aecc72a5364a4c19d30402338a8c8090f8f0d21d5882d13d5d3e84eac2173484"
+    },
+    {
+      "batch_end_index": 8499,
+      "batch_index": 85,
+      "batch_start_index": 8400,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "2d586c0f09036cd6a421558f43b01e2bba3f389dd3aac60b0658a84b54be955f"
+    },
+    {
+      "batch_end_index": 8599,
+      "batch_index": 86,
+      "batch_start_index": 8500,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "e1d9b0864262159bdc7c961624ade327a0a4df9b8e0a06cb146280e104f66075"
+    },
+    {
+      "batch_end_index": 8699,
+      "batch_index": 87,
+      "batch_start_index": 8600,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "90b66dfad2050318ebd61978c7cc10b7c1abe07664a166b0f659dafdcdb97cb6"
+    },
+    {
+      "batch_end_index": 8799,
+      "batch_index": 88,
+      "batch_start_index": 8700,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "8ce4aaedc41bfb6f2e1cc082a533fbfbd496d0bca53a03f75b130f08d4afaab2"
+    },
+    {
+      "batch_end_index": 8899,
+      "batch_index": 89,
+      "batch_start_index": 8800,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "b3b0688e9577a3141c8b1975e2b41774017da36d076aaa71c8c319a272c44497"
+    },
+    {
+      "batch_end_index": 8999,
+      "batch_index": 90,
+      "batch_start_index": 8900,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "9cec5a7ee7a9895fef919b86a54cbcedab9f34cd9f761c0405aa18d4871a65a6"
+    },
+    {
+      "batch_end_index": 9099,
+      "batch_index": 91,
+      "batch_start_index": 9000,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "5ecbc6f79a1cafe45b0619356565bb15d53b037f1b8db9387b072ac3bd5f5a4f"
+    },
+    {
+      "batch_end_index": 9199,
+      "batch_index": 92,
+      "batch_start_index": 9100,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "0404ffac64680a25eaa87e53a2cbd6c74f6b5d2f52248664616d25f90ade57ec"
+    },
+    {
+      "batch_end_index": 9299,
+      "batch_index": 93,
+      "batch_start_index": 9200,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "81a9d049aa19b42a29dbf2d0f1e3ad87c657a263d7ad7592875171566a0e2f10"
+    },
+    {
+      "batch_end_index": 9399,
+      "batch_index": 94,
+      "batch_start_index": 9300,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "6bbbc1e9b8bc222d6f64ce4fbfadf5c30f9360a4387783d3b5b32e01d5404c1f"
+    },
+    {
+      "batch_end_index": 9499,
+      "batch_index": 95,
+      "batch_start_index": 9400,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "e2c79e52ec33356a283cd01e7fcd47d9a5fecab5a2c8e9be3fb96d67ca024610"
+    },
+    {
+      "batch_end_index": 9599,
+      "batch_index": 96,
+      "batch_start_index": 9500,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "0b75a4a2215962bf52308a6928a2b79f4d2ea7e439570ed49decb72bef0d0a2b"
+    },
+    {
+      "batch_end_index": 9699,
+      "batch_index": 97,
+      "batch_start_index": 9600,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "b2f62caf2400e2080fe889a71dcd3200bbe2559e69082c556ab9f5b9ebf1614f"
+    },
+    {
+      "batch_end_index": 9799,
+      "batch_index": 98,
+      "batch_start_index": 9700,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "f1d0a1126a09e3abf7a7067c06db3fe97ca0899a0a805c478d764b2dff4705bd"
+    },
+    {
+      "batch_end_index": 9899,
+      "batch_index": 99,
+      "batch_start_index": 9800,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "74fb17e3fad9547f26deb81e263bff92159e3faca501698317e97524ca1c69db"
+    },
+    {
+      "batch_end_index": 9999,
+      "batch_index": 100,
+      "batch_start_index": 9900,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "86a6aff0a35784053a221c6a99896a4ec862a214b79601c5b817e10b020e4812"
+    },
+    {
+      "batch_end_index": 10099,
+      "batch_index": 101,
+      "batch_start_index": 10000,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "fdcc20e1fcef6744da59305ec6dae6555aacb9831fe75aeea50791ab71dd33ff"
+    },
+    {
+      "batch_end_index": 10199,
+      "batch_index": 102,
+      "batch_start_index": 10100,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "4f426dd12d014448c1fe1b6ebdad3c6e78cd405ad4ce1dcbc7bddb872416c085"
+    },
+    {
+      "batch_end_index": 10299,
+      "batch_index": 103,
+      "batch_start_index": 10200,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "f1fa903bb4f2f70108922d5e3a417bbade99a17e1f272c9fa62e5ae112761f64"
+    },
+    {
+      "batch_end_index": 10399,
+      "batch_index": 104,
+      "batch_start_index": 10300,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "fc7fa2ca364973e877e8286532e4297ebd43036d5dccc3f8eb08b10a3d5faf6d"
+    },
+    {
+      "batch_end_index": 10499,
+      "batch_index": 105,
+      "batch_start_index": 10400,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "3cec450e4bfc92035e14cf91b6ca10d150823ec41a16ae64750e328f13bdae1a"
+    },
+    {
+      "batch_end_index": 10599,
+      "batch_index": 106,
+      "batch_start_index": 10500,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "07bd9d38b58419835427b5f5f3a2402b7a6294ceaf2232c8602938762a78c7fb"
+    },
+    {
+      "batch_end_index": 10699,
+      "batch_index": 107,
+      "batch_start_index": 10600,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "8257d658a2c67d1069ad319f7052dc86723839a319dfcfdcc7886c3ed1abbc83"
+    },
+    {
+      "batch_end_index": 10799,
+      "batch_index": 108,
+      "batch_start_index": 10700,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "7bfc7a3ade13c538e1e6be74be8a485ff7a761ee93376e5ba227805872a9cb5f"
+    },
+    {
+      "batch_end_index": 10899,
+      "batch_index": 109,
+      "batch_start_index": 10800,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "87e908a239e84ce5460b9d97a3eceab7f81e1181fa4d4d6ef6defba2e4f485ac"
+    },
+    {
+      "batch_end_index": 10999,
+      "batch_index": 110,
+      "batch_start_index": 10900,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "2c4d13b168cbd30a14ba6f571bb65b4f79d39460ae3211ff489a4bf066eb34a1"
+    },
+    {
+      "batch_end_index": 11099,
+      "batch_index": 111,
+      "batch_start_index": 11000,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "f08ba1901c054d03402101675c0f638b85aef18dfa710b3729ae203fa9866ee1"
+    },
+    {
+      "batch_end_index": 11199,
+      "batch_index": 112,
+      "batch_start_index": 11100,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "db461f9e822e007437694dba21f9746411fe980aac236d1f556394ad86f27c43"
+    },
+    {
+      "batch_end_index": 11299,
+      "batch_index": 113,
+      "batch_start_index": 11200,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "4c1bf512537c83c36e0bbbdac87332a6875125745894097a34ec93bb43eb8e73"
+    },
+    {
+      "batch_end_index": 11399,
+      "batch_index": 114,
+      "batch_start_index": 11300,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "e9754270f617f50df361af808b00d69f34cd7a0c534383baefdad6883d566104"
+    },
+    {
+      "batch_end_index": 11499,
+      "batch_index": 115,
+      "batch_start_index": 11400,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "9921277aeec74b0bc7b245d832204e1f9271cd381f1edb11e44886477531b811"
+    },
+    {
+      "batch_end_index": 11599,
+      "batch_index": 116,
+      "batch_start_index": 11500,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "ddfd3bb02373b3962623862009ad0214b12860796b27bc5a09d867c700e2dd84"
+    },
+    {
+      "batch_end_index": 11699,
+      "batch_index": 117,
+      "batch_start_index": 11600,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "65232407acf4237ed22900a05e2f09a2d1077605b3b989b9f66dff13456bcc1e"
+    },
+    {
+      "batch_end_index": 11799,
+      "batch_index": 118,
+      "batch_start_index": 11700,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "dace035368a3362e140ef98a9078c8f982cf55eee8fcc00f7bccabbdcf9c8244"
+    },
+    {
+      "batch_end_index": 11899,
+      "batch_index": 119,
+      "batch_start_index": 11800,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "54d02d93ca7ea63ed75fe2ee25dd05187a0d3f99b586ce8c19d703c075f7d2b3"
+    },
+    {
+      "batch_end_index": 11999,
+      "batch_index": 120,
+      "batch_start_index": 11900,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "90637b1813acbc46898e94e9ce2d8b0ed67a5050dc5f0feb841217c0f852376f"
+    },
+    {
+      "batch_end_index": 12099,
+      "batch_index": 121,
+      "batch_start_index": 12000,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "e8cb4d41b1fb825d46a52509abf1888ba15790751b1288e3b1ce2ac91a002187"
+    },
+    {
+      "batch_end_index": 12199,
+      "batch_index": 122,
+      "batch_start_index": 12100,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "96bf62ccf2f18f6d32975387a04e3baf59927443ecec3b93d24596d4960558e4"
+    },
+    {
+      "batch_end_index": 12299,
+      "batch_index": 123,
+      "batch_start_index": 12200,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "3541d532f943af7aa6c4d07de96a7b12bb1ed7a628acf5e4431f69bd700acfcb"
+    },
+    {
+      "batch_end_index": 12399,
+      "batch_index": 124,
+      "batch_start_index": 12300,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "9276c0e805533f63cb5e16a8741a87f3a6b2ee28bb5221e3c8ca2915dd284ba1"
+    },
+    {
+      "batch_end_index": 12499,
+      "batch_index": 125,
+      "batch_start_index": 12400,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "68bdefb3ccf2e7ac979c2aef533fa9a21fc17556b8c15f01016612a0a92b2e89"
+    },
+    {
+      "batch_end_index": 12599,
+      "batch_index": 126,
+      "batch_start_index": 12500,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "950bc2925eba69ab724ab815ce013fc4e2469f3028fbe1363e5332c2d9540cb3"
+    },
+    {
+      "batch_end_index": 12699,
+      "batch_index": 127,
+      "batch_start_index": 12600,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "7432bb5fd91e1a8c63e1eeaab8799a3ebe99d1c7b124736d0eef0ff314b8680a"
+    },
+    {
+      "batch_end_index": 12799,
+      "batch_index": 128,
+      "batch_start_index": 12700,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "148afa16322c5c4b0971c1cf2e8173557c4fd74f58cbb1a37629037d07492591"
+    },
+    {
+      "batch_end_index": 12899,
+      "batch_index": 129,
+      "batch_start_index": 12800,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "29402497ce23feba77934512849632ebcaf5b6013f80082fb2668dc468ea11e2"
+    },
+    {
+      "batch_end_index": 12999,
+      "batch_index": 130,
+      "batch_start_index": 12900,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "f645cc4d86d875dee6118441ca163cfbe60d3cf3c054fd023e6a2224c515585a"
+    },
+    {
+      "batch_end_index": 13099,
+      "batch_index": 131,
+      "batch_start_index": 13000,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "5d36181e774aea7bed9fe6068f358295cd45aabd1d3a673ea801e3f4105745f1"
+    },
+    {
+      "batch_end_index": 13199,
+      "batch_index": 132,
+      "batch_start_index": 13100,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "e18b5bea40d4ab1e52cbea26010b399a34b4b2e41b4ac4d9c885e0e6e17c91b8"
+    },
+    {
+      "batch_end_index": 13299,
+      "batch_index": 133,
+      "batch_start_index": 13200,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "1d9f8d6c0f28bc12cadb8172d585098fa2eb2fb611aa5704b3be9c31768e308c"
+    },
+    {
+      "batch_end_index": 13399,
+      "batch_index": 134,
+      "batch_start_index": 13300,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "2506692cec8783d203fbc35cd2c235412b961c645b106b5f7ef6fd9525ab9173"
+    },
+    {
+      "batch_end_index": 13499,
+      "batch_index": 135,
+      "batch_start_index": 13400,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "ea9ea1608f7f7f339f90adb12b034d7cd655f3ac057479e8034e2c02287b5766"
+    },
+    {
+      "batch_end_index": 13599,
+      "batch_index": 136,
+      "batch_start_index": 13500,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "693140a018c9290417c216ab2cd2f9b6c2f46477dfedd8cfe4b2926ae4d2d594"
+    },
+    {
+      "batch_end_index": 13699,
+      "batch_index": 137,
+      "batch_start_index": 13600,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "b91f6b4799920901e3cecdca75b1ff923ddde1db240e1037079e80ae0a647b06"
+    },
+    {
+      "batch_end_index": 13799,
+      "batch_index": 138,
+      "batch_start_index": 13700,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "89db61c7713de8422049e38ec4ca9390cfb724a3d6af6374f35e8d8301f11645"
+    },
+    {
+      "batch_end_index": 13899,
+      "batch_index": 139,
+      "batch_start_index": 13800,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "3ad2dc6b6381670600fac87629e5b733dd76180bc6aa571b4f5b1e5dd81acb1e"
+    },
+    {
+      "batch_end_index": 13999,
+      "batch_index": 140,
+      "batch_start_index": 13900,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "61a7ffda000e1c0f1b653e7a51fc354c957d92b3b086fe41c13fecc89419e109"
+    },
+    {
+      "batch_end_index": 14099,
+      "batch_index": 141,
+      "batch_start_index": 14000,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "51e3dc37bd32fd63d03a87b467b41175e23db57fdfb99bf22f8025ce21385f4a"
+    },
+    {
+      "batch_end_index": 14199,
+      "batch_index": 142,
+      "batch_start_index": 14100,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "ee496248d2ef81639d4f6adfb80466f07fb63f299d25de739acfbfaa130aa293"
+    },
+    {
+      "batch_end_index": 14299,
+      "batch_index": 143,
+      "batch_start_index": 14200,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "5b31510aef5248bd0def6099b4c2ce07dfea52cbc36f91e94509a03a4b754ea9"
+    },
+    {
+      "batch_end_index": 14399,
+      "batch_index": 144,
+      "batch_start_index": 14300,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "df8c4806f6a66d7220a4813c1b0cd0b91e84bbc22a14808e820625a9456da0ca"
+    },
+    {
+      "batch_end_index": 14499,
+      "batch_index": 145,
+      "batch_start_index": 14400,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "a603e6171aab884754c32dfe4fc0e33f1b0cf081c992895ff7edba3b86f4d773"
+    },
+    {
+      "batch_end_index": 14599,
+      "batch_index": 146,
+      "batch_start_index": 14500,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "4b7f71ecf1f41f3c23ebee1f3a8fbb2ed3641a5a0515db0b996d371c6c21eb0d"
+    },
+    {
+      "batch_end_index": 14699,
+      "batch_index": 147,
+      "batch_start_index": 14600,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "bd5da8e41509971f8be1378c4e8e092f980ba1ce2daf91afef7337c187ebc1ab"
+    },
+    {
+      "batch_end_index": 14799,
+      "batch_index": 148,
+      "batch_start_index": 14700,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "f3d0c64c258846dd47581917a56f01f660de40fcbee5621a16ce7f03503dd935"
+    },
+    {
+      "batch_end_index": 14899,
+      "batch_index": 149,
+      "batch_start_index": 14800,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "d808d834c2ead1a9dc7d0d39bacc7b7095ef575eb2c3e67db0aea0f55cb3c7f0"
+    },
+    {
+      "batch_end_index": 14999,
+      "batch_index": 150,
+      "batch_start_index": 14900,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "9ae0ef1056ac01b77d3effc33e0f61e9603211f30057fa28e1d98ef66e8be1f1"
+    },
+    {
+      "batch_end_index": 15099,
+      "batch_index": 151,
+      "batch_start_index": 15000,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "3f598f6cebd58ebbfec78b61a0ba4b609467882e20c9844135f10215cd5ea5c5"
+    },
+    {
+      "batch_end_index": 15199,
+      "batch_index": 152,
+      "batch_start_index": 15100,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "9d47052c2b1060937cbe9303f923e4ecb335078aa5bb56576cc1cdc06cd3d78b"
+    },
+    {
+      "batch_end_index": 15299,
+      "batch_index": 153,
+      "batch_start_index": 15200,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "f9eba11655a633f8fb1aa3d13e624a6ad04dd21420624f57f54b70f38373854c"
+    },
+    {
+      "batch_end_index": 15399,
+      "batch_index": 154,
+      "batch_start_index": 15300,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "96ca95dce96ad0906e173c9a2ee680aa1cda3c091455d4448b5d2caaee005b7b"
+    },
+    {
+      "batch_end_index": 15499,
+      "batch_index": 155,
+      "batch_start_index": 15400,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "7ddc8b9d1eb49d7c45be8e1f054252e7769226524dd1422e69c445284335bf3b"
+    },
+    {
+      "batch_end_index": 15599,
+      "batch_index": 156,
+      "batch_start_index": 15500,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "d60f1c29ca563a9f445d2e32eb6b729c36456eb8a6224da2640a2eddf6764c20"
+    },
+    {
+      "batch_end_index": 15699,
+      "batch_index": 157,
+      "batch_start_index": 15600,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "95c876f2d96bf40b2a2020a91835b36bd5d5a373294fcfc3bd077f8d7c853b0f"
+    },
+    {
+      "batch_end_index": 15799,
+      "batch_index": 158,
+      "batch_start_index": 15700,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "ed85d04f9545e095f4d13953a39ea01a68d0c93f3290173917b2e49f3f96dfcd"
+    },
+    {
+      "batch_end_index": 15899,
+      "batch_index": 159,
+      "batch_start_index": 15800,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "4d974bdca322ad1922c56f8fe32c9acec2a755b3e4fb33dc031da8a3786f47ac"
+    },
+    {
+      "batch_end_index": 15999,
+      "batch_index": 160,
+      "batch_start_index": 15900,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "d797d4801dff7eb50c632f9ca7a54e0d0c34189f9523f5bfb56c988daf4872e7"
+    },
+    {
+      "batch_end_index": 16099,
+      "batch_index": 161,
+      "batch_start_index": 16000,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "d2add3e0b183f1fd279246a87d0fc936c3dfbdee49eba045ab3a3c759a44553a"
+    },
+    {
+      "batch_end_index": 16199,
+      "batch_index": 162,
+      "batch_start_index": 16100,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "6c97cc0ef00aa67272158be37247cc53696196b4fa2388f6067b0b425a35b79c"
+    },
+    {
+      "batch_end_index": 16299,
+      "batch_index": 163,
+      "batch_start_index": 16200,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "052950ee46190fab0748e73d49173484f170d94e38dde48570959bb220756336"
+    },
+    {
+      "batch_end_index": 16399,
+      "batch_index": 164,
+      "batch_start_index": 16300,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "9fe5203adfb5674f8e930bdbde6db3a5f49110653a726cf107e1e55d5067a9ed"
+    },
+    {
+      "batch_end_index": 16499,
+      "batch_index": 165,
+      "batch_start_index": 16400,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "ad22cf6d379c6f17ee1ef4549de2a32069cea5b034c431969f0cbf2489549c13"
+    },
+    {
+      "batch_end_index": 16599,
+      "batch_index": 166,
+      "batch_start_index": 16500,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "744ac435daebb90a77dc8ecafb054b83ffbf813a4e668ed5adc7397f6cc062c1"
+    },
+    {
+      "batch_end_index": 16699,
+      "batch_index": 167,
+      "batch_start_index": 16600,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "33693e377e11f58dc6650c20767f323581b990f964b752f1b1e15b9da7fd484a"
+    },
+    {
+      "batch_end_index": 16799,
+      "batch_index": 168,
+      "batch_start_index": 16700,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "5519e0988a230adba4bff98674b9ed4deb7898f27291d68cddc6eea74ea48e3c"
+    },
+    {
+      "batch_end_index": 16899,
+      "batch_index": 169,
+      "batch_start_index": 16800,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "c166f7da1d06304ea8d53f661a1a59eeec614a1a7e380f880e889b9455765de1"
+    },
+    {
+      "batch_end_index": 16999,
+      "batch_index": 170,
+      "batch_start_index": 16900,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "1972b125aa01f42701301e8ec52120a7ec78064bf0e8a3d2783aee5f7c734425"
+    },
+    {
+      "batch_end_index": 17099,
+      "batch_index": 171,
+      "batch_start_index": 17000,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "1d8273f4be271dc46973ea85f73aba3ce01160497c4f97618da524b104907512"
+    },
+    {
+      "batch_end_index": 17199,
+      "batch_index": 172,
+      "batch_start_index": 17100,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "0de47226c9d851541c6c83750c4f1bf5848c42968b28884b72c3121bb256a8da"
+    },
+    {
+      "batch_end_index": 17299,
+      "batch_index": 173,
+      "batch_start_index": 17200,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "ed645ce45b77ae33718cde204506bf5e106181b33581ff03a7ca3bf28d468f23"
+    },
+    {
+      "batch_end_index": 17399,
+      "batch_index": 174,
+      "batch_start_index": 17300,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "a94b2dbb5378db00a9589903109de543ec3006e4bbd63721ddbf6fc8f2ea9d4a"
+    },
+    {
+      "batch_end_index": 17499,
+      "batch_index": 175,
+      "batch_start_index": 17400,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "eb437ba21d3ad1601f54217ae83749f250c8b3bd52a42d16311a63b203186bf7"
+    },
+    {
+      "batch_end_index": 17599,
+      "batch_index": 176,
+      "batch_start_index": 17500,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "b05d70a56d72f959fb1097b9c0f567b28f414c6f8000439cdc4413ec8e8d2b4a"
+    },
+    {
+      "batch_end_index": 17699,
+      "batch_index": 177,
+      "batch_start_index": 17600,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "7f248d77e10b4dcf5ff14350b7200a34adada9e27447b8809dbaab4561bbb41d"
+    },
+    {
+      "batch_end_index": 17799,
+      "batch_index": 178,
+      "batch_start_index": 17700,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "a65d0f348171e2516127b264afbd574aa1aaf6a55b3b403f95aacfc38a0faa1b"
+    },
+    {
+      "batch_end_index": 17899,
+      "batch_index": 179,
+      "batch_start_index": 17800,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "8e88d51fcb6b33517ad0fffa7ee249853e0e83534c975e99b9f675deb1490c70"
+    },
+    {
+      "batch_end_index": 17999,
+      "batch_index": 180,
+      "batch_start_index": 17900,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "6c67737eb1490c79d60536d86ea18a632904cd7410bf012e45041c8e58373e0f"
+    },
+    {
+      "batch_end_index": 18099,
+      "batch_index": 181,
+      "batch_start_index": 18000,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "7cc5875050c8e9058aad31d2d17bceca4b74a8212bf76ef0a881a1677f029235"
+    },
+    {
+      "batch_end_index": 18199,
+      "batch_index": 182,
+      "batch_start_index": 18100,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "e0e898c3c55587fa7e66099e8ef3ee9cc3c028d437a6c224cf5737aeb87a0688"
+    },
+    {
+      "batch_end_index": 18299,
+      "batch_index": 183,
+      "batch_start_index": 18200,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "1a27ccd5bb0e9a543bc172f3fa2bb8a4fbec83cd383b32db2394861d2687354a"
+    },
+    {
+      "batch_end_index": 18399,
+      "batch_index": 184,
+      "batch_start_index": 18300,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "1aec1a71a15ede65076fabef21f185f6f777864240c32fe2c754bc4fdc1e7163"
+    },
+    {
+      "batch_end_index": 18499,
+      "batch_index": 185,
+      "batch_start_index": 18400,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "efe64f37a66b997b58b9e305b8567e696f7aa9cf507a965d60c1406d1a8cd7da"
+    },
+    {
+      "batch_end_index": 18599,
+      "batch_index": 186,
+      "batch_start_index": 18500,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "e3f2ea1180da7d80792d52505ba6ce6af6a70e114a7814b0bcc98c73d296cda4"
+    },
+    {
+      "batch_end_index": 18699,
+      "batch_index": 187,
+      "batch_start_index": 18600,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "d302370e15fad74d81f2b978d68b11f37fc4f1774f690d38e17a5297ef6f8141"
+    },
+    {
+      "batch_end_index": 18799,
+      "batch_index": 188,
+      "batch_start_index": 18700,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "cd7a9abfc32c20a0419235190690c66656eceea7fc12e55ba49ad757ffb0bb02"
+    },
+    {
+      "batch_end_index": 18899,
+      "batch_index": 189,
+      "batch_start_index": 18800,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "9df3f91612d29c9ab1360aee802db4619e84d5f5376a44a3a29eaa0a51ed59ff"
+    },
+    {
+      "batch_end_index": 18999,
+      "batch_index": 190,
+      "batch_start_index": 18900,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "4cb459932452b0d6426d4c5174c25186c059499677cd0746f8b02ecca51c88e9"
+    },
+    {
+      "batch_end_index": 19099,
+      "batch_index": 191,
+      "batch_start_index": 19000,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "ec97cd0b355a6114784e0f950583a214c33817cb016070741ded61afbd0df22a"
+    },
+    {
+      "batch_end_index": 19199,
+      "batch_index": 192,
+      "batch_start_index": 19100,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "94f910861dbb32c53a74cd2b14a3a6f4f476a97c7e79e9ef7dd1ec18997dffab"
+    },
+    {
+      "batch_end_index": 19299,
+      "batch_index": 193,
+      "batch_start_index": 19200,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "0ceb9cb64fc9a0354d56e3a9f4d610555c62bb3a897f72b6041d02d420311b48"
+    },
+    {
+      "batch_end_index": 19399,
+      "batch_index": 194,
+      "batch_start_index": 19300,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "14371fa1a929d6b357dc138f5d032beb4472258279e2c3507b7c1d046fb4e637"
+    },
+    {
+      "batch_end_index": 19499,
+      "batch_index": 195,
+      "batch_start_index": 19400,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "dd3d96439e915fc8d430e8dd555da736ab886cd544dd86f024167f70ac87dc41"
+    },
+    {
+      "batch_end_index": 19599,
+      "batch_index": 196,
+      "batch_start_index": 19500,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "30d129e92161a0d9d8946bd48cb13e4f8bb502b531e7033d52968afddc7ddde9"
+    },
+    {
+      "batch_end_index": 19699,
+      "batch_index": 197,
+      "batch_start_index": 19600,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "6dbf5e5bdb7b42bfa270d22ed5aa9ce52a79e1a2333b85ef4ed75e8d1548759a"
+    },
+    {
+      "batch_end_index": 19799,
+      "batch_index": 198,
+      "batch_start_index": 19700,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "e920a3ea4056a0e6ebbd638f3e5ddbe64782f9cc0650c5d8d718f362a58e24f2"
+    },
+    {
+      "batch_end_index": 19899,
+      "batch_index": 199,
+      "batch_start_index": 19800,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "33f230d2e13452cf81747cefbc132a493ee51a705c0719dc235c0fd9d1b3e360"
+    },
+    {
+      "batch_end_index": 19999,
+      "batch_index": 200,
+      "batch_start_index": 19900,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "023f93074a41de9655ac765b2b4b436c4af0cdb0e81a51c722d0463172dee3b5"
+    },
+    {
+      "batch_end_index": 20099,
+      "batch_index": 201,
+      "batch_start_index": 20000,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "2243666e28c2912a484f49d8b7b3c7b2db172cce6d3f14e9c94304ad91ec3940"
+    },
+    {
+      "batch_end_index": 20199,
+      "batch_index": 202,
+      "batch_start_index": 20100,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "2f67cfe9a0ce4f4f95bf185cc439bfdb80c5a9aae412c9bd0a8c32a492e5fb62"
+    },
+    {
+      "batch_end_index": 20299,
+      "batch_index": 203,
+      "batch_start_index": 20200,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "d25f117d834ac6163b82b8dc4efaea63f09d9a036c4b1fef987efad8a6e66cc3"
+    },
+    {
+      "batch_end_index": 20399,
+      "batch_index": 204,
+      "batch_start_index": 20300,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "356f66de93fa7023153f053ae55410d3014872363065263e28fc798b2a359b84"
+    },
+    {
+      "batch_end_index": 20499,
+      "batch_index": 205,
+      "batch_start_index": 20400,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "7d97315dbad1c4a33b89e39ad9f0457cfba1d0c56fc588655842dfc2051362fe"
+    },
+    {
+      "batch_end_index": 20599,
+      "batch_index": 206,
+      "batch_start_index": 20500,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "04c8acb4eb9eb5bed14d1384fd9d75409d843d7a21520de90d4eb4bfa4b0866e"
+    },
+    {
+      "batch_end_index": 20699,
+      "batch_index": 207,
+      "batch_start_index": 20600,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "42314849907cc409e640082e2f711a01e105da84da08c5b59bb6bbb1079fd795"
+    },
+    {
+      "batch_end_index": 20799,
+      "batch_index": 208,
+      "batch_start_index": 20700,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "35f7823ecc3242c46a0ea0aeee292979e47bd53f596be98492c07927b205465d"
+    },
+    {
+      "batch_end_index": 20899,
+      "batch_index": 209,
+      "batch_start_index": 20800,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "d7c3b747b69f4101797c9ac0723b51cb355e5b6de45debc45e57e5a4396ff839"
+    },
+    {
+      "batch_end_index": 20999,
+      "batch_index": 210,
+      "batch_start_index": 20900,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "964d5a6483a8389b757e11a2d5046a28aed0d8cbd3c69c5949014df1ecd383bb"
+    },
+    {
+      "batch_end_index": 21099,
+      "batch_index": 211,
+      "batch_start_index": 21000,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "99473c02376f6d55ec348b2fd3f6ee1de4e8d95aa03d6fdc87a0a274a9e7cae4"
+    },
+    {
+      "batch_end_index": 21199,
+      "batch_index": 212,
+      "batch_start_index": 21100,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "f602502fb8be4c687edc2a021ea3577e751cfb23a750a9733608ca17e02139fb"
+    },
+    {
+      "batch_end_index": 21299,
+      "batch_index": 213,
+      "batch_start_index": 21200,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "13913d472c45f7b27210b7529115cc40b088eeb73645b92f1a9c3e7d2864a5bf"
+    },
+    {
+      "batch_end_index": 21399,
+      "batch_index": 214,
+      "batch_start_index": 21300,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "da74f5f41af1caf4018384260af9aa6ed8eefea4ff41b370151c5ad1473e76a9"
+    },
+    {
+      "batch_end_index": 21499,
+      "batch_index": 215,
+      "batch_start_index": 21400,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "ba3b0e7a689496597dd50fd38f7581f54601585a08eb215777874214bb9a37ab"
+    },
+    {
+      "batch_end_index": 21599,
+      "batch_index": 216,
+      "batch_start_index": 21500,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "6bd5d58abc93c3054c27f1ab03a3b962c5b8368c5bf9c099bcff94a1f885a1d9"
+    },
+    {
+      "batch_end_index": 21699,
+      "batch_index": 217,
+      "batch_start_index": 21600,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "7937fa28f0a24510b1e5b02f748e4f1cdbb3a4cda58d514253bb3c87199dc912"
+    },
+    {
+      "batch_end_index": 21799,
+      "batch_index": 218,
+      "batch_start_index": 21700,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "130589256c2e68e89413f85a2c3fbe1c9860ca919ee3d79d87e16b466422b50e"
+    },
+    {
+      "batch_end_index": 21899,
+      "batch_index": 219,
+      "batch_start_index": 21800,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "f61f2a1f8951610bcd6ab571568e1c553607e71b827595fb7db665e385bc99b9"
+    },
+    {
+      "batch_end_index": 21999,
+      "batch_index": 220,
+      "batch_start_index": 21900,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "3c294707934d4e277116223a6df38c043d7147c9c92c8d9a0b0b34886d7fc3a1"
+    },
+    {
+      "batch_end_index": 22099,
+      "batch_index": 221,
+      "batch_start_index": 22000,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "cb838e61d1c6a877b5f47bfff8b5e50dca9fb5223ccdfd12345a3f889e140afc"
+    },
+    {
+      "batch_end_index": 22199,
+      "batch_index": 222,
+      "batch_start_index": 22100,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "19fcd5d06e36dbf1c6c1634f7296d7770cdaf6f739917d02010a69dd663f8b1b"
+    },
+    {
+      "batch_end_index": 22299,
+      "batch_index": 223,
+      "batch_start_index": 22200,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "3589afc736cbc5a8165010930cc1d149e404bf3db549816e94ccdffbb047bdd8"
+    },
+    {
+      "batch_end_index": 22399,
+      "batch_index": 224,
+      "batch_start_index": 22300,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "aa79df16e716cff9c24a20b0a597c08c4097803fd9b20d3392cfdd55d2abe9bc"
+    },
+    {
+      "batch_end_index": 22499,
+      "batch_index": 225,
+      "batch_start_index": 22400,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "6fea13d27c492295f8275362238976f177e3e4e8f707b31a0f60a2fb575f0af1"
+    },
+    {
+      "batch_end_index": 22599,
+      "batch_index": 226,
+      "batch_start_index": 22500,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "bc2d0c7189129d30cdf3a6a8b0e5567c78e6943bcbbb4c3e26a82a8784f7e01a"
+    },
+    {
+      "batch_end_index": 22699,
+      "batch_index": 227,
+      "batch_start_index": 22600,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "287fb10f795c292d0b24c0b52a00d6b9301508142f1e948601f780f82738f295"
+    },
+    {
+      "batch_end_index": 22799,
+      "batch_index": 228,
+      "batch_start_index": 22700,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "27188dce430d0582af2118f63b3068c3d41376ae59bb5ce2934aa6cf40aa0935"
+    },
+    {
+      "batch_end_index": 22899,
+      "batch_index": 229,
+      "batch_start_index": 22800,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "a41347f7564550400eebddfbe2655cb420226548a8b7eb70daddc801c598b8fd"
+    },
+    {
+      "batch_end_index": 22999,
+      "batch_index": 230,
+      "batch_start_index": 22900,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "991297e70adf4c667d48a685e5743da60f71cb48d5abe8f0aad17ede18373262"
+    },
+    {
+      "batch_end_index": 23099,
+      "batch_index": 231,
+      "batch_start_index": 23000,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "d4ffb6836923f1e74e700fd090cc59de6466c4c848605942450bc01ba20854ff"
+    },
+    {
+      "batch_end_index": 23199,
+      "batch_index": 232,
+      "batch_start_index": 23100,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "a667dceae23887e25cac0a55c4bfe5016ac9563af1cfed4d0fa08c051d4ebdf2"
+    },
+    {
+      "batch_end_index": 23299,
+      "batch_index": 233,
+      "batch_start_index": 23200,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "e753d10fac6bf864528d4edc23a026fec95a9cc1f3dd2085bd86d559eafc895a"
+    },
+    {
+      "batch_end_index": 23399,
+      "batch_index": 234,
+      "batch_start_index": 23300,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "548b0eaf723552f819f19b3b834906db9a33fe539fe7113e550c691e883f2c7d"
+    },
+    {
+      "batch_end_index": 23499,
+      "batch_index": 235,
+      "batch_start_index": 23400,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "c99a213f025d1994be313d59bb3cbc0b05c200cdfdff8c21cfc71973eff160ad"
+    },
+    {
+      "batch_end_index": 23599,
+      "batch_index": 236,
+      "batch_start_index": 23500,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "7c91a90983ffb80e897e4ce0fb60b1fa846d43d8764e85c160939a7fabdfd16c"
+    },
+    {
+      "batch_end_index": 23699,
+      "batch_index": 237,
+      "batch_start_index": 23600,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "b732ce341ed21702dad78e0b69eed5745f7ddeb92325ab1e21844d42d5d510b1"
+    },
+    {
+      "batch_end_index": 23799,
+      "batch_index": 238,
+      "batch_start_index": 23700,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "70d072e3ba1dc2b2422eef609d204c1ef986c25a62a239298d792f4702f2edc8"
+    },
+    {
+      "batch_end_index": 23899,
+      "batch_index": 239,
+      "batch_start_index": 23800,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "2d3f238a2849e792da5f24d3e169387942d8fdfe314c781c887d37197e41f2e9"
+    },
+    {
+      "batch_end_index": 23999,
+      "batch_index": 240,
+      "batch_start_index": 23900,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "9f269100d866ea726cebac5ec2f5db9d63a79b61a212cab016ddba007929fb29"
+    },
+    {
+      "batch_end_index": 24099,
+      "batch_index": 241,
+      "batch_start_index": 24000,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "5695c898c931ef28d927e2e0f2b19ea9428fefbbbfe2ef5492b8aaad85826e98"
+    },
+    {
+      "batch_end_index": 24199,
+      "batch_index": 242,
+      "batch_start_index": 24100,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "108e62c6734d21c39f8f67fe2f90da81935f9a18eefeab389170c3d11116e988"
+    },
+    {
+      "batch_end_index": 24299,
+      "batch_index": 243,
+      "batch_start_index": 24200,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "e9cae485e21d9f572355381540c9e7b4318245cb1d23d49320dad8ac51ff8da6"
+    },
+    {
+      "batch_end_index": 24399,
+      "batch_index": 244,
+      "batch_start_index": 24300,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "46e63cd59d88e66e7040f2a715fde1a431ba1f79d3e87d20812975d4e18a1ee7"
+    },
+    {
+      "batch_end_index": 24499,
+      "batch_index": 245,
+      "batch_start_index": 24400,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "47d97f61369311b48eec70e6badfefae24cba04134896984b02d14968d6e21c0"
+    },
+    {
+      "batch_end_index": 24599,
+      "batch_index": 246,
+      "batch_start_index": 24500,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "8ff2de15d8192e9988b5dc6e9765a7096196383a27b13f36fdd901c36b386e7d"
+    },
+    {
+      "batch_end_index": 24699,
+      "batch_index": 247,
+      "batch_start_index": 24600,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "02b208175580dadc886e8f7c7b82eb9ae48bdc3779538063a0f51c40385d939c"
+    },
+    {
+      "batch_end_index": 24799,
+      "batch_index": 248,
+      "batch_start_index": 24700,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "14f7a02365e7ff45d873722fc1655d4440220b0b77116790770debe864d9b1e7"
+    },
+    {
+      "batch_end_index": 24899,
+      "batch_index": 249,
+      "batch_start_index": 24800,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "324a26e60c052b241f9414bb2726a08f6c4981462b7c2e461afbce78b4d57e98"
+    },
+    {
+      "batch_end_index": 24999,
+      "batch_index": 250,
+      "batch_start_index": 24900,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "f44b0bf42daf600455bb614b99044f0e462de28727629b3422327461aa0cc8fa"
+    },
+    {
+      "batch_end_index": 25099,
+      "batch_index": 251,
+      "batch_start_index": 25000,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "12d57917d459a00dba05080ce4cc798a3ceb598dfff6c91bba69f55e0171eeb0"
+    },
+    {
+      "batch_end_index": 25199,
+      "batch_index": 252,
+      "batch_start_index": 25100,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "32a70900405e9fdc6dca7fe1d397d4053bd30b834f0093c53bbc11b4d5ce4b76"
+    },
+    {
+      "batch_end_index": 25299,
+      "batch_index": 253,
+      "batch_start_index": 25200,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "7232291d3a50946e1eaea889172c7863a23453e32437a5e6aec58d980316723c"
+    },
+    {
+      "batch_end_index": 25399,
+      "batch_index": 254,
+      "batch_start_index": 25300,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "41a91078bc052c937594878702e5c44e7a8bdceb660752f1ae8b372f80d29730"
+    },
+    {
+      "batch_end_index": 25499,
+      "batch_index": 255,
+      "batch_start_index": 25400,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "959ec442167634f9a8aa80bdea111dc20483ecc1d73cf2e8789b868814dd9c79"
+    },
+    {
+      "batch_end_index": 25599,
+      "batch_index": 256,
+      "batch_start_index": 25500,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "25b34e8645e62e8ea896a5eec6cde9b1ac3a8a249bf9854254092182332a3848"
+    },
+    {
+      "batch_end_index": 25699,
+      "batch_index": 257,
+      "batch_start_index": 25600,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "ad5b70d26df46e5a8440cca9526d0c4d71100c97d89db26940d9e2e217b579de"
+    },
+    {
+      "batch_end_index": 25799,
+      "batch_index": 258,
+      "batch_start_index": 25700,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "59e91187d493422e004667b0d045eb2c13b1c7870b70176f001570b6452d7b62"
+    },
+    {
+      "batch_end_index": 25899,
+      "batch_index": 259,
+      "batch_start_index": 25800,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "dc1767b9e3fedf87b5c8a40b1e094c81674fd2975ccc6ab8bcc4fa8811f18a7d"
+    },
+    {
+      "batch_end_index": 25999,
+      "batch_index": 260,
+      "batch_start_index": 25900,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "205ad21c09fe8fa65a2ae1df81cf3261ed1e67e75da753c465432f289f17d695"
+    },
+    {
+      "batch_end_index": 26099,
+      "batch_index": 261,
+      "batch_start_index": 26000,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "fe9db643f0a23c3929499b5c42aedb6a41afe105cf24a8809155bf1579069d76"
+    },
+    {
+      "batch_end_index": 26199,
+      "batch_index": 262,
+      "batch_start_index": 26100,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "bb15d957e9bdd3a1c9c12e56432aa5ffbf074fdba667cbaf25c51c4966431dc1"
+    },
+    {
+      "batch_end_index": 26299,
+      "batch_index": 263,
+      "batch_start_index": 26200,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "9f555130d63584d920b79fef988e2d7534865e27ca85b598f18237aaab6d3765"
+    },
+    {
+      "batch_end_index": 26399,
+      "batch_index": 264,
+      "batch_start_index": 26300,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "a10fa0429bbb77bacbe3edd0de2aed4fee4af4bfab661897d6306bdf1d20b901"
+    },
+    {
+      "batch_end_index": 26499,
+      "batch_index": 265,
+      "batch_start_index": 26400,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "c6faf1149a5207e1c505d73b518ff823c902a061ff6075d86efb2bef5c3d91c2"
+    },
+    {
+      "batch_end_index": 26599,
+      "batch_index": 266,
+      "batch_start_index": 26500,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "e5853b8112daaa8d640118091b74daeabce9de6d793384f82b2367f0ff7d4407"
+    },
+    {
+      "batch_end_index": 26699,
+      "batch_index": 267,
+      "batch_start_index": 26600,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "73b72210595e225c04976ce3ccc5025d14494e4dd41599a5c39d48417a7e9962"
+    },
+    {
+      "batch_end_index": 26799,
+      "batch_index": 268,
+      "batch_start_index": 26700,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "3546d963f6859b911da4c0399c4a05219d231f337cabf2c19e7590b533a989de"
+    },
+    {
+      "batch_end_index": 26899,
+      "batch_index": 269,
+      "batch_start_index": 26800,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "99e99c5ac377ae1cb259ea166cde5454b3368b9a7a79b15c490d6176c49442ca"
+    },
+    {
+      "batch_end_index": 26999,
+      "batch_index": 270,
+      "batch_start_index": 26900,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "f6653416efaefb0978e4981c0527bd32200a8e9cbadb98a8b9c22d327e0800e4"
+    },
+    {
+      "batch_end_index": 27099,
+      "batch_index": 271,
+      "batch_start_index": 27000,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "ec9a59c92bdf552c7deb7174003df96213ff0815a95ac096513ab67f2a913db7"
+    },
+    {
+      "batch_end_index": 27199,
+      "batch_index": 272,
+      "batch_start_index": 27100,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "5032b5fbac3ec222c84fadef4d697dac9307d947e58cc81832350b098c10d359"
+    },
+    {
+      "batch_end_index": 27299,
+      "batch_index": 273,
+      "batch_start_index": 27200,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "8a5dc97d71af7671a0277c07a0866713609a6466fd5e41d47da7e97b7adba7ab"
+    },
+    {
+      "batch_end_index": 27399,
+      "batch_index": 274,
+      "batch_start_index": 27300,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "21f26ec5fa277b6b21c7e42600282eae45ce47323309d9ccdfa04807a45130ce"
+    },
+    {
+      "batch_end_index": 27499,
+      "batch_index": 275,
+      "batch_start_index": 27400,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "53c390f31856683bd1c69988a16c8d35ea28aba2eb56f8e21a25b7d70cb5211c"
+    },
+    {
+      "batch_end_index": 27599,
+      "batch_index": 276,
+      "batch_start_index": 27500,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "06d1726cf36caa141b5c5647d92ee708b7061abf4e44d01bb03a04d32edbf24d"
+    },
+    {
+      "batch_end_index": 27699,
+      "batch_index": 277,
+      "batch_start_index": 27600,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "71c6bf6c0fb18d9623f85d9041b0fe5652f1989ed6d145223ec7826948acb2c7"
+    },
+    {
+      "batch_end_index": 27799,
+      "batch_index": 278,
+      "batch_start_index": 27700,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "8fb9b923508323b8e22f93a5710c82f07235d231962a5ca28fb86bfdd91d756d"
+    },
+    {
+      "batch_end_index": 27899,
+      "batch_index": 279,
+      "batch_start_index": 27800,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "b2e6bde919d92a3c1cd3a3552f11dff4ce02c5b770ea26479dc1764f1054af08"
+    },
+    {
+      "batch_end_index": 27999,
+      "batch_index": 280,
+      "batch_start_index": 27900,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "c55de4b69de50ae5541956c59c43d7e1246f446d2746f5b9a4613fa0061cb0fd"
+    },
+    {
+      "batch_end_index": 28099,
+      "batch_index": 281,
+      "batch_start_index": 28000,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "e0dbea7fa41ad3899fe8b1f2ae47565fa0a449cd89b9ae7ee2ff588a75d5c089"
+    },
+    {
+      "batch_end_index": 28199,
+      "batch_index": 282,
+      "batch_start_index": 28100,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "45ade0f2a900b7b81508ffe2d2f8f9702931375f2b923cc457f79764f4877bcd"
+    },
+    {
+      "batch_end_index": 28299,
+      "batch_index": 283,
+      "batch_start_index": 28200,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "080c6651742c8c0d413708d496f1b8e287b3fb7b2c9aa6c1c0ca08439ab7853c"
+    },
+    {
+      "batch_end_index": 28399,
+      "batch_index": 284,
+      "batch_start_index": 28300,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "d5ab8dda72b0e92962091881384259f6afe61a3878d6336f3b4a5ca516e89b50"
+    },
+    {
+      "batch_end_index": 28499,
+      "batch_index": 285,
+      "batch_start_index": 28400,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "61a6e48bd17d73efe60e365a377c3058e6d0777fb9cd7c107864daff88e54cd8"
+    },
+    {
+      "batch_end_index": 28599,
+      "batch_index": 286,
+      "batch_start_index": 28500,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "4d760ca0e62f9d655f4b8d05f34073632b37f35ca0ac0c6e614108f22651fd15"
+    },
+    {
+      "batch_end_index": 28699,
+      "batch_index": 287,
+      "batch_start_index": 28600,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "895e1aee958e2722502de413649119311c3fa23b4db4dc90cac262bbe27a02d4"
+    },
+    {
+      "batch_end_index": 28799,
+      "batch_index": 288,
+      "batch_start_index": 28700,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "276d1ed1fe93a78926f5870eab331566f813385729204a3c76ba9c991a1fbfcc"
+    },
+    {
+      "batch_end_index": 28899,
+      "batch_index": 289,
+      "batch_start_index": 28800,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "9eb6d4f4df9a7abc91907e980929932f6c75dc2a6c6abd93c8b7d59ec5100bb4"
+    },
+    {
+      "batch_end_index": 28999,
+      "batch_index": 290,
+      "batch_start_index": 28900,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "bc73a8c88d0276bacf992f75541c68af233cd2e9a2eb6c89fcf2c06c8453fa98"
+    },
+    {
+      "batch_end_index": 29099,
+      "batch_index": 291,
+      "batch_start_index": 29000,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "840216c0601f8d15eeabbddf4a093a481def0364278d3919f47f92a22b86abc6"
+    },
+    {
+      "batch_end_index": 29199,
+      "batch_index": 292,
+      "batch_start_index": 29100,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "5fc24ce59391ace05e69b0e444ab50753d092cac03b9b55a7147d97425fcf010"
+    },
+    {
+      "batch_end_index": 29299,
+      "batch_index": 293,
+      "batch_start_index": 29200,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "af0cd6dbeede5193fc0f9c5c2bdc22a29b304bac5c9a5f554d2d649dfd64e20e"
+    },
+    {
+      "batch_end_index": 29399,
+      "batch_index": 294,
+      "batch_start_index": 29300,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "67bed7d290118e8d28bcb6b4afe4f5c944b7efb8bea716a1953f3c859abf0353"
+    },
+    {
+      "batch_end_index": 29499,
+      "batch_index": 295,
+      "batch_start_index": 29400,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "4d664802606e3fa22beace2d55157b8fffb693a56517f20c098e5b7fdc7428ef"
+    },
+    {
+      "batch_end_index": 29599,
+      "batch_index": 296,
+      "batch_start_index": 29500,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "749d21e53fc88c5d2a054f75feb2de8d4542e818b5e79ba5bdb31c0da963165e"
+    },
+    {
+      "batch_end_index": 29699,
+      "batch_index": 297,
+      "batch_start_index": 29600,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "d568e1346c07a31f34f8f743baca272dd0d3fb91d2e3a11cd51136f4131b574f"
+    },
+    {
+      "batch_end_index": 29799,
+      "batch_index": 298,
+      "batch_start_index": 29700,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "e03398de9a10d576eca65f2588f20cd0359b540bc0b62622a1f2929fddde9823"
+    },
+    {
+      "batch_end_index": 29899,
+      "batch_index": 299,
+      "batch_start_index": 29800,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "b2bd51cb876366e3f6e9388039e43fbb8b4996507e9c58f979c696c177c90ca0"
+    },
+    {
+      "batch_end_index": 29999,
+      "batch_index": 300,
+      "batch_start_index": 29900,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "4b758988126695665ac4b78f337984d871301ef21e93561d0ec3ec2e55e45b21"
+    },
+    {
+      "batch_end_index": 30099,
+      "batch_index": 301,
+      "batch_start_index": 30000,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "7fbe7bb11de1a3f8199a894509f4ef65edba3ddf92526ea44d19a14b732cc620"
+    },
+    {
+      "batch_end_index": 30199,
+      "batch_index": 302,
+      "batch_start_index": 30100,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "f8a48349ecd9419132285eb7a8821b6e767dba2c5c48f7eb594a5fa6ee643d3b"
+    },
+    {
+      "batch_end_index": 30299,
+      "batch_index": 303,
+      "batch_start_index": 30200,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "f24188a2d29b9dde6738db4124d9ef52b90faf1f92479dde0848711e97a35dc1"
+    },
+    {
+      "batch_end_index": 30399,
+      "batch_index": 304,
+      "batch_start_index": 30300,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "478b7ec0417c18ca25ccdd9056fb0f1f1c32e789c8ea782d2bfa164f13d2d683"
+    },
+    {
+      "batch_end_index": 30499,
+      "batch_index": 305,
+      "batch_start_index": 30400,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "d6d7fbab6b6020f75d577d07c05be91f09e9d6ed075f39f6d6d8d113ff8bca02"
+    },
+    {
+      "batch_end_index": 30599,
+      "batch_index": 306,
+      "batch_start_index": 30500,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "36830dfb1e818ef2b927c51d6f786b636f7bf110017b1ab83bebaed74f003ca5"
+    },
+    {
+      "batch_end_index": 30699,
+      "batch_index": 307,
+      "batch_start_index": 30600,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "41c38bf888cb586b57d033b58eb49d6f4845bd4ddaf08c93be5528c4467e645e"
+    },
+    {
+      "batch_end_index": 30799,
+      "batch_index": 308,
+      "batch_start_index": 30700,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "c3e11831e0735fccd7778075dd1fa89c7609a7e462741e4b6b4512dfe0cc12bb"
+    },
+    {
+      "batch_end_index": 30899,
+      "batch_index": 309,
+      "batch_start_index": 30800,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "862cf7542547e0e79e1c10ca053bd31eaa94ee7d4ceae858c240f72d494deb6a"
+    },
+    {
+      "batch_end_index": 30999,
+      "batch_index": 310,
+      "batch_start_index": 30900,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "c73eea688d0bc8ad436dc90193e1ef9cf74b5070bc0580e6ee9cc3f98e5a75e5"
+    },
+    {
+      "batch_end_index": 31099,
+      "batch_index": 311,
+      "batch_start_index": 31000,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "f5f5fa0822bef3b78bbde92266c6b303fe78fefe5b9a3b874960092b62ce3608"
+    },
+    {
+      "batch_end_index": 31199,
+      "batch_index": 312,
+      "batch_start_index": 31100,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "2fb0d8fb619a832983282e1b1e44e9fa3f3a4e764d2ed0690d535b59965dbc3c"
+    },
+    {
+      "batch_end_index": 31299,
+      "batch_index": 313,
+      "batch_start_index": 31200,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "8c06a0d6e0729212fac4edbdc6b5285857c16dead303591649292c6adde68563"
+    },
+    {
+      "batch_end_index": 31399,
+      "batch_index": 314,
+      "batch_start_index": 31300,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "50e0b10a8a0b1865d9cc798937b92b4d22fe4717c77aca4d4820bc1b79303bc7"
+    },
+    {
+      "batch_end_index": 31499,
+      "batch_index": 315,
+      "batch_start_index": 31400,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "5e2ef4a4ccaccbeca9e7ff9468abf765da14d8126f2de8dbec12d137b8a6754e"
+    },
+    {
+      "batch_end_index": 31599,
+      "batch_index": 316,
+      "batch_start_index": 31500,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "bd4abc37f97cbbd17cd1aaae1188e47657375757cb551cf1c9891144a4557e15"
+    },
+    {
+      "batch_end_index": 31699,
+      "batch_index": 317,
+      "batch_start_index": 31600,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "400141a412846b04b73ec4989625dbb0454a44507bf11cf44a5afafebaed8acb"
+    },
+    {
+      "batch_end_index": 31799,
+      "batch_index": 318,
+      "batch_start_index": 31700,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "7f8b7ddf9879698fc12115e76aaf34b007ea0f783b2638ff79f6595bcd710e2f"
+    },
+    {
+      "batch_end_index": 31899,
+      "batch_index": 319,
+      "batch_start_index": 31800,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "f8b1ba67e24a29ed285a517903bc8a069d517b751d2e942d4d055fb585fab3db"
+    },
+    {
+      "batch_end_index": 31999,
+      "batch_index": 320,
+      "batch_start_index": 31900,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "490b22eb162a3cdad4957cc91f3ac27a4210bb2f641137208b5b8315ddb4f9c0"
+    },
+    {
+      "batch_end_index": 32099,
+      "batch_index": 321,
+      "batch_start_index": 32000,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "7bc0055a884bdd7c9727856622f6f63b114f235962ff4d5c6d049c3700102677"
+    },
+    {
+      "batch_end_index": 32199,
+      "batch_index": 322,
+      "batch_start_index": 32100,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "fe593ed040893a8f46b5ce597218acf10558935c5d4899c1a4c31fc050ff5d2a"
+    },
+    {
+      "batch_end_index": 32299,
+      "batch_index": 323,
+      "batch_start_index": 32200,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "93fb70f026b84a3b3df57249bf2154cc7d602a58d50119f981d0fc98ade15c91"
+    },
+    {
+      "batch_end_index": 32399,
+      "batch_index": 324,
+      "batch_start_index": 32300,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "1850c1c4560c11c50abf5f2eeac9571cc47275740db26f64f16218aeb949e4a7"
+    },
+    {
+      "batch_end_index": 32499,
+      "batch_index": 325,
+      "batch_start_index": 32400,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "b52358e5bbe97b20ae4e1b07201a2ef31c49c0557d2899a3f1adc53a73bbc7f4"
+    },
+    {
+      "batch_end_index": 32599,
+      "batch_index": 326,
+      "batch_start_index": 32500,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "d75bc557ff4e07a39aa68771a971e3a21d8f2da6332fa4c047f89310c89bccfa"
+    },
+    {
+      "batch_end_index": 32699,
+      "batch_index": 327,
+      "batch_start_index": 32600,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "3866af03e2662447833cc3db056aaf956f6793f8b75837b47d32367a07b693d5"
+    },
+    {
+      "batch_end_index": 32799,
+      "batch_index": 328,
+      "batch_start_index": 32700,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "f8ce45cd48a09a3e64df33098d6a005260c0a723357947c1a6d862f5059d7550"
+    },
+    {
+      "batch_end_index": 32899,
+      "batch_index": 329,
+      "batch_start_index": 32800,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "92d01e0615dbdd4edafc466af5f0c18207cdfdf1427775745d9048806d77e39f"
+    },
+    {
+      "batch_end_index": 32999,
+      "batch_index": 330,
+      "batch_start_index": 32900,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "bb3281dd48704802a92fb8321ac95141626674e9ea84c09dcb33623d6ab6636e"
+    },
+    {
+      "batch_end_index": 33099,
+      "batch_index": 331,
+      "batch_start_index": 33000,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "adca3918316f7e577b1bb1f468a6d17603cfc9f14d32d5ff8fce25ae135088c5"
+    },
+    {
+      "batch_end_index": 33199,
+      "batch_index": 332,
+      "batch_start_index": 33100,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "03182f3b372b020dd5f138013ea36eb549f7270e344a9112132b6c44a4820aba"
+    },
+    {
+      "batch_end_index": 33299,
+      "batch_index": 333,
+      "batch_start_index": 33200,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "6ff6a72e9f8ef60683a23664385c64aadf6e028197e1f8692351dc164b8368a2"
+    },
+    {
+      "batch_end_index": 33399,
+      "batch_index": 334,
+      "batch_start_index": 33300,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "7558467a4dc368c77f8ec419a474048aec4d79c573cbe000462e66d9b1e1a8ed"
+    },
+    {
+      "batch_end_index": 33499,
+      "batch_index": 335,
+      "batch_start_index": 33400,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "b399e5e63c45fc649a28194c98d076b24320a1ef4714a234a7a08bdd99fae74a"
+    },
+    {
+      "batch_end_index": 33599,
+      "batch_index": 336,
+      "batch_start_index": 33500,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "755a0992e2b0b1e27fc4d3a0475cf806b14cbabb9e707f0beb610cdf035b9677"
+    },
+    {
+      "batch_end_index": 33699,
+      "batch_index": 337,
+      "batch_start_index": 33600,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "0000e3336a98c97aa4a46bf1303f736839d4e039dba6fbf686429a86cf4dacec"
+    },
+    {
+      "batch_end_index": 33799,
+      "batch_index": 338,
+      "batch_start_index": 33700,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "934a331b1450f68040b0e20eaf821e25b906684e68670da777f809842922e1a6"
+    },
+    {
+      "batch_end_index": 33899,
+      "batch_index": 339,
+      "batch_start_index": 33800,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "0fbdb286042da45f01d32c6c06fb68b906a0698ccf2b73973dce4fa6da4643d1"
+    },
+    {
+      "batch_end_index": 33999,
+      "batch_index": 340,
+      "batch_start_index": 33900,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "cf55bafd1c9cad5a17e82dec0d823a2364f93f703bd6bcaad3a881cc791db7c3"
+    },
+    {
+      "batch_end_index": 34099,
+      "batch_index": 341,
+      "batch_start_index": 34000,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "33d984d3f064ff60e3b3a3d3fdc39cc229b999ddb7b80fcd60c73549b803578d"
+    },
+    {
+      "batch_end_index": 34199,
+      "batch_index": 342,
+      "batch_start_index": 34100,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "0bff47e8cd3130eeef2976d39d42a7dca6cdc1dace712f0fee5b26d3483ff1e0"
+    },
+    {
+      "batch_end_index": 34299,
+      "batch_index": 343,
+      "batch_start_index": 34200,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "f5e7d0facfea044aac5ae60312beb396aa2f721171cd728695d5d71ad7c256b7"
+    },
+    {
+      "batch_end_index": 34399,
+      "batch_index": 344,
+      "batch_start_index": 34300,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "903e16d1e90f3f38679f540d93b95dc841fabcb72c076e3c38f19b1ccc7bff6a"
+    },
+    {
+      "batch_end_index": 34499,
+      "batch_index": 345,
+      "batch_start_index": 34400,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "5006160598557b526f5c2cf7d177b564061b556e77fe60f98cf4d160b442ca4a"
+    },
+    {
+      "batch_end_index": 34599,
+      "batch_index": 346,
+      "batch_start_index": 34500,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "4fd1f954881b8471dcdd2b1580f4a82bddfc1bf98ba682d8ed91e2ddbf133b75"
+    },
+    {
+      "batch_end_index": 34699,
+      "batch_index": 347,
+      "batch_start_index": 34600,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "a2ed4044c46127487f2fa20519961484f1bb65135d41827ee66622069d91ca73"
+    },
+    {
+      "batch_end_index": 34799,
+      "batch_index": 348,
+      "batch_start_index": 34700,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "fd018e47551f1ec44d41c300cb11bc21fb7d02832ffd0f2c7509f10a96abcb91"
+    },
+    {
+      "batch_end_index": 34899,
+      "batch_index": 349,
+      "batch_start_index": 34800,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "410c66376acc233c5f46e4b35bd4657d7f53b4447ae6eb053a0a9ea5262a9938"
+    },
+    {
+      "batch_end_index": 34999,
+      "batch_index": 350,
+      "batch_start_index": 34900,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "8633cd618f474f240ca267b3eef03ccd1273f9e848365ff8df79843cddcb3537"
+    },
+    {
+      "batch_end_index": 35099,
+      "batch_index": 351,
+      "batch_start_index": 35000,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "f1abf6214ef6ceafaa0d47a28104e508eb990c50f8fce5254716469521da475e"
+    },
+    {
+      "batch_end_index": 35199,
+      "batch_index": 352,
+      "batch_start_index": 35100,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "0c03e008365b3a9e6bfa09ffa5ac2feff3bc4f31dddb49b589a6599df8856d30"
+    },
+    {
+      "batch_end_index": 35299,
+      "batch_index": 353,
+      "batch_start_index": 35200,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "3c265d664ab486aa56b9fe8ec2bf3d4a07556c3073ceca64960f89a7ec9c7784"
+    },
+    {
+      "batch_end_index": 35399,
+      "batch_index": 354,
+      "batch_start_index": 35300,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "1c763315a6472c380f65500bb17c74b0b5833c2638ff7aa01d3403b98ef236da"
+    },
+    {
+      "batch_end_index": 35499,
+      "batch_index": 355,
+      "batch_start_index": 35400,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "e0ee27fae61983147bf4dfae6cbc9155eddb4c73425df855ad9f0e80505bd305"
+    },
+    {
+      "batch_end_index": 35599,
+      "batch_index": 356,
+      "batch_start_index": 35500,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "0c6299b2911cd51d605bc1bdb6565d629c4a739cce8c9ffcd72bd8364444fdd1"
+    },
+    {
+      "batch_end_index": 35699,
+      "batch_index": 357,
+      "batch_start_index": 35600,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "c824d14219e62efec9238d7daf5f268533e21814679deeeef0b6878c06123e24"
+    },
+    {
+      "batch_end_index": 35799,
+      "batch_index": 358,
+      "batch_start_index": 35700,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "db14fe493e1423306ab13160c109f34b85d9b183e7d29bf5dbb46d33deadb27b"
+    },
+    {
+      "batch_end_index": 35899,
+      "batch_index": 359,
+      "batch_start_index": 35800,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "51f42c6cfc7f1310429bb636664157aa17d7be2572f4ff62f1b42e4d06d12a21"
+    },
+    {
+      "batch_end_index": 35999,
+      "batch_index": 360,
+      "batch_start_index": 35900,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "632dc3289317610a5c7da889d4eeeafa2c5c72dc9665ad694eb1c0bef3b7f343"
+    },
+    {
+      "batch_end_index": 36099,
+      "batch_index": 361,
+      "batch_start_index": 36000,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "afa23f8b1de2c1a85e17ca258fd086bda9e6df056f591bd2561e1919075cd8a7"
+    },
+    {
+      "batch_end_index": 36199,
+      "batch_index": 362,
+      "batch_start_index": 36100,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "e7fb2dc67208dda4622411ab738ea8d7dd83be1864c4eb4fe22a06aff833e71f"
+    },
+    {
+      "batch_end_index": 36299,
+      "batch_index": 363,
+      "batch_start_index": 36200,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "bb946a434f5b3f55cd8279f34d55be06daba8997ea786b62afc921736701fe73"
+    },
+    {
+      "batch_end_index": 36399,
+      "batch_index": 364,
+      "batch_start_index": 36300,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "8e96c2700b0930fd2b1ff1da8f6c405ea1f65b74bd6f68cf5f36bbe937bf604b"
+    },
+    {
+      "batch_end_index": 36499,
+      "batch_index": 365,
+      "batch_start_index": 36400,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "ca94cb5df7ea0d95718e4087ba4daf2176c7bb85b15937fd54de6147d1f60a5e"
+    },
+    {
+      "batch_end_index": 36599,
+      "batch_index": 366,
+      "batch_start_index": 36500,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "1c2a63805f8c6aedf528f6455f455b06dd1fc4201637f01727def83999d679df"
+    },
+    {
+      "batch_end_index": 36699,
+      "batch_index": 367,
+      "batch_start_index": 36600,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "f476fb077d655b7342f7942e7a4a67504cf5798c7377d680d8233147caf376b4"
+    },
+    {
+      "batch_end_index": 36799,
+      "batch_index": 368,
+      "batch_start_index": 36700,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "8fad26a901b18bf9b0e49b9c0d063e98cd5681d441e91edb63bbfb4d10d46ffa"
+    },
+    {
+      "batch_end_index": 36899,
+      "batch_index": 369,
+      "batch_start_index": 36800,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "0782651df17448260e4f5087e1ac4054e88450c4fd3d78db472ef8ea32027d07"
+    },
+    {
+      "batch_end_index": 36999,
+      "batch_index": 370,
+      "batch_start_index": 36900,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "3b3d355f4259e6fbb9bccfaa81c1f017cc253a1df07408bbfb0713e3bf49cc4c"
+    },
+    {
+      "batch_end_index": 37099,
+      "batch_index": 371,
+      "batch_start_index": 37000,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "3515f7773e69ed5a215253b2a008177d3570ac17f014e87cec23c8f994dde619"
+    },
+    {
+      "batch_end_index": 37199,
+      "batch_index": 372,
+      "batch_start_index": 37100,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "0c12fa31a235eadedf1312e3ea202e865496378d9af67c4a64a899fe4c276e9d"
+    },
+    {
+      "batch_end_index": 37299,
+      "batch_index": 373,
+      "batch_start_index": 37200,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "929e93a60e48c9ad199285399394f748b15467aa09ae80dfb964baa0d2563657"
+    },
+    {
+      "batch_end_index": 37399,
+      "batch_index": 374,
+      "batch_start_index": 37300,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "525c57d2c66116b27d25a2f2f7309b19281c6a8d31aa74e57024de938729669c"
+    },
+    {
+      "batch_end_index": 37499,
+      "batch_index": 375,
+      "batch_start_index": 37400,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "a900c03e2939096cb027ea3d99c4dcb601116f72132e937767b8f1210f210b22"
+    },
+    {
+      "batch_end_index": 37599,
+      "batch_index": 376,
+      "batch_start_index": 37500,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "d549b31b345dda9b0fa383b4a6d8f2c53cbce13659c08b73328c59447023f646"
+    },
+    {
+      "batch_end_index": 37699,
+      "batch_index": 377,
+      "batch_start_index": 37600,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "742950b1d065928bf899ea37d64b650360f94eec03511a78ed433c35b72c64ee"
+    },
+    {
+      "batch_end_index": 37799,
+      "batch_index": 378,
+      "batch_start_index": 37700,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "99ae3b7cb518defa0059fdaa9e5c78a952ea0c5e7932a60eec900af0580ca76b"
+    },
+    {
+      "batch_end_index": 37899,
+      "batch_index": 379,
+      "batch_start_index": 37800,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "386a991a1fff602410d456e7de9c84dbdc2232181777573b896418bb5dad8f90"
+    },
+    {
+      "batch_end_index": 37999,
+      "batch_index": 380,
+      "batch_start_index": 37900,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "f889268669af63607de79a7fe9b51ee36fbbb1f7c3f3667ffc4f5bc294396878"
+    },
+    {
+      "batch_end_index": 38099,
+      "batch_index": 381,
+      "batch_start_index": 38000,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "0ec4efab715b3ec68c2ce9eba49f54983b6b9b9dbd6ad20e12cf64e5ed947676"
+    },
+    {
+      "batch_end_index": 38199,
+      "batch_index": 382,
+      "batch_start_index": 38100,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "4ae14d9d2d67a34a7abf5265bdff5bd13704be6b2ea00f77c50144e837bac0a3"
+    },
+    {
+      "batch_end_index": 38299,
+      "batch_index": 383,
+      "batch_start_index": 38200,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "4bfade0562aa3fd2d371f8d1ee8952a270685a6c321bd72f2b72dbff77bd6ddc"
+    },
+    {
+      "batch_end_index": 38399,
+      "batch_index": 384,
+      "batch_start_index": 38300,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "0913ce1ac465dc75c19074a232bada891ef545b0baa170e467329ea1181508ef"
+    },
+    {
+      "batch_end_index": 38499,
+      "batch_index": 385,
+      "batch_start_index": 38400,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "bc81114a66ae8a189bc853841ab84d25f8a291f5eb0f59ddf474a30650475b96"
+    },
+    {
+      "batch_end_index": 38599,
+      "batch_index": 386,
+      "batch_start_index": 38500,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "926379532b3939af101a0fd21b32f67169a67a76c7bb728637c4069764a6553f"
+    },
+    {
+      "batch_end_index": 38699,
+      "batch_index": 387,
+      "batch_start_index": 38600,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "a833338671d06177716e68d2f2885787b907ff023236ed5bd213fb9b7eb8cbb8"
+    },
+    {
+      "batch_end_index": 38799,
+      "batch_index": 388,
+      "batch_start_index": 38700,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "91f83c0c91a441bdea0c1a001b4fdbfa535032fa30ef889b18e40450245c5137"
+    },
+    {
+      "batch_end_index": 38899,
+      "batch_index": 389,
+      "batch_start_index": 38800,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "c08dd0b3ae564f8254481ef89c1776d46d0a21a3d957cb1e73b54c7e139c898f"
+    },
+    {
+      "batch_end_index": 38999,
+      "batch_index": 390,
+      "batch_start_index": 38900,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "5fc784b0f4a1d119001747fac24e8a3499601b0f520f07b559e1ddd96615d898"
+    },
+    {
+      "batch_end_index": 39099,
+      "batch_index": 391,
+      "batch_start_index": 39000,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "d30edfcc0a9a743e2b85f20101a8d4de20d9a3ead9f08edc01ad3c8fbecaf936"
+    },
+    {
+      "batch_end_index": 39199,
+      "batch_index": 392,
+      "batch_start_index": 39100,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "891adbd694d270bccf20ce3b6acda6146677b3f7f041134b50a3b3dec29c1879"
+    },
+    {
+      "batch_end_index": 39299,
+      "batch_index": 393,
+      "batch_start_index": 39200,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "e7488b661d49c0d2ae0b537335293a8b0f7b70ce956a2b7e74d0edb6b1b1a751"
+    },
+    {
+      "batch_end_index": 39399,
+      "batch_index": 394,
+      "batch_start_index": 39300,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "0a407ebcd520d6748e9548b33cec05cf99fd64f1498c45d7044816263cee20dd"
+    },
+    {
+      "batch_end_index": 39499,
+      "batch_index": 395,
+      "batch_start_index": 39400,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "a0482fef5df5ade8be07982dc1f6ec46a1b837cf7eccfb869c34b0ba60b7023c"
+    },
+    {
+      "batch_end_index": 39599,
+      "batch_index": 396,
+      "batch_start_index": 39500,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "f44f0c35ebf8d7a5b4e0756dfe31cb310a681018f5393d0e369f9d218da5b70b"
+    },
+    {
+      "batch_end_index": 39699,
+      "batch_index": 397,
+      "batch_start_index": 39600,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "df6b0ca13a70c29680f98f6b3f8ea22985d422e4bf6f93de9d7bfa82175154c6"
+    },
+    {
+      "batch_end_index": 39799,
+      "batch_index": 398,
+      "batch_start_index": 39700,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "c3507f406df7297448fbbd3d73814af552b0821cc7f6b958048761efe190994a"
+    },
+    {
+      "batch_end_index": 39899,
+      "batch_index": 399,
+      "batch_start_index": 39800,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "3669c193b9ed02010aa18cbc4060707ac03efb78e3cff21f22e1f75de1dd2d09"
+    },
+    {
+      "batch_end_index": 39999,
+      "batch_index": 400,
+      "batch_start_index": 39900,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "01486fc0641f5f7f4bfa3cb45755d56cab7c417d4f7f5bd374e8e0932eebd4bc"
+    },
+    {
+      "batch_end_index": 40099,
+      "batch_index": 401,
+      "batch_start_index": 40000,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "fa7515d4098ea2b0068d9079e1ce62481fe5ed4b02e692b9ac36ce726d9fee01"
+    },
+    {
+      "batch_end_index": 40199,
+      "batch_index": 402,
+      "batch_start_index": 40100,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "b8a66cc7ba504f2205d65c0252d56075cf6c7d0b2526c371dadf34ed26054b11"
+    },
+    {
+      "batch_end_index": 40299,
+      "batch_index": 403,
+      "batch_start_index": 40200,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "a5f5fa2f502b69e24e082cc0e1329e615855bc3ae74b16110f94a845f7360440"
+    },
+    {
+      "batch_end_index": 40399,
+      "batch_index": 404,
+      "batch_start_index": 40300,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "d6e44ca21a9a621dfdcd7dc5c90c3e2a0e01f9420168d3ab9fefa9fa071414a8"
+    },
+    {
+      "batch_end_index": 40499,
+      "batch_index": 405,
+      "batch_start_index": 40400,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "6d62003f00af1043ed04bcbcdb59294e86b3fde6f278b2f782584e9983c8bac6"
+    },
+    {
+      "batch_end_index": 40599,
+      "batch_index": 406,
+      "batch_start_index": 40500,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "5fa4161d7bc5f5e30386837d83ee541876e9dbc5477a2225cce3688da3e0c997"
+    },
+    {
+      "batch_end_index": 40699,
+      "batch_index": 407,
+      "batch_start_index": 40600,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "fa9f5d1015d7ec7c15ac40cbe49e3fd954096369ba82bc29aede699edf0b9bf0"
+    },
+    {
+      "batch_end_index": 40799,
+      "batch_index": 408,
+      "batch_start_index": 40700,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "a9861042c60bfd0a15622a99b24e9f49b697dc5fc691de8cc85a96dda0f82f0a"
+    },
+    {
+      "batch_end_index": 40899,
+      "batch_index": 409,
+      "batch_start_index": 40800,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "f37307804d03e70078f31a627289ec7323fef03587154c05a509777171cd756f"
+    },
+    {
+      "batch_end_index": 40999,
+      "batch_index": 410,
+      "batch_start_index": 40900,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "c9d324498a69b82e0ae41750b40f3b217b48f9ae3f83635f0d3b6f3942459638"
+    },
+    {
+      "batch_end_index": 41099,
+      "batch_index": 411,
+      "batch_start_index": 41000,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "d81e93e19d001629502287091dd677d9b94923948e5a31982031ad77b79698f2"
+    },
+    {
+      "batch_end_index": 41199,
+      "batch_index": 412,
+      "batch_start_index": 41100,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "bbafb069fdf76e40bfa20376b036e84cddf4d5b4d0932d29f73b3004a0df52e4"
+    },
+    {
+      "batch_end_index": 41299,
+      "batch_index": 413,
+      "batch_start_index": 41200,
+      "protein_uid_count": 100,
+      "xml_payload_sha256": "d3d09c47af2ce4e6913dd2ac07b70677aebfc67160b9b76b8280be471a3be95c"
+    },
+    {
+      "batch_end_index": 41344,
+      "batch_index": 414,
+      "batch_start_index": 41300,
+      "protein_uid_count": 45,
+      "xml_payload_sha256": "87b67303c2ac5d5f91a6d0d2b96befe5154b02916bae527ad15676e9477c7d95"
+    }
+  ],
+  "biopython_version": "1.86",
+  "consolidated_record_count": 41345,
+  "database_name": "protein",
+  "identifier_type": "uid",
+  "immutable_snapshot_directory_name": "2026-04-09T00-51-02Z__q_891f443d754c",
+  "immutable_snapshot_relative_path": "snapshots\\2026-04-09T00-51-02Z__q_891f443d754c",
+  "manifest_file_name": "manifest.json",
+  "max_retry_attempts": 5,
+  "normalized_protein_uid_count": 41345,
+  "protein_uids_file_name": "protein_uids.txt",
+  "protein_uids_sha256": "6772f5e988d76a3756c95f8781e812bcdb1b0d0e465606a76251286beecc89f5",
+  "python_version": "3.14.0",
+  "request_delay_seconds": 0.1,
+  "requested_protein_uid_count": 41345,
+  "retmode": "xml",
+  "retrieved_at_utc": "2026-04-09T00:51:02Z",
+  "search_query": "PIWI[All Fields] AND Bacteria[Organism]",
+  "snapshot_format_version": "1.0",
+  "source_uid_count": 41345,
+  "source_uid_sha256": "6772f5e988d76a3756c95f8781e812bcdb1b0d0e465606a76251286beecc89f5",
+  "source_uid_snapshot_directory_name": "2026-04-06T20-42-12Z__q_891f443d754c",
+  "source_uid_snapshot_manifest_sha256": "d84a2f0183232e5eece4c24c07daffb95df265132e28a4f09a8f03f802b24ee2",
+  "source_uid_snapshot_relative_path": "snapshots\\2026-04-06T20-42-12Z__q_891f443d754c",
+  "translated_query": "PIWI[All Fields] AND (\"Bacteria\"[Organism] OR \"Bacteria Latreille et al. 1825\"[Organism])",
+  "xml_file_name": "protein_records.xml",
+  "xml_file_sha256": "ada0563932d20f54f68c614df3c40d4fa3520038ad438a41cc471a1eacb970bf"
+}

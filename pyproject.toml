@@ -1,0 +1,20 @@
+[project]
+name = "pago-project"
+version = "0.1.0"
+description = "Reproducible pipeline for pAgo protein metadata, sequence embeddings, and exploratory ML analysis."
+requires-python = ">=3.14,<3.15"
+dependencies = [
+    "biopython",
+    "h5py",
+    "ipykernel",
+    "joblib",
+    "numpy",
+    "pandas",
+    "plotly",
+    "psutil",
+    "python-dotenv",
+    "requests",
+    "scikit-learn",
+    "scipy",
+    "tqdm",
+]

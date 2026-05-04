@@ -340,7 +340,8 @@ def save_sweep_genes_snapshot(
             "Resolved FASTA snapshot payload is missing a valid source manifest."
         )
 
-    sequence_records = list(SeqIO.parse(str(fasta_file_path), "fasta"))
+    with fasta_file_path.open("r", encoding="utf-8") as fasta_file_handle:
+        sequence_records = list(SeqIO.parse(fasta_file_handle, "fasta"))
     if not sequence_records:
         raise RuntimeError("The FASTA snapshot does not contain any sequences.")
 
