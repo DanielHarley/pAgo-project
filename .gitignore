@@ -3,7 +3,7 @@
 # IDEs
 .idea/
 *.iml
-.cursor/
+llm/
 
 # venv
 .venv/
