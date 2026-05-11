@@ -415,6 +415,7 @@ def load_latest_pago_qc_evidence_inventory(
 def latest_pago_qc_evidence_inventory_is_available(
     *,
     snapshot_root_directory: PathLike,
+    metadata_csv_file_path: Optional[PathLike] = None,
 ) -> bool:
     resolved_snapshot_root_directory = _as_path(snapshot_root_directory)
     latest_directory = resolved_snapshot_root_directory / "latest"
@@ -430,6 +431,18 @@ def latest_pago_qc_evidence_inventory_is_available(
             snapshot_directory=latest_directory,
             manifest_payload=manifest_payload,
         )
+        if metadata_csv_file_path is not None:
+            expected_metadata_csv_sha256 = manifest_payload.get("metadata_csv_sha256")
+            if (
+                not isinstance(expected_metadata_csv_sha256, str)
+                or not expected_metadata_csv_sha256.strip()
+            ):
+                return False
+            actual_metadata_csv_sha256 = sha256_of_file(
+                input_file_path=metadata_csv_file_path
+            )
+            if expected_metadata_csv_sha256.strip() != actual_metadata_csv_sha256:
+                return False
     except (FileNotFoundError, RuntimeError, OSError, ValueError):
         return False
 
@@ -447,7 +460,8 @@ def resolve_pago_qc_evidence_inventory(
     resolved_snapshot_root_directory = _as_path(snapshot_root_directory)
 
     latest_is_available = latest_pago_qc_evidence_inventory_is_available(
-        snapshot_root_directory=resolved_snapshot_root_directory
+        snapshot_root_directory=resolved_snapshot_root_directory,
+        metadata_csv_file_path=metadata_csv_file_path,
     )
     if resolved_snapshot_mode == SnapshotMode.reuse_latest:
         if not latest_is_available:
