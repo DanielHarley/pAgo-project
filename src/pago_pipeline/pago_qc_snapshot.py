@@ -337,8 +337,12 @@ def _validate_loaded_pago_qc_evidence_inventory_payload(
             if not isinstance(file_payload, Mapping):
                 continue
             expected_sha256 = file_payload.get("sha256")
-            if expected_sha256 is None:
-                continue
+            if not isinstance(expected_sha256, str) or not expected_sha256.strip():
+                raise RuntimeError(
+                    "Saved pAgo QC evidence inventory manifest output entry "
+                    f"must define a non-empty sha256 for {output_file_key!r}."
+                )
+            expected_sha256 = expected_sha256.strip()
             actual_sha256 = sha256_of_file(input_file_path=resolved_file_path)
             if actual_sha256 != expected_sha256:
                 raise RuntimeError(
