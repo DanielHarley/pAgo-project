@@ -10,6 +10,9 @@ from src.pago_pipeline.ncbi_snapshot import SnapshotMode
 from src.pago_pipeline.pago_qc_snapshot import (
     DEFAULT_EVIDENCE_COUNTS_FILE_NAME,
     DEFAULT_EVIDENCE_FLAGS_FILE_NAME,
+    DEFAULT_FILTER_DECISION_COUNTS_FILE_NAME,
+    DEFAULT_LABEL_COUNTS_FILE_NAME,
+    DEFAULT_LABELLED_RECORDS_FILE_NAME,
     DEFAULT_MANIFEST_FILE_NAME,
     DEFAULT_SUSPICIOUS_TERMS_FILE_NAME,
     DEFAULT_TOP_PRODUCTS_FILE_NAME,
@@ -32,6 +35,9 @@ class PagoQcSnapshotValidationTests(unittest.TestCase):
         output_file_names_by_key = {
             "evidence_flags_file": DEFAULT_EVIDENCE_FLAGS_FILE_NAME,
             "evidence_counts_file": DEFAULT_EVIDENCE_COUNTS_FILE_NAME,
+            "labelled_records_file": DEFAULT_LABELLED_RECORDS_FILE_NAME,
+            "label_counts_file": DEFAULT_LABEL_COUNTS_FILE_NAME,
+            "filter_decision_counts_file": DEFAULT_FILTER_DECISION_COUNTS_FILE_NAME,
             "top_region_names_file": DEFAULT_TOP_REGION_NAMES_FILE_NAME,
             "top_products_file": DEFAULT_TOP_PRODUCTS_FILE_NAME,
             "suspicious_terms_file": DEFAULT_SUSPICIOUS_TERMS_FILE_NAME,
@@ -62,6 +68,11 @@ class PagoQcSnapshotValidationTests(unittest.TestCase):
             output_file_names_by_key = {
                 "evidence_flags_file": DEFAULT_EVIDENCE_FLAGS_FILE_NAME,
                 "evidence_counts_file": DEFAULT_EVIDENCE_COUNTS_FILE_NAME,
+                "labelled_records_file": DEFAULT_LABELLED_RECORDS_FILE_NAME,
+                "label_counts_file": DEFAULT_LABEL_COUNTS_FILE_NAME,
+                "filter_decision_counts_file": (
+                    DEFAULT_FILTER_DECISION_COUNTS_FILE_NAME
+                ),
                 "top_region_names_file": DEFAULT_TOP_REGION_NAMES_FILE_NAME,
                 "top_products_file": DEFAULT_TOP_PRODUCTS_FILE_NAME,
                 "suspicious_terms_file": DEFAULT_SUSPICIOUS_TERMS_FILE_NAME,
@@ -163,4 +174,19 @@ class PagoQcSnapshotValidationTests(unittest.TestCase):
             pd.testing.assert_series_equal(
                 inventory_payload["evidence_flags"]["protein_uid"],
                 pd.Series([2], name="protein_uid"),
+            )
+            self.assertIn("labelled_records", inventory_payload)
+            self.assertIn("label_counts", inventory_payload)
+            self.assertIn("filter_decision_counts", inventory_payload)
+            self.assertEqual(
+                inventory_payload["manifest"]["snapshot_format_version"],
+                "2.0",
+            )
+            self.assertEqual(
+                inventory_payload["manifest"]["label_columns"],
+                ["primary_label", "qc_decision", "confidence_score", "rationale"],
+            )
+            self.assertEqual(
+                inventory_payload["manifest"]["length_bin_column"],
+                "length_bin",
             )

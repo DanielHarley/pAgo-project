@@ -18,9 +18,13 @@ from src.pago_pipeline.ncbi_snapshot import (
     list_saved_snapshot_directories,
 )
 from src.pago_pipeline.pago_qc import (
+    DEPRECATED_ALIAS_BY_COLUMN,
     FLAG_COLUMNS,
+    build_filter_decision_counts_dataframe,
     build_pago_qc_evidence_flags,
+    build_pago_qc_labelled_records,
     build_evidence_counts_dataframe,
+    build_label_counts_dataframe,
     build_suspicious_terms_dataframe,
     build_top_value_count_dataframe,
 )
@@ -30,10 +34,21 @@ PathLike: TypeAlias = str | Path
 
 DEFAULT_EVIDENCE_FLAGS_FILE_NAME = "evidence_flags.csv"
 DEFAULT_EVIDENCE_COUNTS_FILE_NAME = "evidence_counts.csv"
+DEFAULT_LABELLED_RECORDS_FILE_NAME = "labelled_records.csv"
+DEFAULT_LABEL_COUNTS_FILE_NAME = "label_counts.csv"
+DEFAULT_FILTER_DECISION_COUNTS_FILE_NAME = "filter_decision_counts.csv"
 DEFAULT_TOP_REGION_NAMES_FILE_NAME = "top_region_names.csv"
 DEFAULT_TOP_PRODUCTS_FILE_NAME = "top_products.csv"
 DEFAULT_SUSPICIOUS_TERMS_FILE_NAME = "suspicious_terms.csv"
 DEFAULT_MANIFEST_FILE_NAME = "manifest.json"
+SNAPSHOT_FORMAT_VERSION = "2.0"
+LABEL_COLUMNS: tuple[str, ...] = (
+    "primary_label",
+    "qc_decision",
+    "confidence_score",
+    "rationale",
+)
+LENGTH_BIN_COLUMN = "length_bin"
 
 
 @dataclass(frozen=True)
@@ -44,6 +59,9 @@ class PagoQcEvidenceInventoryResult:
     manifest_file_path: Path
     evidence_flags_file_path: Path
     evidence_counts_file_path: Path
+    labelled_records_file_path: Path
+    label_counts_file_path: Path
+    filter_decision_counts_file_path: Path
     top_region_names_file_path: Path
     top_products_file_path: Path
     suspicious_terms_file_path: Path
@@ -106,7 +124,7 @@ def _build_manifest_payload(
 
     manifest_payload: dict[str, object] = {
         "artifact_type": "pago_qc_evidence_inventory",
-        "snapshot_format_version": "1.0",
+        "snapshot_format_version": SNAPSHOT_FORMAT_VERSION,
         "snapshot_created_at_utc": snapshot_created_at_utc,
         "manifest_file_name": DEFAULT_MANIFEST_FILE_NAME,
         "immutable_snapshot_directory_name": immutable_snapshot_directory_name,
@@ -116,6 +134,9 @@ def _build_manifest_payload(
         "metadata_row_count": int(len(metadata_dataframe)),
         "metadata_column_count": int(len(metadata_dataframe.columns)),
         "flag_columns": list(flag_columns),
+        "label_columns": list(LABEL_COLUMNS),
+        "length_bin_column": LENGTH_BIN_COLUMN,
+        "deprecated_aliases": dict(DEPRECATED_ALIAS_BY_COLUMN),
         "output_files": output_files,
     }
 
@@ -148,8 +169,17 @@ def save_pago_qc_evidence_inventory(
     evidence_dataframe = build_pago_qc_evidence_flags(
         metadata_dataframe=metadata_dataframe,
     )
+    labelled_records_dataframe = build_pago_qc_labelled_records(
+        evidence_dataframe=evidence_dataframe,
+    )
     evidence_counts_dataframe = build_evidence_counts_dataframe(
         evidence_dataframe=evidence_dataframe,
+    )
+    label_counts_dataframe = build_label_counts_dataframe(
+        labelled_dataframe=labelled_records_dataframe,
+    )
+    filter_decision_counts_dataframe = build_filter_decision_counts_dataframe(
+        labelled_dataframe=labelled_records_dataframe,
     )
     top_region_names_dataframe = build_top_value_count_dataframe(
         dataframe=metadata_dataframe,
@@ -170,6 +200,15 @@ def save_pago_qc_evidence_inventory(
         "evidence_counts_file": (
             immutable_snapshot_directory / DEFAULT_EVIDENCE_COUNTS_FILE_NAME
         ),
+        "labelled_records_file": (
+            immutable_snapshot_directory / DEFAULT_LABELLED_RECORDS_FILE_NAME
+        ),
+        "label_counts_file": (
+            immutable_snapshot_directory / DEFAULT_LABEL_COUNTS_FILE_NAME
+        ),
+        "filter_decision_counts_file": (
+            immutable_snapshot_directory / DEFAULT_FILTER_DECISION_COUNTS_FILE_NAME
+        ),
         "top_region_names_file": (
             immutable_snapshot_directory / DEFAULT_TOP_REGION_NAMES_FILE_NAME
         ),
@@ -188,6 +227,18 @@ def save_pago_qc_evidence_inventory(
     _write_dataframe_csv_atomic(
         dataframe=evidence_counts_dataframe,
         output_file_path=output_file_path_by_key["evidence_counts_file"],
+    )
+    _write_dataframe_csv_atomic(
+        dataframe=labelled_records_dataframe,
+        output_file_path=output_file_path_by_key["labelled_records_file"],
+    )
+    _write_dataframe_csv_atomic(
+        dataframe=label_counts_dataframe,
+        output_file_path=output_file_path_by_key["label_counts_file"],
+    )
+    _write_dataframe_csv_atomic(
+        dataframe=filter_decision_counts_dataframe,
+        output_file_path=output_file_path_by_key["filter_decision_counts_file"],
     )
     _write_dataframe_csv_atomic(
         dataframe=top_region_names_dataframe,
@@ -227,6 +278,18 @@ def save_pago_qc_evidence_inventory(
                     DEFAULT_EVIDENCE_COUNTS_FILE_NAME,
                 ),
                 (
+                    output_file_path_by_key["labelled_records_file"],
+                    DEFAULT_LABELLED_RECORDS_FILE_NAME,
+                ),
+                (
+                    output_file_path_by_key["label_counts_file"],
+                    DEFAULT_LABEL_COUNTS_FILE_NAME,
+                ),
+                (
+                    output_file_path_by_key["filter_decision_counts_file"],
+                    DEFAULT_FILTER_DECISION_COUNTS_FILE_NAME,
+                ),
+                (
                     output_file_path_by_key["top_region_names_file"],
                     DEFAULT_TOP_REGION_NAMES_FILE_NAME,
                 ),
@@ -249,6 +312,11 @@ def save_pago_qc_evidence_inventory(
         manifest_file_path=manifest_file_path,
         evidence_flags_file_path=output_file_path_by_key["evidence_flags_file"],
         evidence_counts_file_path=output_file_path_by_key["evidence_counts_file"],
+        labelled_records_file_path=output_file_path_by_key["labelled_records_file"],
+        label_counts_file_path=output_file_path_by_key["label_counts_file"],
+        filter_decision_counts_file_path=output_file_path_by_key[
+            "filter_decision_counts_file"
+        ],
         top_region_names_file_path=output_file_path_by_key["top_region_names_file"],
         top_products_file_path=output_file_path_by_key["top_products_file"],
         suspicious_terms_file_path=output_file_path_by_key["suspicious_terms_file"],
@@ -316,6 +384,9 @@ def _validate_loaded_pago_qc_evidence_inventory_payload(
     required_output_file_keys = (
         "evidence_flags_file",
         "evidence_counts_file",
+        "labelled_records_file",
+        "label_counts_file",
+        "filter_decision_counts_file",
         "top_region_names_file",
         "top_products_file",
         "suspicious_terms_file",
@@ -378,6 +449,13 @@ def load_pago_qc_evidence_inventory_by_directory(
         "manifest": dict(manifest_payload),
         "evidence_flags_file_path": resolved_file_path_by_key["evidence_flags_file"],
         "evidence_counts_file_path": resolved_file_path_by_key["evidence_counts_file"],
+        "labelled_records_file_path": resolved_file_path_by_key[
+            "labelled_records_file"
+        ],
+        "label_counts_file_path": resolved_file_path_by_key["label_counts_file"],
+        "filter_decision_counts_file_path": resolved_file_path_by_key[
+            "filter_decision_counts_file"
+        ],
         "top_region_names_file_path": resolved_file_path_by_key[
             "top_region_names_file"
         ],
@@ -391,6 +469,14 @@ def load_pago_qc_evidence_inventory_by_directory(
         ),
         "evidence_counts": pd.read_csv(
             resolved_file_path_by_key["evidence_counts_file"]
+        ),
+        "labelled_records": pd.read_csv(
+            resolved_file_path_by_key["labelled_records_file"],
+            low_memory=False,
+        ),
+        "label_counts": pd.read_csv(resolved_file_path_by_key["label_counts_file"]),
+        "filter_decision_counts": pd.read_csv(
+            resolved_file_path_by_key["filter_decision_counts_file"]
         ),
         "top_region_names": pd.read_csv(
             resolved_file_path_by_key["top_region_names_file"]
