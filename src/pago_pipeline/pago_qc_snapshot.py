@@ -165,6 +165,7 @@ def save_pago_qc_evidence_inventory(
     metadata_dataframe = pd.read_csv(
         resolved_metadata_csv_file_path,
         low_memory=False,
+        dtype={"protein_uid": "string"},
     )
     evidence_dataframe = build_pago_qc_evidence_flags(
         metadata_dataframe=metadata_dataframe,
@@ -380,6 +381,13 @@ def _validate_loaded_pago_qc_evidence_inventory_payload(
             "Saved pAgo QC evidence inventory manifest artifact_type mismatch. "
             f"Expected 'pago_qc_evidence_inventory', got {artifact_type!r}."
         )
+    snapshot_format_version = manifest_payload.get("snapshot_format_version")
+    if snapshot_format_version != SNAPSHOT_FORMAT_VERSION:
+        raise RuntimeError(
+            "Saved pAgo QC evidence inventory snapshot_format_version mismatch. "
+            f"Expected {SNAPSHOT_FORMAT_VERSION!r}, got "
+            f"{snapshot_format_version!r}."
+        )
 
     required_output_file_keys = (
         "evidence_flags_file",
@@ -466,6 +474,7 @@ def load_pago_qc_evidence_inventory_by_directory(
         "evidence_flags": pd.read_csv(
             resolved_file_path_by_key["evidence_flags_file"],
             low_memory=False,
+            dtype={"protein_uid": "string"},
         ),
         "evidence_counts": pd.read_csv(
             resolved_file_path_by_key["evidence_counts_file"]
@@ -473,6 +482,7 @@ def load_pago_qc_evidence_inventory_by_directory(
         "labelled_records": pd.read_csv(
             resolved_file_path_by_key["labelled_records_file"],
             low_memory=False,
+            dtype={"protein_uid": "string"},
         ),
         "label_counts": pd.read_csv(resolved_file_path_by_key["label_counts_file"]),
         "filter_decision_counts": pd.read_csv(
