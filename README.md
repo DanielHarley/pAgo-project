@@ -2,8 +2,9 @@
 
 This repository contains a reproducible pipeline for collecting NCBI protein
 records related to pAgo candidates, materializing raw XML snapshots, extracting
-protein metadata, generating sequence embeddings, and running exploratory PCA
-and KMeans analyses.
+protein metadata, curating pAgo evidence and labels, materializing filtered
+datasets, generating sequence embeddings, and running exploratory PCA and
+KMeans analyses.
 
 ## Recreating the environment
 
@@ -96,6 +97,89 @@ Run notebooks in numeric order:
 6. `notebooks/05_sweep_genes_embeddings.ipynb`
 7. `notebooks/06_pca_kmeans_analysis.ipynb`
 8. `notebooks/07_pca_3d_plot.ipynb`
+9. `notebooks/08_pago_qc_evidence_inventory.ipynb`
+10. `notebooks/09_pago_qc_filtered_datasets.ipynb`
+
+Notebooks are orchestration layers only. Reusable logic lives under
+`src/pago_pipeline/`, where each snapshot-producing stage owns its validation,
+manifest, and reuse behavior.
+
+## pAgo QC curation
+
+The pAgo QC workflow separates observation, interpretation, and operational
+filtering:
+
+```text
+metadata.csv
+  -> evidence_flags.csv
+  -> labelled_records.csv
+  -> filtered dataset CSVs
+```
+
+The evidence and label layer is implemented by:
+
+- `src/pago_pipeline/pago_qc.py`
+- `src/pago_pipeline/pago_qc_snapshot.py`
+- `notebooks/08_pago_qc_evidence_inventory.ipynb`
+
+It writes snapshot artifacts under:
+
+```text
+data/03-features/pago_qc/evidence_inventory/
+  latest/
+  snapshots/
+```
+
+The filtered dataset layer is implemented by:
+
+- `src/pago_pipeline/pago_qc_filter.py`
+- `src/pago_pipeline/pago_qc_filter_snapshot.py`
+- `notebooks/09_pago_qc_filtered_datasets.ipynb`
+
+It writes snapshot artifacts under:
+
+```text
+data/03-features/pago_qc/filtered_datasets/
+  latest/
+  snapshots/
+```
+
+The filtered datasets currently materialized are:
+
+- `classic_pago_high_precision_records.csv`
+- `classic_pago_review_records.csv`
+- `piwi_re_records.csv`
+- `excluded_records.csv`
+- `filtered_dataset_counts.csv`
+
+`excluded_records.csv` means excluded from the conservative classic pAgo
+positive dataset. It is not a biologically validated negative class.
+
+See `docs/pago_qc.md` for the QC labels, decisions, output contracts, and
+snapshot integrity rules.
+
+## Generated feature outputs
+
+Feature outputs are generated under `data/03-features/` and are intentionally
+ignored by Git. Each generated feature stage uses a `latest/` directory for the
+most convenient current artifact and a `snapshots/` directory for immutable
+historical runs.
+
+The SWeeP embedding notebook writes to:
+
+```text
+data/03-features/sweep_genes/
+  latest/
+  snapshots/
+```
+
+The pAgo QC notebooks write to:
+
+```text
+data/03-features/pago_qc/
+  evidence_inventory/
+  filtered_datasets/
+```
 
 ## SWeeP dependency
 
