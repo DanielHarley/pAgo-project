@@ -168,6 +168,11 @@ REQUIRED_LABEL_INPUT_COLUMNS: tuple[str, ...] = (
     "is_long_outlier_gt_1300",
 )
 
+REQUIRED_EVIDENCE_INPUT_COLUMNS: tuple[str, ...] = (
+    "protein_uid",
+    "gbseq__length",
+)
+
 
 class PagoQcPrimaryLabel(str, Enum):
     CLASSIC_PIWI_CANDIDATE = "classic_piwi_candidate"
@@ -234,8 +239,16 @@ def build_pago_qc_evidence_flags(
     *,
     metadata_dataframe: pd.DataFrame,
 ) -> pd.DataFrame:
-    if "protein_uid" not in metadata_dataframe.columns:
-        raise RuntimeError("metadata_dataframe must contain protein_uid.")
+    missing_columns = [
+        column_name
+        for column_name in REQUIRED_EVIDENCE_INPUT_COLUMNS
+        if column_name not in metadata_dataframe.columns
+    ]
+    if missing_columns:
+        raise RuntimeError(
+            "metadata_dataframe is missing required pAgo QC input columns: "
+            f"{missing_columns}."
+        )
 
     metadata_dataframe_copy = metadata_dataframe.copy()
     metadata_dataframe_copy["protein_uid"] = (
@@ -250,7 +263,7 @@ def build_pago_qc_evidence_flags(
     evidence_dataframe = metadata_dataframe_copy[existing_core_columns].copy()
 
     sequence_length = pd.to_numeric(
-        metadata_dataframe_copy.get("gbseq__length"),
+        metadata_dataframe_copy["gbseq__length"],
         errors="coerce",
     )
     region_text = combine_text_columns(

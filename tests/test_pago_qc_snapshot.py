@@ -21,6 +21,7 @@ from src.pago_pipeline.pago_qc_snapshot import (
     _validate_loaded_pago_qc_evidence_inventory_payload,
     latest_pago_qc_evidence_inventory_is_available,
     resolve_pago_qc_evidence_inventory,
+    save_pago_qc_evidence_inventory,
 )
 from src.pago_pipeline.storage import sha256_of_file, write_json_atomic
 
@@ -107,6 +108,32 @@ class PagoQcSnapshotValidationTests(unittest.TestCase):
                     snapshot_directory=temporary_directory,
                     manifest_payload=manifest_payload,
                 )
+
+    def test_save_pago_qc_inventory_cleans_incomplete_snapshot_after_failure(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory_name:
+            temporary_directory = Path(temporary_directory_name)
+            snapshot_root_directory = temporary_directory / "pago_qc"
+            missing_metadata_csv_file_path = temporary_directory / "missing.csv"
+
+            with self.assertRaises(FileNotFoundError):
+                save_pago_qc_evidence_inventory(
+                    metadata_csv_file_path=missing_metadata_csv_file_path,
+                    snapshot_root_directory=snapshot_root_directory,
+                )
+
+            snapshots_directory = snapshot_root_directory / "snapshots"
+            remaining_snapshot_directories = (
+                [
+                    path
+                    for path in snapshots_directory.iterdir()
+                    if path.is_dir()
+                ]
+                if snapshots_directory.exists()
+                else []
+            )
+            self.assertEqual(remaining_snapshot_directories, [])
 
     def test_pago_qc_inventory_validation_rejects_snapshot_version_mismatch(
         self,
