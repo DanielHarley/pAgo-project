@@ -1,11 +1,23 @@
 from __future__ import annotations
 
+import unittest
+
 import pandas as pd
 
 from src.pago_pipeline.pago_qc import (
     build_pago_qc_evidence_flags,
     build_pago_qc_labelled_records,
 )
+
+
+class PagoQcEvidenceFlagsValidationTests(unittest.TestCase):
+    def test_build_pago_qc_evidence_flags_requires_sequence_length_column(
+        self,
+    ) -> None:
+        metadata_dataframe = pd.DataFrame({"protein_uid": ["1"]})
+
+        with self.assertRaisesRegex(RuntimeError, "gbseq__length"):
+            build_pago_qc_evidence_flags(metadata_dataframe=metadata_dataframe)
 
 
 def test_build_pago_qc_evidence_flags_marks_core_evidence_classes() -> None:

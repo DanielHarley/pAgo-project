@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import shutil
 import tempfile
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
@@ -161,150 +162,157 @@ def save_pago_qc_evidence_inventory(
     )
     immutable_snapshot_directory.mkdir(parents=True, exist_ok=False)
     immutable_snapshot_relative_path = str(Path("snapshots") / snapshot_directory_name)
+    immutable_snapshot_complete = False
 
-    metadata_dataframe = pd.read_csv(
-        resolved_metadata_csv_file_path,
-        low_memory=False,
-        dtype={"protein_uid": "string"},
-    )
-    evidence_dataframe = build_pago_qc_evidence_flags(
-        metadata_dataframe=metadata_dataframe,
-    )
-    labelled_records_dataframe = build_pago_qc_labelled_records(
-        evidence_dataframe=evidence_dataframe,
-    )
-    evidence_counts_dataframe = build_evidence_counts_dataframe(
-        evidence_dataframe=evidence_dataframe,
-    )
-    label_counts_dataframe = build_label_counts_dataframe(
-        labelled_dataframe=labelled_records_dataframe,
-    )
-    filter_decision_counts_dataframe = build_filter_decision_counts_dataframe(
-        labelled_dataframe=labelled_records_dataframe,
-    )
-    top_region_names_dataframe = build_top_value_count_dataframe(
-        dataframe=metadata_dataframe,
-        column_name="feature__region__qual__region_name",
-    )
-    top_products_dataframe = build_top_value_count_dataframe(
-        dataframe=metadata_dataframe,
-        column_name="feature__protein__qual__product",
-    )
-    suspicious_terms_dataframe = build_suspicious_terms_dataframe(
-        evidence_dataframe=evidence_dataframe,
-    )
-
-    output_file_path_by_key = {
-        "evidence_flags_file": (
-            immutable_snapshot_directory / DEFAULT_EVIDENCE_FLAGS_FILE_NAME
-        ),
-        "evidence_counts_file": (
-            immutable_snapshot_directory / DEFAULT_EVIDENCE_COUNTS_FILE_NAME
-        ),
-        "labelled_records_file": (
-            immutable_snapshot_directory / DEFAULT_LABELLED_RECORDS_FILE_NAME
-        ),
-        "label_counts_file": (
-            immutable_snapshot_directory / DEFAULT_LABEL_COUNTS_FILE_NAME
-        ),
-        "filter_decision_counts_file": (
-            immutable_snapshot_directory / DEFAULT_FILTER_DECISION_COUNTS_FILE_NAME
-        ),
-        "top_region_names_file": (
-            immutable_snapshot_directory / DEFAULT_TOP_REGION_NAMES_FILE_NAME
-        ),
-        "top_products_file": (
-            immutable_snapshot_directory / DEFAULT_TOP_PRODUCTS_FILE_NAME
-        ),
-        "suspicious_terms_file": (
-            immutable_snapshot_directory / DEFAULT_SUSPICIOUS_TERMS_FILE_NAME
-        ),
-    }
-
-    _write_dataframe_csv_atomic(
-        dataframe=evidence_dataframe,
-        output_file_path=output_file_path_by_key["evidence_flags_file"],
-    )
-    _write_dataframe_csv_atomic(
-        dataframe=evidence_counts_dataframe,
-        output_file_path=output_file_path_by_key["evidence_counts_file"],
-    )
-    _write_dataframe_csv_atomic(
-        dataframe=labelled_records_dataframe,
-        output_file_path=output_file_path_by_key["labelled_records_file"],
-    )
-    _write_dataframe_csv_atomic(
-        dataframe=label_counts_dataframe,
-        output_file_path=output_file_path_by_key["label_counts_file"],
-    )
-    _write_dataframe_csv_atomic(
-        dataframe=filter_decision_counts_dataframe,
-        output_file_path=output_file_path_by_key["filter_decision_counts_file"],
-    )
-    _write_dataframe_csv_atomic(
-        dataframe=top_region_names_dataframe,
-        output_file_path=output_file_path_by_key["top_region_names_file"],
-    )
-    _write_dataframe_csv_atomic(
-        dataframe=top_products_dataframe,
-        output_file_path=output_file_path_by_key["top_products_file"],
-    )
-    _write_dataframe_csv_atomic(
-        dataframe=suspicious_terms_dataframe,
-        output_file_path=output_file_path_by_key["suspicious_terms_file"],
-    )
-
-    manifest_file_path = immutable_snapshot_directory / DEFAULT_MANIFEST_FILE_NAME
-    manifest_payload = _build_manifest_payload(
-        snapshot_created_at_utc=snapshot_created_at_utc,
-        immutable_snapshot_directory_name=snapshot_directory_name,
-        immutable_snapshot_relative_path=immutable_snapshot_relative_path,
-        metadata_csv_file_path=resolved_metadata_csv_file_path,
-        output_file_path_by_key=output_file_path_by_key,
-        metadata_dataframe=metadata_dataframe,
-        flag_columns=FLAG_COLUMNS,
-    )
-    write_json_atomic(payload=manifest_payload, output_file_path=manifest_file_path)
-
-    if update_latest_directory:
-        _replace_latest_directory(
-            latest_directory=resolved_snapshot_root_directory / "latest",
-            files_to_copy=[
-                (
-                    output_file_path_by_key["evidence_flags_file"],
-                    DEFAULT_EVIDENCE_FLAGS_FILE_NAME,
-                ),
-                (
-                    output_file_path_by_key["evidence_counts_file"],
-                    DEFAULT_EVIDENCE_COUNTS_FILE_NAME,
-                ),
-                (
-                    output_file_path_by_key["labelled_records_file"],
-                    DEFAULT_LABELLED_RECORDS_FILE_NAME,
-                ),
-                (
-                    output_file_path_by_key["label_counts_file"],
-                    DEFAULT_LABEL_COUNTS_FILE_NAME,
-                ),
-                (
-                    output_file_path_by_key["filter_decision_counts_file"],
-                    DEFAULT_FILTER_DECISION_COUNTS_FILE_NAME,
-                ),
-                (
-                    output_file_path_by_key["top_region_names_file"],
-                    DEFAULT_TOP_REGION_NAMES_FILE_NAME,
-                ),
-                (
-                    output_file_path_by_key["top_products_file"],
-                    DEFAULT_TOP_PRODUCTS_FILE_NAME,
-                ),
-                (
-                    output_file_path_by_key["suspicious_terms_file"],
-                    DEFAULT_SUSPICIOUS_TERMS_FILE_NAME,
-                ),
-                (manifest_file_path, DEFAULT_MANIFEST_FILE_NAME),
-            ],
+    try:
+        metadata_dataframe = pd.read_csv(
+            resolved_metadata_csv_file_path,
+            low_memory=False,
+            dtype={"protein_uid": "string"},
         )
+        evidence_dataframe = build_pago_qc_evidence_flags(
+            metadata_dataframe=metadata_dataframe,
+        )
+        labelled_records_dataframe = build_pago_qc_labelled_records(
+            evidence_dataframe=evidence_dataframe,
+        )
+        evidence_counts_dataframe = build_evidence_counts_dataframe(
+            evidence_dataframe=evidence_dataframe,
+        )
+        label_counts_dataframe = build_label_counts_dataframe(
+            labelled_dataframe=labelled_records_dataframe,
+        )
+        filter_decision_counts_dataframe = build_filter_decision_counts_dataframe(
+            labelled_dataframe=labelled_records_dataframe,
+        )
+        top_region_names_dataframe = build_top_value_count_dataframe(
+            dataframe=metadata_dataframe,
+            column_name="feature__region__qual__region_name",
+        )
+        top_products_dataframe = build_top_value_count_dataframe(
+            dataframe=metadata_dataframe,
+            column_name="feature__protein__qual__product",
+        )
+        suspicious_terms_dataframe = build_suspicious_terms_dataframe(
+            evidence_dataframe=evidence_dataframe,
+        )
+
+        output_file_path_by_key = {
+            "evidence_flags_file": (
+                immutable_snapshot_directory / DEFAULT_EVIDENCE_FLAGS_FILE_NAME
+            ),
+            "evidence_counts_file": (
+                immutable_snapshot_directory / DEFAULT_EVIDENCE_COUNTS_FILE_NAME
+            ),
+            "labelled_records_file": (
+                immutable_snapshot_directory / DEFAULT_LABELLED_RECORDS_FILE_NAME
+            ),
+            "label_counts_file": (
+                immutable_snapshot_directory / DEFAULT_LABEL_COUNTS_FILE_NAME
+            ),
+            "filter_decision_counts_file": (
+                immutable_snapshot_directory / DEFAULT_FILTER_DECISION_COUNTS_FILE_NAME
+            ),
+            "top_region_names_file": (
+                immutable_snapshot_directory / DEFAULT_TOP_REGION_NAMES_FILE_NAME
+            ),
+            "top_products_file": (
+                immutable_snapshot_directory / DEFAULT_TOP_PRODUCTS_FILE_NAME
+            ),
+            "suspicious_terms_file": (
+                immutable_snapshot_directory / DEFAULT_SUSPICIOUS_TERMS_FILE_NAME
+            ),
+        }
+
+        _write_dataframe_csv_atomic(
+            dataframe=evidence_dataframe,
+            output_file_path=output_file_path_by_key["evidence_flags_file"],
+        )
+        _write_dataframe_csv_atomic(
+            dataframe=evidence_counts_dataframe,
+            output_file_path=output_file_path_by_key["evidence_counts_file"],
+        )
+        _write_dataframe_csv_atomic(
+            dataframe=labelled_records_dataframe,
+            output_file_path=output_file_path_by_key["labelled_records_file"],
+        )
+        _write_dataframe_csv_atomic(
+            dataframe=label_counts_dataframe,
+            output_file_path=output_file_path_by_key["label_counts_file"],
+        )
+        _write_dataframe_csv_atomic(
+            dataframe=filter_decision_counts_dataframe,
+            output_file_path=output_file_path_by_key["filter_decision_counts_file"],
+        )
+        _write_dataframe_csv_atomic(
+            dataframe=top_region_names_dataframe,
+            output_file_path=output_file_path_by_key["top_region_names_file"],
+        )
+        _write_dataframe_csv_atomic(
+            dataframe=top_products_dataframe,
+            output_file_path=output_file_path_by_key["top_products_file"],
+        )
+        _write_dataframe_csv_atomic(
+            dataframe=suspicious_terms_dataframe,
+            output_file_path=output_file_path_by_key["suspicious_terms_file"],
+        )
+
+        manifest_file_path = immutable_snapshot_directory / DEFAULT_MANIFEST_FILE_NAME
+        manifest_payload = _build_manifest_payload(
+            snapshot_created_at_utc=snapshot_created_at_utc,
+            immutable_snapshot_directory_name=snapshot_directory_name,
+            immutable_snapshot_relative_path=immutable_snapshot_relative_path,
+            metadata_csv_file_path=resolved_metadata_csv_file_path,
+            output_file_path_by_key=output_file_path_by_key,
+            metadata_dataframe=metadata_dataframe,
+            flag_columns=FLAG_COLUMNS,
+        )
+        write_json_atomic(payload=manifest_payload, output_file_path=manifest_file_path)
+        immutable_snapshot_complete = True
+
+        if update_latest_directory:
+            _replace_latest_directory(
+                latest_directory=resolved_snapshot_root_directory / "latest",
+                files_to_copy=[
+                    (
+                        output_file_path_by_key["evidence_flags_file"],
+                        DEFAULT_EVIDENCE_FLAGS_FILE_NAME,
+                    ),
+                    (
+                        output_file_path_by_key["evidence_counts_file"],
+                        DEFAULT_EVIDENCE_COUNTS_FILE_NAME,
+                    ),
+                    (
+                        output_file_path_by_key["labelled_records_file"],
+                        DEFAULT_LABELLED_RECORDS_FILE_NAME,
+                    ),
+                    (
+                        output_file_path_by_key["label_counts_file"],
+                        DEFAULT_LABEL_COUNTS_FILE_NAME,
+                    ),
+                    (
+                        output_file_path_by_key["filter_decision_counts_file"],
+                        DEFAULT_FILTER_DECISION_COUNTS_FILE_NAME,
+                    ),
+                    (
+                        output_file_path_by_key["top_region_names_file"],
+                        DEFAULT_TOP_REGION_NAMES_FILE_NAME,
+                    ),
+                    (
+                        output_file_path_by_key["top_products_file"],
+                        DEFAULT_TOP_PRODUCTS_FILE_NAME,
+                    ),
+                    (
+                        output_file_path_by_key["suspicious_terms_file"],
+                        DEFAULT_SUSPICIOUS_TERMS_FILE_NAME,
+                    ),
+                    (manifest_file_path, DEFAULT_MANIFEST_FILE_NAME),
+                ],
+            )
+    except Exception:
+        if not immutable_snapshot_complete and immutable_snapshot_directory.exists():
+            shutil.rmtree(immutable_snapshot_directory, ignore_errors=True)
+        raise
 
     return PagoQcEvidenceInventoryResult(
         metadata_csv_file_path=resolved_metadata_csv_file_path,
