@@ -12,6 +12,7 @@ dependencies = [
     "pandas",
     "plotly",
     "psutil",
+    "pyhmmer",
     "python-dotenv",
     "requests",
     "scikit-learn",
