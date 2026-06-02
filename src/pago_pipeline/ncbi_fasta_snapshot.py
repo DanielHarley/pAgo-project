@@ -357,20 +357,72 @@ def get_most_recent_fasta_snapshot_directory(
 def latest_fasta_snapshot_is_available(
     *,
     snapshot_root_directory: PathLike,
+    source_metadata_snapshot_root_directory: Optional[PathLike] = None,
 ) -> bool:
     """
     Return True only if the convenience latest FASTA snapshot copy is complete.
+
+    When source_metadata_snapshot_root_directory is provided, the latest FASTA
+    snapshot must also match the current latest metadata input snapshot.
     """
 
     resolved_snapshot_root_directory = _as_path(snapshot_root_directory)
     latest_directory = resolved_snapshot_root_directory / "latest"
     latest_manifest_file_path = latest_directory / "manifest.json"
-    latest_fasta_file_path = latest_directory / "protein_sequences.fasta"
+    if not latest_directory.exists() or not latest_manifest_file_path.exists():
+        return False
+
+    try:
+        manifest_payload = read_json_file(input_file_path=latest_manifest_file_path)
+        if not isinstance(manifest_payload, Mapping):
+            return False
+        _validate_loaded_fasta_snapshot_payload(
+            snapshot_directory=latest_directory,
+            manifest_payload=manifest_payload,
+        )
+        if source_metadata_snapshot_root_directory is not None:
+            source_metadata_snapshot_payload = load_latest_metadata_snapshot(
+                snapshot_root_directory=source_metadata_snapshot_root_directory,
+            )
+            if not _source_metadata_snapshot_identity_matches(
+                manifest_payload=manifest_payload,
+                source_metadata_snapshot_payload=source_metadata_snapshot_payload,
+            ):
+                return False
+    except (FileNotFoundError, RuntimeError, OSError, ValueError):
+        return False
+
+    return True
+
+
+def _source_metadata_snapshot_identity_matches(
+    *,
+    manifest_payload: Mapping[str, object],
+    source_metadata_snapshot_payload: Mapping[str, object],
+) -> bool:
+    expected_manifest_sha256 = manifest_payload.get(
+        "source_metadata_manifest_sha256"
+    )
+    expected_csv_sha256 = manifest_payload.get("source_metadata_csv_file_sha256")
+    source_manifest_file_path = source_metadata_snapshot_payload.get(
+        "manifest_file_path"
+    )
+    source_csv_file_path = source_metadata_snapshot_payload.get("csv_file_path")
+
+    if not isinstance(expected_manifest_sha256, str) or not expected_manifest_sha256:
+        return False
+    if not isinstance(expected_csv_sha256, str) or not expected_csv_sha256:
+        return False
+    if not isinstance(source_manifest_file_path, Path):
+        return False
+    if not isinstance(source_csv_file_path, Path):
+        return False
 
     return (
-        latest_directory.exists()
-        and latest_manifest_file_path.exists()
-        and latest_fasta_file_path.exists()
+        sha256_of_file(input_file_path=source_manifest_file_path)
+        == expected_manifest_sha256
+        and sha256_of_file(input_file_path=source_csv_file_path)
+        == expected_csv_sha256
     )
 
 
@@ -393,33 +445,18 @@ def resolve_ncbi_protein_fasta_snapshot(
     )
 
     latest_is_available = latest_fasta_snapshot_is_available(
-        snapshot_root_directory=resolved_snapshot_root_directory
+        snapshot_root_directory=resolved_snapshot_root_directory,
+        source_metadata_snapshot_root_directory=(
+            resolved_source_metadata_snapshot_root_directory
+        ),
     )
 
     if resolved_snapshot_mode == SnapshotMode.reuse_latest:
         if not latest_is_available:
-            latest_directory = resolved_snapshot_root_directory / "latest"
-            latest_manifest_file_path = latest_directory / "manifest.json"
-            latest_fasta_file_path = latest_directory / "protein_sequences.fasta"
-
-            if not latest_directory.exists():
-                raise FileNotFoundError(
-                    "No latest FASTA snapshot directory was found. Run the workflow "
-                    "once with snapshot_mode='create_new' before using "
-                    "'reuse_latest'."
-                )
-
-            if not latest_manifest_file_path.exists():
-                raise FileNotFoundError(
-                    f"Latest FASTA snapshot manifest not found: "
-                    f"{latest_manifest_file_path}. Run the workflow once with "
-                    f"snapshot_mode='create_new' to create it."
-                )
-
             raise FileNotFoundError(
-                f"Latest FASTA snapshot file not found: "
-                f"{latest_fasta_file_path}. Run the workflow once with "
-                f"snapshot_mode='create_new' to create it."
+                "No latest FASTA snapshot directory was found for the current "
+                "source metadata snapshot. Run the workflow once with "
+                "snapshot_mode='create_new' before using 'reuse_latest'."
             )
 
         return load_latest_fasta_snapshot(
