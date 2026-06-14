@@ -374,6 +374,24 @@ def latest_fasta_snapshot_is_available(
     )
 
 
+def _fasta_snapshot_matches_source_metadata(
+    *,
+    fasta_snapshot_payload: dict[str, object],
+    source_metadata_snapshot_payload: dict[str, object],
+) -> bool:
+    fasta_manifest = fasta_snapshot_payload.get("manifest")
+    source_metadata_manifest = source_metadata_snapshot_payload.get("manifest")
+    if not isinstance(fasta_manifest, Mapping) or not isinstance(
+        source_metadata_manifest, Mapping
+    ):
+        return False
+
+    return (
+        fasta_manifest.get("source_metadata_csv_file_sha256")
+        == source_metadata_manifest.get("csv_file_sha256")
+    )
+
+
 def resolve_ncbi_protein_fasta_snapshot(
     *,
     snapshot_mode: SnapshotMode | str,
@@ -426,15 +444,6 @@ def resolve_ncbi_protein_fasta_snapshot(
             snapshot_root_directory=resolved_snapshot_root_directory
         )
 
-    if (
-        resolved_snapshot_mode == SnapshotMode.reuse_latest_or_create
-        and latest_is_available
-    ):
-        print("Latest FASTA snapshot is available. Reusing frozen snapshot.")
-        return load_latest_fasta_snapshot(
-            snapshot_root_directory=resolved_snapshot_root_directory
-        )
-
     if resolved_snapshot_mode not in {
         SnapshotMode.create_new,
         SnapshotMode.reuse_latest_or_create,
@@ -453,6 +462,25 @@ def resolve_ncbi_protein_fasta_snapshot(
             "No reusable source metadata snapshot was found for the FASTA workflow. "
             "Create the upstream metadata snapshot before running the FASTA step."
         ) from exc
+
+    if (
+        resolved_snapshot_mode == SnapshotMode.reuse_latest_or_create
+        and latest_is_available
+    ):
+        latest_fasta_snapshot_payload = load_latest_fasta_snapshot(
+            snapshot_root_directory=resolved_snapshot_root_directory
+        )
+        if _fasta_snapshot_matches_source_metadata(
+            fasta_snapshot_payload=latest_fasta_snapshot_payload,
+            source_metadata_snapshot_payload=source_metadata_snapshot_payload,
+        ):
+            print("Latest FASTA snapshot is available. Reusing frozen snapshot.")
+            return latest_fasta_snapshot_payload
+
+        print(
+            "Latest FASTA snapshot is available but does not match the latest "
+            "source metadata snapshot. Creating a new frozen snapshot."
+        )
 
     saved_snapshot = save_ncbi_protein_fasta_snapshot(
         snapshot_root_directory=resolved_snapshot_root_directory,

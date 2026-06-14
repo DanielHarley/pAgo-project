@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 import hashlib
+import platform
 import re
 import shutil
 import tempfile
 from dataclasses import asdict
+from datetime import datetime, timezone
 from enum import StrEnum
 import xml.etree.ElementTree as ET
 from pathlib import Path
@@ -28,6 +30,7 @@ from src.pago_pipeline.storage import (
 )
 
 PathLike = Union[str, Path]
+DEFAULT_LOCAL_EXCEL_IDENTIFIER_COLUMN = "Accession"
 
 
 class SnapshotMode(StrEnum):
@@ -87,6 +90,156 @@ def _build_query_hash(search_query: str, hash_length: int = 12) -> str:
     return full_hash[:hash_length]
 
 
+def _normalize_local_protein_identifiers(
+    *,
+    protein_identifiers: list[Any],
+    deduplicate_identifiers: bool,
+    sort_identifiers: bool,
+) -> list[str]:
+    """
+    Normalize locally provided protein identifiers for snapshot persistence.
+    """
+    normalized_identifiers = [
+        str(protein_identifier).strip()
+        for protein_identifier in protein_identifiers
+        if str(protein_identifier).strip()
+    ]
+
+    if deduplicate_identifiers:
+        seen_identifiers = set()
+        deduplicated_identifiers: list[str] = []
+
+        for protein_identifier in normalized_identifiers:
+            if protein_identifier not in seen_identifiers:
+                seen_identifiers.add(protein_identifier)
+                deduplicated_identifiers.append(protein_identifier)
+
+        normalized_identifiers = deduplicated_identifiers
+
+    if sort_identifiers:
+        normalized_identifiers = sorted(normalized_identifiers)
+
+    return normalized_identifiers
+
+
+def _read_excel_identifier_values(
+    *,
+    excel_file_path: PathLike,
+    sheet_name: str | int,
+    identifier_column: str,
+) -> list[Any]:
+    """
+    Read one identifier column from a local Excel workbook.
+    """
+    resolved_excel_file_path = _as_path(excel_file_path)
+
+    if not resolved_excel_file_path.exists():
+        raise FileNotFoundError(f"Excel source file not found: {resolved_excel_file_path}")
+
+    if not resolved_excel_file_path.is_file():
+        raise ValueError(f"Excel source path is not a file: {resolved_excel_file_path}")
+
+    try:
+        import pandas as pd
+    except ImportError as error:
+        raise ImportError(
+            "pandas is required to read local Excel protein identifier sources."
+        ) from error
+
+    try:
+        excel_dataframe = pd.read_excel(
+            resolved_excel_file_path,
+            sheet_name=sheet_name,
+        )
+    except ImportError as error:
+        raise ImportError(
+            "Reading .xls sources requires the optional dependency xlrd. "
+            "Install project dependencies again with requirements.lock.txt."
+        ) from error
+
+    if identifier_column not in excel_dataframe.columns:
+        available_columns = [str(column) for column in excel_dataframe.columns]
+        raise ValueError(
+            f"Identifier column {identifier_column!r} was not found in "
+            f"{resolved_excel_file_path}. Available columns: {available_columns}."
+        )
+
+    identifier_series = excel_dataframe[identifier_column].dropna()
+    return identifier_series.tolist()
+
+
+def fetch_local_excel_protein_identifier_snapshot(
+    *,
+    excel_file_path: PathLike,
+    sheet_name: str | int = 0,
+    identifier_column: str = DEFAULT_LOCAL_EXCEL_IDENTIFIER_COLUMN,
+    deduplicate_identifiers: bool = True,
+    sort_identifiers: bool = True,
+) -> NCBIProteinUidFetchResult:
+    """
+    Build a snapshot-ready protein identifier payload from a local Excel file.
+
+    The downstream XML stage can submit accession.version values to NCBI EFetch
+    in the same id list field historically used for numeric protein UIDs.
+    """
+    resolved_excel_file_path = _as_path(excel_file_path)
+    raw_identifier_values = _read_excel_identifier_values(
+        excel_file_path=resolved_excel_file_path,
+        sheet_name=sheet_name,
+        identifier_column=identifier_column,
+    )
+
+    normalized_identifiers = _normalize_local_protein_identifiers(
+        protein_identifiers=raw_identifier_values,
+        deduplicate_identifiers=deduplicate_identifiers,
+        sort_identifiers=sort_identifiers,
+    )
+
+    if not normalized_identifiers:
+        raise ValueError(
+            "The local Excel source did not contain any non-empty protein "
+            f"identifiers in column {identifier_column!r}."
+        )
+
+    protein_identifiers_sha256 = sha256_of_lines(
+        text_lines=normalized_identifiers,
+        deduplicate_lines_preserving_order=False,
+        sort_lines=False,
+    )
+    excel_file_sha256 = sha256_of_file(input_file_path=resolved_excel_file_path)
+    search_query = (
+        f"local_excel:{resolved_excel_file_path.name}:"
+        f"sheet={sheet_name}:column={identifier_column}"
+    )
+
+    return NCBIProteinUidFetchResult(
+        database_name="protein",
+        search_query=search_query,
+        translated_query=None,
+        identifier_type="accession.version",
+        retrieved_at_utc=datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        ncbi_reported_result_count=len(raw_identifier_values),
+        protein_uids=normalized_identifiers,
+        raw_protein_uid_count=len(raw_identifier_values),
+        normalized_protein_uid_count=len(normalized_identifiers),
+        deduplicate_uids=deduplicate_identifiers,
+        sort_uids=sort_identifiers,
+        protein_uids_sha256=protein_identifiers_sha256,
+        page_size=0,
+        request_delay_seconds=0.0,
+        max_retry_attempts=0,
+        history_web_env=None,
+        history_query_key=None,
+        python_version=platform.python_version(),
+        biopython_version="not_used_for_local_excel_source",
+        source_type="local_excel",
+        source_file_path=str(resolved_excel_file_path),
+        source_file_sha256=excel_file_sha256,
+        source_sheet_name=str(sheet_name),
+        source_identifier_column=identifier_column,
+    )
+
+
 def _build_consolidated_xml_payload(
     *,
     fetch_result: NCBIProteinXmlFetchResult,
@@ -143,6 +296,101 @@ def _build_consolidated_xml_payload(
     return consolidated_xml_payload, total_record_count
 
 
+def _read_xml_batch_payload(
+    *,
+    xml_batch: NCBIProteinXmlBatchFetchResult,
+) -> bytes:
+    if xml_batch.xml_payload_bytes:
+        return xml_batch.xml_payload_bytes
+
+    if xml_batch.xml_payload_file_path:
+        return _as_path(xml_batch.xml_payload_file_path).read_bytes()
+
+    raise ValueError(
+        f"XML batch {xml_batch.batch_index} has neither in-memory payload nor "
+        "xml_payload_file_path."
+    )
+
+
+def _write_consolidated_xml_payload_streaming(
+    *,
+    fetch_result: NCBIProteinXmlFetchResult,
+    output_file_path: PathLike,
+) -> int:
+    """
+    Consolidate XML batches one at a time to keep memory bounded.
+    """
+    if not fetch_result.xml_batches:
+        raise ValueError("fetch_result.xml_batches must contain at least one batch.")
+
+    resolved_output_file_path = _as_path(output_file_path)
+    resolved_output_file_path.parent.mkdir(parents=True, exist_ok=True)
+
+    temporary_output_file = tempfile.NamedTemporaryFile(
+        mode="wb",
+        delete=False,
+        dir=resolved_output_file_path.parent,
+        suffix=".tmp",
+    )
+    temporary_output_file_path = Path(temporary_output_file.name)
+    total_record_count = 0
+    expected_root_tag: Optional[str] = None
+
+    try:
+        with temporary_output_file:
+            temporary_output_file.write(b'<?xml version="1.0" encoding="utf-8"?>\n')
+            temporary_output_file.write(b"<GBSet>\n")
+
+            for xml_batch in fetch_result.xml_batches:
+                xml_payload_bytes = _read_xml_batch_payload(xml_batch=xml_batch)
+
+                try:
+                    batch_root = ET.fromstring(xml_payload_bytes)
+                except ET.ParseError as error:
+                    raise RuntimeError(
+                        f"Failed to parse XML batch {xml_batch.batch_index}: {error}"
+                    ) from error
+
+                if expected_root_tag is None:
+                    expected_root_tag = batch_root.tag
+                elif batch_root.tag != expected_root_tag:
+                    raise RuntimeError(
+                        "XML batch root tag mismatch during consolidation. "
+                        f"Expected {expected_root_tag}, got {batch_root.tag} "
+                        f"in batch {xml_batch.batch_index}."
+                    )
+
+                if batch_root.tag != "GBSet":
+                    raise RuntimeError(
+                        "XML batch root tag mismatch during consolidation. "
+                        f"Expected GBSet, got {batch_root.tag}."
+                    )
+
+                batch_children = list(batch_root)
+                for child in batch_children:
+                    if child.tag != "GBSeq":
+                        raise RuntimeError(
+                            "XML batch contains unexpected child tag during "
+                            f"consolidation: {child.tag}."
+                        )
+
+                    temporary_output_file.write(ET.tostring(child, encoding="utf-8"))
+                    temporary_output_file.write(b"\n")
+
+                total_record_count += len(batch_children)
+                batch_root.clear()
+
+            temporary_output_file.write(b"</GBSet>\n")
+
+        temporary_output_file_path.replace(resolved_output_file_path)
+    except Exception:
+        if temporary_output_file_path.exists():
+            temporary_output_file_path.unlink(missing_ok=True)
+        raise
+
+    return total_record_count
+
+
 def _validate_saved_consolidated_xml_snapshot(
     *,
     xml_file_path: PathLike,
@@ -159,26 +407,44 @@ def _validate_saved_consolidated_xml_snapshot(
     """
     resolved_xml_file_path = _as_path(xml_file_path)
 
+    record_count = 0
+    invalid_child_tags: set[str] = set()
+    root_seen = False
+    depth = 0
+
     try:
-        parsed_tree = ET.parse(resolved_xml_file_path)
+        for event, element in ET.iterparse(
+            resolved_xml_file_path,
+            events=("start", "end"),
+        ):
+            if event == "start":
+                if not root_seen:
+                    root_seen = True
+                    if element.tag != expected_root_tag:
+                        raise RuntimeError(
+                            "Saved consolidated XML snapshot root tag mismatch. "
+                            f"Expected {expected_root_tag}, got {element.tag}."
+                        )
+                else:
+                    depth += 1
+                    if depth == 1 and element.tag != expected_record_tag:
+                        invalid_child_tags.add(element.tag)
+            elif event == "end":
+                if depth == 1 and element.tag == expected_record_tag:
+                    record_count += 1
+                if depth <= 1:
+                    element.clear()
+                if depth > 0:
+                    depth -= 1
     except ET.ParseError as error:
         raise RuntimeError(
             f"Saved consolidated XML snapshot is not well-formed: {error}"
         ) from error
 
-    root_element = parsed_tree.getroot()
-    if root_element.tag != expected_root_tag:
-        raise RuntimeError(
-            "Saved consolidated XML snapshot root tag mismatch. "
-            f"Expected {expected_root_tag}, got {root_element.tag}."
-        )
+    if not root_seen:
+        raise RuntimeError("Saved consolidated XML snapshot is empty.")
 
-    child_elements = list(root_element)
-    record_count = len(child_elements)
-
-    invalid_child_tags = sorted(
-        {child.tag for child in child_elements if child.tag != expected_record_tag}
-    )
+    invalid_child_tags = sorted(invalid_child_tags)
     if invalid_child_tags:
         raise RuntimeError(
             "Saved consolidated XML snapshot contains unexpected child tags "
@@ -229,6 +495,61 @@ def _extract_ncbi_protein_uid_from_gbseq_element(
     return next(iter(uid_candidates))
 
 
+def _extract_ncbi_protein_identifier_candidates_from_gbseq_element(
+    *,
+    gbseq_element: ET.Element,
+) -> set[str]:
+    """
+    Extract equivalent protein identifiers from one GBSeq record.
+    """
+    identifier_candidates: set[str] = set()
+    ignored_pipe_tokens = {
+        "bbs",
+        "dbj",
+        "emb",
+        "gb",
+        "gi",
+        "gnl",
+        "lcl",
+        "pdb",
+        "pir",
+        "prf",
+        "ref",
+        "sp",
+    }
+
+    for gbseqid_element in gbseq_element.findall(".//GBSeqid"):
+        gbseqid_text = (gbseqid_element.text or "").strip()
+        if not gbseqid_text:
+            continue
+
+        identifier_candidates.add(gbseqid_text)
+
+        uid_match = re.fullmatch(r"gi\|(\d+)\|?", gbseqid_text)
+        if uid_match is not None:
+            identifier_candidates.add(uid_match.group(1))
+
+        for token in gbseqid_text.split("|"):
+            normalized_token = token.strip()
+            if (
+                normalized_token
+                and normalized_token.lower() not in ignored_pipe_tokens
+            ):
+                identifier_candidates.add(normalized_token)
+
+    for xpath in (
+        "./GBSeq_accession-version",
+        "./GBSeq_primary-accession",
+        ".//GBSeq_other-seqids/GBSeqid",
+    ):
+        for identifier_element in gbseq_element.findall(xpath):
+            identifier_text = (identifier_element.text or "").strip()
+            if identifier_text:
+                identifier_candidates.add(identifier_text)
+
+    return identifier_candidates
+
+
 def _validate_xml_record_uids(
     *,
     xml_file_path: PathLike,
@@ -240,57 +561,94 @@ def _validate_xml_record_uids(
     Validate that the XML record UIDs match the requested protein UIDs.
     """
     resolved_xml_file_path = _as_path(xml_file_path)
+    expected_uid_counter = Counter(expected_protein_uids)
+    matched_protein_uids: list[str] = []
+    unmatched_record_candidates: list[list[str]] = []
+    invalid_child_tags: set[str] = set()
+    root_seen = False
+    depth = 0
 
     try:
-        parsed_tree = ET.parse(resolved_xml_file_path)
+        for event, element in ET.iterparse(
+            resolved_xml_file_path,
+            events=("start", "end"),
+        ):
+            if event == "start":
+                if not root_seen:
+                    root_seen = True
+                    if element.tag != expected_root_tag:
+                        raise RuntimeError(
+                            "Saved consolidated XML snapshot root tag mismatch "
+                            "during UID validation. "
+                            f"Expected {expected_root_tag}, got {element.tag}."
+                        )
+                else:
+                    depth += 1
+                    if depth == 1 and element.tag != expected_record_tag:
+                        invalid_child_tags.add(element.tag)
+            elif event == "end":
+                if depth == 1 and element.tag == expected_record_tag:
+                    identifier_candidates = (
+                        _extract_ncbi_protein_identifier_candidates_from_gbseq_element(
+                            gbseq_element=element,
+                        )
+                    )
+                    matching_expected_identifiers = [
+                        expected_identifier
+                        for expected_identifier, expected_count
+                        in expected_uid_counter.items()
+                        if (
+                            expected_count > 0
+                            and expected_identifier in identifier_candidates
+                        )
+                    ]
+
+                    if len(matching_expected_identifiers) > 1:
+                        raise RuntimeError(
+                            "Saved consolidated XML snapshot record matched "
+                            "multiple expected protein identifiers: "
+                            f"{matching_expected_identifiers}."
+                        )
+
+                    if len(matching_expected_identifiers) == 1:
+                        matched_identifier = matching_expected_identifiers[0]
+                        expected_uid_counter[matched_identifier] -= 1
+                        matched_protein_uids.append(matched_identifier)
+                    else:
+                        unmatched_record_candidates.append(
+                            sorted(identifier_candidates)
+                        )
+
+                if depth <= 1:
+                    element.clear()
+                if depth > 0:
+                    depth -= 1
     except ET.ParseError as error:
         raise RuntimeError(
             f"Saved consolidated XML snapshot is not well-formed: {error}"
         ) from error
 
-    root_element = parsed_tree.getroot()
-    if root_element.tag != expected_root_tag:
-        raise RuntimeError(
-            "Saved consolidated XML snapshot root tag mismatch during UID "
-            f"validation. Expected {expected_root_tag}, got {root_element.tag}."
-        )
+    if not root_seen:
+        raise RuntimeError("Saved consolidated XML snapshot is empty.")
 
-    child_elements = list(root_element)
-    invalid_child_tags = sorted(
-        {child.tag for child in child_elements if child.tag != expected_record_tag}
-    )
+    invalid_child_tags = sorted(invalid_child_tags)
     if invalid_child_tags:
         raise RuntimeError(
             "Saved consolidated XML snapshot contains unexpected child tags "
             f"during UID validation: {invalid_child_tags}."
         )
 
-    extracted_protein_uids = [
-        _extract_ncbi_protein_uid_from_gbseq_element(gbseq_element=child_element)
-        for child_element in child_elements
-    ]
-
-    expected_uid_counter = Counter(expected_protein_uids)
-    extracted_uid_counter = Counter(extracted_protein_uids)
-    if extracted_uid_counter != expected_uid_counter:
-        missing_uids = sorted(
-            (
-                expected_uid_counter - extracted_uid_counter
-            ).elements()
-        )
-        unexpected_uids = sorted(
-            (
-                extracted_uid_counter - expected_uid_counter
-            ).elements()
-        )
+    if any(expected_uid_counter.values()) or unmatched_record_candidates:
+        missing_uids = sorted(expected_uid_counter.elements())
         raise RuntimeError(
             "Saved consolidated XML snapshot record UIDs do not match the "
             "expected protein UIDs. "
-            f"Missing: {missing_uids[:5]}; Unexpected: {unexpected_uids[:5]}."
+            f"Missing: {missing_uids[:5]}; "
+            f"Unexpected record identifier candidates: "
+            f"{unmatched_record_candidates[:5]}."
         )
 
-    return extracted_protein_uids
-
+    return matched_protein_uids
 
 def build_snapshot_directory_name(
     *,
@@ -420,6 +778,15 @@ def _build_xml_snapshot_manifest(
         "batch_count": fetch_result.batch_count,
         "request_delay_seconds": fetch_result.request_delay_seconds,
         "max_retry_attempts": fetch_result.max_retry_attempts,
+        "batch_workspace_directory": fetch_result.batch_workspace_directory,
+        "socket_idle_timeout_seconds": fetch_result.socket_idle_timeout_seconds,
+        "batch_deadline_seconds": fetch_result.batch_deadline_seconds,
+        "circuit_breaker_failure_threshold": (
+            fetch_result.circuit_breaker_failure_threshold
+        ),
+        "circuit_breaker_cooldown_seconds": (
+            fetch_result.circuit_breaker_cooldown_seconds
+        ),
         "python_version": fetch_result.python_version,
         "biopython_version": fetch_result.biopython_version,
         "manifest_file_name": "manifest.json",
@@ -588,13 +955,32 @@ def save_ncbi_protein_xml_snapshot(
                     "batch_end_index": xml_batch.batch_end_index,
                     "protein_uid_count": xml_batch.protein_uid_count,
                     "xml_payload_sha256": xml_batch.xml_payload_sha256,
+                    "xml_payload_file_path": xml_batch.xml_payload_file_path,
+                    "response_byte_count": xml_batch.response_byte_count,
+                    "open_latency_seconds": xml_batch.open_latency_seconds,
+                    "read_latency_seconds": xml_batch.read_latency_seconds,
+                    "total_latency_seconds": xml_batch.total_latency_seconds,
+                    "average_throughput_bytes_per_second": (
+                        xml_batch.average_throughput_bytes_per_second
+                    ),
+                    "attempt_count": xml_batch.attempt_count,
                 }
             )
 
-        consolidated_xml_payload, consolidated_record_count = (
-            _build_consolidated_xml_payload(fetch_result=fetch_result)
-        )
         expected_record_count = fetch_result.normalized_protein_uid_count
+        has_persisted_xml_batches = any(
+            xml_batch.xml_payload_file_path for xml_batch in fetch_result.xml_batches
+        )
+
+        if has_persisted_xml_batches:
+            consolidated_record_count = _write_consolidated_xml_payload_streaming(
+                fetch_result=fetch_result,
+                output_file_path=consolidated_xml_file_path,
+            )
+        else:
+            consolidated_xml_payload, consolidated_record_count = (
+                _build_consolidated_xml_payload(fetch_result=fetch_result)
+            )
 
         if consolidated_record_count != expected_record_count:
             raise RuntimeError(
@@ -604,10 +990,11 @@ def save_ncbi_protein_xml_snapshot(
                 f"{consolidated_record_count}."
             )
 
-        write_bytes_atomic(
-            binary_payload=consolidated_xml_payload,
-            output_file_path=consolidated_xml_file_path,
-        )
+        if not has_persisted_xml_batches:
+            write_bytes_atomic(
+                binary_payload=consolidated_xml_payload,
+                output_file_path=consolidated_xml_file_path,
+            )
 
         validated_record_count = _validate_saved_consolidated_xml_snapshot(
             xml_file_path=consolidated_xml_file_path,
@@ -991,11 +1378,56 @@ def latest_xml_snapshot_is_available(
     )
 
 
+def _local_excel_source_matches_manifest(
+    *,
+    manifest_payload: Dict[str, Any],
+    excel_file_path: PathLike,
+    sheet_name: str | int,
+    identifier_column: str,
+) -> bool:
+    """
+    Return True when a saved UID snapshot matches the requested Excel source.
+    """
+    resolved_excel_file_path = _as_path(excel_file_path)
+
+    if not resolved_excel_file_path.exists():
+        return False
+
+    return (
+        manifest_payload.get("source_type") == "local_excel"
+        and manifest_payload.get("source_file_path") == str(resolved_excel_file_path)
+        and manifest_payload.get("source_file_sha256")
+        == sha256_of_file(input_file_path=resolved_excel_file_path)
+        and manifest_payload.get("source_sheet_name") == str(sheet_name)
+        and manifest_payload.get("source_identifier_column") == identifier_column
+    )
+
+
+def _source_uid_snapshot_matches_xml_manifest(
+    *,
+    xml_manifest_payload: Dict[str, Any],
+    source_uid_snapshot_payload: Dict[str, Any],
+) -> bool:
+    """
+    Return True when an XML snapshot was built from the given UID snapshot.
+    """
+    source_uid_manifest = source_uid_snapshot_payload.get("manifest", {})
+    source_uid_sha256 = source_uid_manifest.get("protein_uids_sha256")
+
+    if source_uid_sha256 is None:
+        return False
+
+    return xml_manifest_payload.get("source_uid_sha256") == source_uid_sha256
+
+
 def resolve_ncbi_protein_uid_snapshot(
     *,
     snapshot_mode: SnapshotMode | str,
     snapshot_root_directory: PathLike,
     search_query: Optional[str] = None,
+    local_excel_file_path: Optional[PathLike] = None,
+    local_excel_sheet_name: str | int = 0,
+    local_excel_identifier_column: str = DEFAULT_LOCAL_EXCEL_IDENTIFIER_COLUMN,
     ssl_ca_file: Optional[str] = None,
     ssl_ca_directory: Optional[str] = None,
     deduplicate_uids: bool = True,
@@ -1016,6 +1448,7 @@ def resolve_ncbi_protein_uid_snapshot(
     """
     resolved_snapshot_mode = _coerce_snapshot_mode(snapshot_mode)
     resolved_snapshot_root_directory = _as_path(snapshot_root_directory)
+    use_local_excel_source = local_excel_file_path is not None
 
     latest_is_available = latest_snapshot_is_available(
         snapshot_root_directory=resolved_snapshot_root_directory,
@@ -1047,17 +1480,43 @@ def resolve_ncbi_protein_uid_snapshot(
                 f"snapshot_mode='create_new' to create it."
             )
 
-        return load_latest_snapshot(
+        latest_snapshot_payload = load_latest_snapshot(
             snapshot_root_directory=resolved_snapshot_root_directory,
         )
+
+        if use_local_excel_source and not _local_excel_source_matches_manifest(
+            manifest_payload=latest_snapshot_payload["manifest"],
+            excel_file_path=local_excel_file_path,
+            sheet_name=local_excel_sheet_name,
+            identifier_column=local_excel_identifier_column,
+        ):
+            raise RuntimeError(
+                "The latest source UID snapshot does not match the requested "
+                "local Excel source."
+            )
+
+        return latest_snapshot_payload
 
     if (
         resolved_snapshot_mode == SnapshotMode.reuse_latest_or_create
         and latest_is_available
     ):
-        print("Latest snapshot is available. Reusing frozen snapshot.")
-        return load_latest_snapshot(
+        latest_snapshot_payload = load_latest_snapshot(
             snapshot_root_directory=resolved_snapshot_root_directory,
+        )
+
+        if not use_local_excel_source or _local_excel_source_matches_manifest(
+            manifest_payload=latest_snapshot_payload["manifest"],
+            excel_file_path=local_excel_file_path,
+            sheet_name=local_excel_sheet_name,
+            identifier_column=local_excel_identifier_column,
+        ):
+            print("Latest snapshot is available. Reusing frozen snapshot.")
+            return latest_snapshot_payload
+
+        print(
+            "Latest snapshot is available but does not match the requested "
+            "local Excel source. Creating a new frozen snapshot."
         )
 
     if resolved_snapshot_mode not in {
@@ -1069,28 +1528,35 @@ def resolve_ncbi_protein_uid_snapshot(
             "'create_new', 'reuse_latest', 'reuse_latest_or_create'."
         )
 
-    if not ncbi_email:
+    if use_local_excel_source:
+        fetch_result = fetch_local_excel_protein_identifier_snapshot(
+            excel_file_path=local_excel_file_path,
+            sheet_name=local_excel_sheet_name,
+            identifier_column=local_excel_identifier_column,
+            deduplicate_identifiers=deduplicate_uids,
+            sort_identifiers=sort_uids,
+        )
+    elif not ncbi_email:
         raise ValueError(
             "ncbi_email is required when snapshot creation from NCBI is needed."
         )
-
-    if not search_query or not search_query.strip():
+    elif not search_query or not search_query.strip():
         raise ValueError(
             "search_query is required when snapshot creation from NCBI is needed."
         )
-
-    fetch_result = fetch_ncbi_protein_uid_snapshot(
-        ncbi_email=ncbi_email,
-        ncbi_api_key=ncbi_api_key,
-        query=search_query,
-        ssl_ca_file=ssl_ca_file,
-        ssl_ca_directory=ssl_ca_directory,
-        deduplicate_uids=deduplicate_uids,
-        sort_uids=sort_uids,
-        page_size=page_size,
-        max_retry_attempts=max_retry_attempts,
-        request_delay_seconds=request_delay_seconds,
-    )
+    else:
+        fetch_result = fetch_ncbi_protein_uid_snapshot(
+            ncbi_email=ncbi_email,
+            ncbi_api_key=ncbi_api_key,
+            query=search_query,
+            ssl_ca_file=ssl_ca_file,
+            ssl_ca_directory=ssl_ca_directory,
+            deduplicate_uids=deduplicate_uids,
+            sort_uids=sort_uids,
+            page_size=page_size,
+            max_retry_attempts=max_retry_attempts,
+            request_delay_seconds=request_delay_seconds,
+        )
 
     saved_snapshot_directory = save_ncbi_protein_uid_snapshot(
         fetch_result=fetch_result,
@@ -1108,11 +1574,17 @@ def resolve_ncbi_protein_xml_snapshot(
     snapshot_mode: SnapshotMode | str,
     snapshot_root_directory: PathLike,
     source_uid_snapshot_root_directory: PathLike,
+    source_uid_snapshot_payload: Optional[Dict[str, Any]] = None,
     ssl_ca_file: Optional[str] = None,
     ssl_ca_directory: Optional[str] = None,
-    xml_batch_size: int = 100,
+    xml_batch_size: int = 50,
     max_retry_attempts: int = 5,
     xml_request_delay_seconds: Optional[float] = None,
+    socket_idle_timeout_seconds: float = 90.0,
+    batch_deadline_seconds: float = 300.0,
+    circuit_breaker_failure_threshold: int = 3,
+    circuit_breaker_cooldown_seconds: float = 180.0,
+    batch_workspace_root_directory: Optional[PathLike] = None,
     ncbi_email: Optional[str] = None,
     ncbi_api_key: Optional[str] = None,
     update_latest_directory: bool = True,
@@ -1165,17 +1637,45 @@ def resolve_ncbi_protein_xml_snapshot(
                 f"snapshot_mode='create_new' to create it."
             )
 
-        return load_latest_xml_snapshot(
+        latest_xml_snapshot_payload = load_latest_xml_snapshot(
             snapshot_root_directory=resolved_snapshot_root_directory,
         )
+
+        if (
+            source_uid_snapshot_payload is not None
+            and not _source_uid_snapshot_matches_xml_manifest(
+                xml_manifest_payload=latest_xml_snapshot_payload["manifest"],
+                source_uid_snapshot_payload=source_uid_snapshot_payload,
+            )
+        ):
+            raise RuntimeError(
+                "The latest XML snapshot does not match the requested source "
+                "UID snapshot."
+            )
+
+        return latest_xml_snapshot_payload
 
     if (
         resolved_snapshot_mode == SnapshotMode.reuse_latest_or_create
         and latest_is_available
     ):
-        print("Latest XML snapshot is available. Reusing frozen snapshot.")
-        return load_latest_xml_snapshot(
+        latest_xml_snapshot_payload = load_latest_xml_snapshot(
             snapshot_root_directory=resolved_snapshot_root_directory,
+        )
+
+        if (
+            source_uid_snapshot_payload is None
+            or _source_uid_snapshot_matches_xml_manifest(
+                xml_manifest_payload=latest_xml_snapshot_payload["manifest"],
+                source_uid_snapshot_payload=source_uid_snapshot_payload,
+            )
+        ):
+            print("Latest XML snapshot is available. Reusing frozen snapshot.")
+            return latest_xml_snapshot_payload
+
+        print(
+            "Latest XML snapshot is available but does not match the requested "
+            "source UID snapshot. Creating a new frozen XML snapshot."
         )
 
     if resolved_snapshot_mode not in {
@@ -1187,17 +1687,18 @@ def resolve_ncbi_protein_xml_snapshot(
             "'create_new', 'reuse_latest', 'reuse_latest_or_create'."
         )
 
-    try:
-        source_uid_snapshot_payload = resolve_ncbi_protein_uid_snapshot(
-            snapshot_mode=SnapshotMode.reuse_latest,
-            snapshot_root_directory=source_uid_snapshot_root_directory,
-        )
-    except FileNotFoundError as exc:
-        raise FileNotFoundError(
-            "No reusable source UID snapshot was found for the XML workflow. "
-            "Create the upstream protein UID snapshot before running the XML "
-            "snapshot step."
-        ) from exc
+    if source_uid_snapshot_payload is None:
+        try:
+            source_uid_snapshot_payload = resolve_ncbi_protein_uid_snapshot(
+                snapshot_mode=SnapshotMode.reuse_latest,
+                snapshot_root_directory=source_uid_snapshot_root_directory,
+            )
+        except FileNotFoundError as exc:
+            raise FileNotFoundError(
+                "No reusable source UID snapshot was found for the XML workflow. "
+                "Create the upstream protein UID snapshot before running the XML "
+                "snapshot step."
+            ) from exc
 
     if not ncbi_email:
         raise ValueError(
@@ -1209,6 +1710,23 @@ def resolve_ncbi_protein_xml_snapshot(
     source_uid_snapshot_manifest_file_path = source_uid_snapshot_payload[
         "manifest_file_path"
     ]
+    source_uid_sha256 = source_uid_snapshot_manifest.get(
+        "protein_uids_sha256",
+        sha256_of_lines(
+            text_lines=protein_uids,
+            deduplicate_lines_preserving_order=False,
+            sort_lines=False,
+        ),
+    )
+    resolved_batch_workspace_root_directory = (
+        _as_path(batch_workspace_root_directory)
+        if batch_workspace_root_directory is not None
+        else resolved_snapshot_root_directory / "workspaces"
+    )
+    batch_workspace_directory = (
+        resolved_batch_workspace_root_directory
+        / f"uids_{str(source_uid_sha256)[:16]}__batch_{xml_batch_size}__xml"
+    )
 
     fetch_result = fetch_ncbi_protein_xml_batches(
         ncbi_email=ncbi_email,
@@ -1219,6 +1737,11 @@ def resolve_ncbi_protein_xml_snapshot(
         batch_size=xml_batch_size,
         max_retry_attempts=max_retry_attempts,
         request_delay_seconds=xml_request_delay_seconds,
+        batch_workspace_directory=batch_workspace_directory,
+        socket_idle_timeout_seconds=socket_idle_timeout_seconds,
+        batch_deadline_seconds=batch_deadline_seconds,
+        circuit_breaker_failure_threshold=circuit_breaker_failure_threshold,
+        circuit_breaker_cooldown_seconds=circuit_breaker_cooldown_seconds,
     )
 
     saved_snapshot_directory = save_ncbi_protein_xml_snapshot(

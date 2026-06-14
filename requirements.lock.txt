@@ -47,3 +47,4 @@ traitlets==5.14.3
 tzdata==2026.1
 urllib3==2.6.3
 wcwidth==0.6.0
+xlrd==2.0.2

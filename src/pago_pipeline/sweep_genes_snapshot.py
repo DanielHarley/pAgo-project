@@ -745,6 +745,105 @@ def latest_sweep_genes_snapshot_is_available(
     return True
 
 
+def _sweep_genes_snapshot_matches_source_fasta(
+    *,
+    sweep_snapshot_payload: dict[str, object],
+    source_fasta_snapshot_payload: dict[str, object],
+) -> bool:
+    sweep_manifest = sweep_snapshot_payload.get("manifest")
+    source_fasta_manifest = source_fasta_snapshot_payload.get("manifest")
+    if not isinstance(sweep_manifest, Mapping) or not isinstance(
+        source_fasta_manifest, Mapping
+    ):
+        return False
+
+    return (
+        sweep_manifest.get("source_fasta_file_sha256")
+        == source_fasta_manifest.get("fasta_file_sha256")
+    )
+
+
+def _sweep_genes_manifest_matches_source_fasta(
+    *,
+    sweep_manifest: Mapping[str, object],
+    source_fasta_manifest: Mapping[str, object],
+) -> bool:
+    return (
+        sweep_manifest.get("source_fasta_file_sha256")
+        == source_fasta_manifest.get("fasta_file_sha256")
+    )
+
+
+def _find_sweep_genes_snapshot_directory_matching_source_fasta(
+    *,
+    snapshot_root_directory: PathLike,
+    source_fasta_snapshot_payload: dict[str, object],
+) -> Optional[Path]:
+    source_fasta_manifest = source_fasta_snapshot_payload.get("manifest")
+    if not isinstance(source_fasta_manifest, Mapping):
+        return None
+
+    for snapshot_directory in reversed(
+        list_saved_snapshot_directories(
+            snapshot_root_directory=snapshot_root_directory,
+        )
+    ):
+        manifest_file_path = snapshot_directory / "manifest.json"
+        if not manifest_file_path.exists():
+            continue
+
+        try:
+            manifest_payload = read_json_file(input_file_path=manifest_file_path)
+        except (OSError, ValueError):
+            continue
+
+        if not isinstance(manifest_payload, Mapping):
+            continue
+
+        if _sweep_genes_manifest_matches_source_fasta(
+            sweep_manifest=manifest_payload,
+            source_fasta_manifest=source_fasta_manifest,
+        ):
+            return snapshot_directory
+
+    return None
+
+
+def _publish_sweep_genes_latest_from_snapshot_directory(
+    *,
+    snapshot_root_directory: PathLike,
+    snapshot_directory: PathLike,
+) -> None:
+    resolved_snapshot_directory = _as_path(snapshot_directory)
+    manifest_payload = read_json_file(
+        input_file_path=resolved_snapshot_directory / "manifest.json",
+    )
+    if not isinstance(manifest_payload, Mapping):
+        raise RuntimeError(
+            "Saved SWeeP Genes snapshot manifest must deserialize into a JSON object."
+        )
+
+    embeddings_file_path, sequence_metadata_file_path, profiling_log_file_path = (
+        _validate_loaded_sweep_genes_snapshot_payload(
+            snapshot_directory=resolved_snapshot_directory,
+            manifest_payload=manifest_payload,
+            require_profiling_log=True,
+        )
+    )
+    files_to_copy = [
+        (embeddings_file_path, embeddings_file_path.name),
+        (sequence_metadata_file_path, sequence_metadata_file_path.name),
+        (resolved_snapshot_directory / "manifest.json", "manifest.json"),
+    ]
+    if profiling_log_file_path is not None:
+        files_to_copy.insert(2, (profiling_log_file_path, profiling_log_file_path.name))
+
+    _replace_latest_directory(
+        latest_directory=_as_path(snapshot_root_directory) / "latest",
+        files_to_copy=files_to_copy,
+    )
+
+
 def resolve_sweep_genes_snapshot(
     *,
     snapshot_mode: SnapshotMode | str,
@@ -782,16 +881,6 @@ def resolve_sweep_genes_snapshot(
         )
         return latest_snapshot_payload
 
-    if (
-        resolved_snapshot_mode == SnapshotMode.reuse_latest_or_create
-        and latest_is_available
-    ):
-        print("Latest SWeeP Genes snapshot is available. Reusing frozen snapshot.")
-        latest_snapshot_payload = load_latest_sweep_genes_snapshot(
-            snapshot_root_directory=resolved_snapshot_root_directory
-        )
-        return latest_snapshot_payload
-
     if resolved_snapshot_mode not in {
         SnapshotMode.create_new,
         SnapshotMode.reuse_latest_or_create,
@@ -810,6 +899,58 @@ def resolve_sweep_genes_snapshot(
             "No reusable source FASTA snapshot was found for the SWeeP Genes workflow. "
             "Create the upstream FASTA snapshot before running the SWeeP Genes step."
         ) from exc
+
+    if (
+        resolved_snapshot_mode == SnapshotMode.reuse_latest_or_create
+        and latest_is_available
+    ):
+        latest_manifest_file_path = (
+            resolved_snapshot_root_directory / "latest" / "manifest.json"
+        )
+        latest_manifest_payload = read_json_file(
+            input_file_path=latest_manifest_file_path
+        )
+        source_fasta_manifest = source_fasta_snapshot_payload.get("manifest")
+        if not isinstance(latest_manifest_payload, Mapping) or not isinstance(
+            source_fasta_manifest, Mapping
+        ):
+            raise RuntimeError(
+                "Latest SWeeP Genes or source FASTA manifest must deserialize "
+                "into a JSON object."
+            )
+
+        if _sweep_genes_manifest_matches_source_fasta(
+            sweep_manifest=latest_manifest_payload,
+            source_fasta_manifest=source_fasta_manifest,
+        ):
+            print("Latest SWeeP Genes snapshot is available. Reusing frozen snapshot.")
+            return load_latest_sweep_genes_snapshot(
+                snapshot_root_directory=resolved_snapshot_root_directory
+            )
+
+        print(
+            "Latest SWeeP Genes snapshot is available but does not match the "
+            "latest source FASTA snapshot. Creating a new frozen snapshot."
+        )
+        matching_snapshot_directory = (
+            _find_sweep_genes_snapshot_directory_matching_source_fasta(
+                snapshot_root_directory=resolved_snapshot_root_directory,
+                source_fasta_snapshot_payload=source_fasta_snapshot_payload,
+            )
+        )
+        if matching_snapshot_directory is not None:
+            print(
+                "Found an existing SWeeP Genes snapshot matching the latest "
+                "source FASTA snapshot. Reusing frozen snapshot."
+            )
+            if update_latest_directory:
+                _publish_sweep_genes_latest_from_snapshot_directory(
+                    snapshot_root_directory=resolved_snapshot_root_directory,
+                    snapshot_directory=matching_snapshot_directory,
+                )
+            return load_sweep_genes_snapshot_by_directory(
+                snapshot_directory=matching_snapshot_directory,
+            )
 
     saved_snapshot = save_sweep_genes_snapshot(
         snapshot_root_directory=resolved_snapshot_root_directory,

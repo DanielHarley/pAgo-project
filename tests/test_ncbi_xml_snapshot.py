@@ -23,8 +23,10 @@ if "Bio" not in sys.modules:
 import src.pago_pipeline.ncbi_api as ncbi_api
 from src.pago_pipeline.ncbi_snapshot import (
     build_snapshot_directory_name,
+    fetch_local_excel_protein_identifier_snapshot,
     resolve_ncbi_protein_uid_snapshot,
     resolve_ncbi_protein_xml_snapshot,
+    save_ncbi_protein_uid_snapshot,
     save_ncbi_protein_xml_snapshot,
     _validate_saved_consolidated_xml_snapshot,
 )
@@ -34,6 +36,7 @@ from src.pago_pipeline.ncbi_api import (
     _configured_ncbi_entrez_urlopen,
     _resolve_ncbi_ssl_ca_configuration,
     fetch_ncbi_protein_uid_snapshot,
+    fetch_ncbi_protein_xml_batches,
 )
 from src.pago_pipeline.storage import sha256_of_lines
 
@@ -110,6 +113,57 @@ class ValidateSavedConsolidatedXmlSnapshotTests(unittest.TestCase):
             )
 
 
+class LocalExcelProteinIdentifierSnapshotTests(unittest.TestCase):
+    def test_builds_and_saves_snapshot_from_excel_accession_column(self) -> None:
+        import pandas as pd
+
+        with tempfile.TemporaryDirectory() as temporary_directory_name:
+            temporary_directory = Path(temporary_directory_name)
+            excel_file_path = temporary_directory / "mbo006184236st1.xls"
+            excel_file_path.write_bytes(b"fake excel payload")
+            snapshot_root_directory = temporary_directory / "protein_uid_snapshots"
+
+            excel_dataframe = pd.DataFrame(
+                {
+                    "Accession": ["WP_002566035.1", "NP_213999.1", "NP_213999.1"],
+                    "Description": ["A", "B", "duplicate"],
+                }
+            )
+
+            with patch("pandas.read_excel", return_value=excel_dataframe):
+                fetch_result = fetch_local_excel_protein_identifier_snapshot(
+                    excel_file_path=excel_file_path,
+                    sheet_name="novel_pago_fixed_july2018",
+                    identifier_column="Accession",
+                    deduplicate_identifiers=True,
+                    sort_identifiers=True,
+                )
+
+            saved_snapshot_directory = save_ncbi_protein_uid_snapshot(
+                fetch_result=fetch_result,
+                snapshot_root_directory=snapshot_root_directory,
+                update_latest_directory=True,
+            )
+
+            latest_manifest = json.loads(
+                (snapshot_root_directory / "latest" / "manifest.json").read_text(
+                    encoding="utf-8",
+                )
+            )
+            latest_uids = (
+                snapshot_root_directory / "latest" / "protein_uids.txt"
+            ).read_text(encoding="utf-8").splitlines()
+
+            self.assertTrue(saved_snapshot_directory.exists())
+            self.assertEqual(latest_uids, ["NP_213999.1", "WP_002566035.1"])
+            self.assertEqual(latest_manifest["source_type"], "local_excel")
+            self.assertEqual(
+                latest_manifest["source_identifier_column"],
+                "Accession",
+            )
+            self.assertEqual(latest_manifest["identifier_type"], "accession.version")
+
+
 class SaveNcbiProteinXmlSnapshotTests(unittest.TestCase):
     def _write_source_uid_manifest(
         self,
@@ -140,6 +194,92 @@ class SaveNcbiProteinXmlSnapshotTests(unittest.TestCase):
             + f"  <GBSeq_locus>{locus}</GBSeq_locus>\n".encode("utf-8")
             + b"</GBSeq>\n"
         )
+
+    def _build_accession_gbseq_xml_record(
+        self,
+        accession_version: str,
+        locus: str,
+    ) -> bytes:
+        primary_accession = accession_version.split(".", maxsplit=1)[0]
+        return (
+            b"<GBSeq>\n"
+            + f"  <GBSeq_locus>{locus}</GBSeq_locus>\n".encode("utf-8")
+            + (
+                f"  <GBSeq_primary-accession>{primary_accession}"
+                f"</GBSeq_primary-accession>\n"
+            ).encode("utf-8")
+            + (
+                f"  <GBSeq_accession-version>{accession_version}"
+                f"</GBSeq_accession-version>\n"
+            ).encode("utf-8")
+            + f"  <GBSeqid>ref|{accession_version}|</GBSeqid>\n".encode("utf-8")
+            + b"</GBSeq>\n"
+        )
+
+    def test_saves_xml_snapshot_for_accession_version_identifiers(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory_name:
+            temporary_directory = Path(temporary_directory_name)
+            snapshot_root_directory = temporary_directory / "xml_snapshot"
+            protein_uids = ["NP_213999.1"]
+            protein_uids_sha256 = sha256_of_lines(
+                text_lines=protein_uids,
+                deduplicate_lines_preserving_order=False,
+                sort_lines=False,
+            )
+            source_uid_snapshot_manifest, source_uid_snapshot_manifest_file_path = (
+                self._write_source_uid_manifest(
+                    temporary_directory,
+                    search_query="local_excel:test.xls:sheet=0:column=Accession",
+                    protein_uids_sha256=protein_uids_sha256,
+                    normalized_protein_uid_count=len(protein_uids),
+                )
+            )
+            fetch_result = NCBIProteinXmlFetchResult(
+                database_name="protein",
+                identifier_type="uid",
+                retrieved_at_utc="2026-03-21T18:42:03Z",
+                requested_protein_uid_count=len(protein_uids),
+                normalized_protein_uid_count=len(protein_uids),
+                protein_uids_sha256=protein_uids_sha256,
+                batch_size=100,
+                batch_count=1,
+                retmode="xml",
+                request_delay_seconds=0.34,
+                max_retry_attempts=5,
+                python_version="3.12.0",
+                biopython_version="test",
+                xml_batches=[
+                    NCBIProteinXmlBatchFetchResult(
+                        batch_index=1,
+                        batch_start_index=0,
+                        batch_end_index=0,
+                        protein_uids=protein_uids,
+                        protein_uid_count=len(protein_uids),
+                        xml_payload_bytes=b"".join(
+                            [
+                                b'<?xml version="1.0" encoding="utf-8"?>\n',
+                                b"<GBSet>\n",
+                                self._build_accession_gbseq_xml_record(
+                                    "NP_213999.1",
+                                    "NP_213999",
+                                ),
+                                b"</GBSet>\n",
+                            ]
+                        ),
+                        xml_payload_sha256="deadbeef",
+                    )
+                ],
+            )
+
+            saved_snapshot_directory = save_ncbi_protein_xml_snapshot(
+                fetch_result=fetch_result,
+                snapshot_root_directory=snapshot_root_directory,
+                source_uid_snapshot_manifest=source_uid_snapshot_manifest,
+                source_uid_snapshot_manifest_file_path=source_uid_snapshot_manifest_file_path,
+                protein_uids=protein_uids,
+            )
+
+            self.assertTrue((saved_snapshot_directory / "protein_records.xml").exists())
 
     def test_raises_when_consolidated_xml_record_count_is_less_than_expected(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory_name:
@@ -412,6 +552,88 @@ class SaveNcbiProteinXmlSnapshotTests(unittest.TestCase):
                     snapshot_root_directory=snapshot_root_directory,
                     source_uid_snapshot_root_directory=temporary_directory / "unused_source",
                 )
+
+
+class FetchNcbiProteinXmlBatchWorkspaceTests(unittest.TestCase):
+    class _FakeFetchHandle:
+        def __init__(self, payload: bytes) -> None:
+            self._payload = payload
+            self._has_read = False
+            self.url = "https://example.test/efetch"
+            self.headers = {"content-type": "text/xml"}
+
+        def read(self, size: int = -1) -> bytes:
+            if self._has_read:
+                return b""
+            self._has_read = True
+            return self._payload
+
+        def close(self) -> None:
+            return None
+
+    def _build_xml_payload(self, uid: str) -> bytes:
+        return (
+            b'<?xml version="1.0" encoding="utf-8"?>\n'
+            b"<GBSet>\n"
+            + f"  <GBSeq><GBSeqid>gi|{uid}</GBSeqid></GBSeq>\n".encode("utf-8")
+            + b"</GBSet>\n"
+        )
+
+    def test_reuses_validated_workspace_batches_without_refetching(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory_name:
+            temporary_directory = Path(temporary_directory_name)
+            workspace_directory = temporary_directory / "workspace"
+            payloads = [
+                self._FakeFetchHandle(self._build_xml_payload("1001")),
+                self._FakeFetchHandle(self._build_xml_payload("1002")),
+            ]
+
+            with patch.object(
+                ncbi_api.Entrez,
+                "efetch",
+                side_effect=payloads,
+                create=True,
+            ) as efetch_mock:
+                with patch("src.pago_pipeline.ncbi_api.time.sleep"):
+                    first_result = fetch_ncbi_protein_xml_batches(
+                        ncbi_email="test@example.org",
+                        ncbi_api_key=None,
+                        protein_uids=["1001", "1002"],
+                        batch_size=1,
+                        request_delay_seconds=0.0,
+                        batch_workspace_directory=workspace_directory,
+                    )
+
+            self.assertEqual(first_result.batch_count, 2)
+            self.assertEqual(efetch_mock.call_count, 2)
+            self.assertTrue(
+                (workspace_directory / "batches" / "batch_000001.xml").exists()
+            )
+            self.assertTrue((workspace_directory / "latency_events.jsonl").exists())
+
+            with patch.object(
+                ncbi_api.Entrez,
+                "efetch",
+                side_effect=AssertionError("should not refetch"),
+                create=True,
+            ):
+                second_result = fetch_ncbi_protein_xml_batches(
+                    ncbi_email="test@example.org",
+                    ncbi_api_key=None,
+                    protein_uids=["1001", "1002"],
+                    batch_size=1,
+                    request_delay_seconds=0.0,
+                    batch_workspace_directory=workspace_directory,
+                )
+
+        self.assertEqual(second_result.batch_count, 2)
+        self.assertEqual(
+            [batch.xml_payload_bytes for batch in second_result.xml_batches],
+            [b"", b""],
+        )
+        self.assertTrue(
+            all(batch.xml_payload_file_path for batch in second_result.xml_batches)
+        )
 
 
 class NCBIApiSslConfigurationTests(unittest.TestCase):

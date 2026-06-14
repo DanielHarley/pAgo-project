@@ -461,6 +461,24 @@ def latest_metadata_snapshot_is_available(
     )
 
 
+def _metadata_snapshot_matches_source_xml(
+    *,
+    metadata_snapshot_payload: dict[str, object],
+    source_xml_snapshot_payload: dict[str, object],
+) -> bool:
+    metadata_manifest = metadata_snapshot_payload.get("manifest")
+    source_xml_manifest = source_xml_snapshot_payload.get("manifest")
+    if not isinstance(metadata_manifest, Mapping) or not isinstance(
+        source_xml_manifest, Mapping
+    ):
+        return False
+
+    return (
+        metadata_manifest.get("source_xml_file_sha256")
+        == source_xml_manifest.get("xml_file_sha256")
+    )
+
+
 def resolve_ncbi_protein_metadata_snapshot(
     *,
     snapshot_mode: SnapshotMode | str,
@@ -521,15 +539,6 @@ def resolve_ncbi_protein_metadata_snapshot(
             snapshot_root_directory=resolved_snapshot_root_directory,
         )
 
-    if (
-        resolved_snapshot_mode == SnapshotMode.reuse_latest_or_create
-        and latest_is_available
-    ):
-        print("Latest metadata snapshot is available. Reusing frozen snapshot.")
-        return load_latest_metadata_snapshot(
-            snapshot_root_directory=resolved_snapshot_root_directory,
-        )
-
     if resolved_snapshot_mode not in {
         SnapshotMode.create_new,
         SnapshotMode.reuse_latest_or_create,
@@ -548,6 +557,25 @@ def resolve_ncbi_protein_metadata_snapshot(
             "No reusable source XML snapshot was found for the metadata workflow. "
             "Create the upstream XML snapshot before running the metadata step."
         ) from exc
+
+    if (
+        resolved_snapshot_mode == SnapshotMode.reuse_latest_or_create
+        and latest_is_available
+    ):
+        latest_metadata_snapshot_payload = load_latest_metadata_snapshot(
+            snapshot_root_directory=resolved_snapshot_root_directory,
+        )
+        if _metadata_snapshot_matches_source_xml(
+            metadata_snapshot_payload=latest_metadata_snapshot_payload,
+            source_xml_snapshot_payload=source_xml_snapshot_payload,
+        ):
+            print("Latest metadata snapshot is available. Reusing frozen snapshot.")
+            return latest_metadata_snapshot_payload
+
+        print(
+            "Latest metadata snapshot is available but does not match the "
+            "latest source XML snapshot. Creating a new frozen snapshot."
+        )
 
     saved_snapshot = save_ncbi_protein_metadata_snapshot(
         snapshot_root_directory=resolved_snapshot_root_directory,

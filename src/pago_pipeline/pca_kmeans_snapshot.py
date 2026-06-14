@@ -999,6 +999,131 @@ def latest_pca_kmeans_snapshot_is_available(
     return True
 
 
+def _pca_kmeans_snapshot_matches_sources(
+    *,
+    pca_kmeans_snapshot_payload: dict[str, object],
+    source_sweep_snapshot_payload: dict[str, object],
+    source_metadata_snapshot_payload: dict[str, object],
+) -> bool:
+    pca_kmeans_manifest = pca_kmeans_snapshot_payload.get("manifest")
+    if not isinstance(pca_kmeans_manifest, Mapping):
+        return False
+
+    source_sweep_manifest_file_path = source_sweep_snapshot_payload.get(
+        "manifest_file_path"
+    )
+    source_metadata_manifest_file_path = source_metadata_snapshot_payload.get(
+        "manifest_file_path"
+    )
+    if not isinstance(source_sweep_manifest_file_path, (str, Path)) or not isinstance(
+        source_metadata_manifest_file_path, (str, Path)
+    ):
+        return False
+
+    return (
+        pca_kmeans_manifest.get("source_sweep_manifest_sha256")
+        == sha256_of_file(input_file_path=Path(source_sweep_manifest_file_path))
+        and pca_kmeans_manifest.get("source_metadata_manifest_sha256")
+        == sha256_of_file(input_file_path=Path(source_metadata_manifest_file_path))
+    )
+
+
+def _pca_kmeans_manifest_matches_sources(
+    *,
+    pca_kmeans_manifest: Mapping[str, object],
+    source_sweep_snapshot_payload: dict[str, object],
+    source_metadata_snapshot_payload: dict[str, object],
+) -> bool:
+    source_sweep_manifest_file_path = source_sweep_snapshot_payload.get(
+        "manifest_file_path"
+    )
+    source_metadata_manifest_file_path = source_metadata_snapshot_payload.get(
+        "manifest_file_path"
+    )
+    if not isinstance(source_sweep_manifest_file_path, (str, Path)) or not isinstance(
+        source_metadata_manifest_file_path, (str, Path)
+    ):
+        return False
+
+    return (
+        pca_kmeans_manifest.get("source_sweep_manifest_sha256")
+        == sha256_of_file(input_file_path=Path(source_sweep_manifest_file_path))
+        and pca_kmeans_manifest.get("source_metadata_manifest_sha256")
+        == sha256_of_file(input_file_path=Path(source_metadata_manifest_file_path))
+    )
+
+
+def _find_pca_kmeans_snapshot_directory_matching_sources(
+    *,
+    snapshot_root_directory: PathLike,
+    source_sweep_snapshot_payload: dict[str, object],
+    source_metadata_snapshot_payload: dict[str, object],
+) -> Optional[Path]:
+    for snapshot_directory in reversed(
+        list_saved_snapshot_directories(
+            snapshot_root_directory=snapshot_root_directory,
+        )
+    ):
+        manifest_file_path = snapshot_directory / "manifest.json"
+        if not manifest_file_path.exists():
+            continue
+
+        try:
+            manifest_payload = read_json_file(input_file_path=manifest_file_path)
+        except (OSError, ValueError):
+            continue
+
+        if not isinstance(manifest_payload, Mapping):
+            continue
+
+        if _pca_kmeans_manifest_matches_sources(
+            pca_kmeans_manifest=manifest_payload,
+            source_sweep_snapshot_payload=source_sweep_snapshot_payload,
+            source_metadata_snapshot_payload=source_metadata_snapshot_payload,
+        ):
+            return snapshot_directory
+
+    return None
+
+
+def _publish_pca_kmeans_latest_from_snapshot_directory(
+    *,
+    snapshot_root_directory: PathLike,
+    snapshot_directory: PathLike,
+) -> None:
+    resolved_snapshot_directory = _as_path(snapshot_directory)
+    manifest_file_path = resolved_snapshot_directory / "manifest.json"
+    manifest_payload = read_json_file(input_file_path=manifest_file_path)
+    if not isinstance(manifest_payload, Mapping):
+        raise RuntimeError(
+            "Saved PCA/KMeans snapshot manifest must deserialize into a JSON object."
+        )
+
+    (
+        pca_coordinates_file_path,
+        explained_variance_ratio_file_path,
+        cluster_assignments_file_path,
+        stability_grid_file_path,
+        profiling_log_file_path,
+        alignment_report_file_path,
+    ) = _validate_loaded_pca_kmeans_snapshot_payload(
+        snapshot_directory=resolved_snapshot_directory,
+        manifest_payload=manifest_payload,
+    )
+    _replace_latest_directory(
+        latest_directory=_as_path(snapshot_root_directory) / "latest",
+        files_to_copy=[
+            (pca_coordinates_file_path, pca_coordinates_file_path.name),
+            (explained_variance_ratio_file_path, explained_variance_ratio_file_path.name),
+            (cluster_assignments_file_path, cluster_assignments_file_path.name),
+            (stability_grid_file_path, stability_grid_file_path.name),
+            (profiling_log_file_path, profiling_log_file_path.name),
+            (alignment_report_file_path, alignment_report_file_path.name),
+            (manifest_file_path, manifest_file_path.name),
+        ],
+    )
+
+
 def resolve_pca_kmeans_snapshot(
     *,
     snapshot_mode: SnapshotMode | str,
@@ -1043,15 +1168,6 @@ def resolve_pca_kmeans_snapshot(
             snapshot_root_directory=resolved_snapshot_root_directory
         )
 
-    if (
-        resolved_snapshot_mode == SnapshotMode.reuse_latest_or_create
-        and latest_is_available
-    ):
-        print("Latest PCA/KMeans snapshot is available. Reusing frozen snapshot.")
-        return load_latest_pca_kmeans_snapshot(
-            snapshot_root_directory=resolved_snapshot_root_directory
-        )
-
     if resolved_snapshot_mode not in {
         SnapshotMode.create_new,
         SnapshotMode.reuse_latest_or_create,
@@ -1080,6 +1196,56 @@ def resolve_pca_kmeans_snapshot(
             "No reusable metadata snapshot was found for the PCA/KMeans workflow. "
             "Create the upstream metadata snapshot before running this step."
         ) from exc
+
+    if (
+        resolved_snapshot_mode == SnapshotMode.reuse_latest_or_create
+        and latest_is_available
+    ):
+        latest_manifest_file_path = (
+            resolved_snapshot_root_directory / "latest" / "manifest.json"
+        )
+        latest_manifest_payload = read_json_file(
+            input_file_path=latest_manifest_file_path
+        )
+        if not isinstance(latest_manifest_payload, Mapping):
+            raise RuntimeError(
+                "Latest PCA/KMeans snapshot manifest must deserialize into a JSON object."
+            )
+
+        if _pca_kmeans_manifest_matches_sources(
+            pca_kmeans_manifest=latest_manifest_payload,
+            source_sweep_snapshot_payload=source_sweep_snapshot_payload,
+            source_metadata_snapshot_payload=source_metadata_snapshot_payload,
+        ):
+            print("Latest PCA/KMeans snapshot is available. Reusing frozen snapshot.")
+            return load_latest_pca_kmeans_snapshot(
+                snapshot_root_directory=resolved_snapshot_root_directory
+            )
+
+        print(
+            "Latest PCA/KMeans snapshot is available but does not match the "
+            "latest SWeeP/metadata snapshots. Creating a new frozen snapshot."
+        )
+        matching_snapshot_directory = (
+            _find_pca_kmeans_snapshot_directory_matching_sources(
+                snapshot_root_directory=resolved_snapshot_root_directory,
+                source_sweep_snapshot_payload=source_sweep_snapshot_payload,
+                source_metadata_snapshot_payload=source_metadata_snapshot_payload,
+            )
+        )
+        if matching_snapshot_directory is not None:
+            print(
+                "Found an existing PCA/KMeans snapshot matching the latest "
+                "SWeeP/metadata snapshots. Reusing frozen snapshot."
+            )
+            if update_latest_directory:
+                _publish_pca_kmeans_latest_from_snapshot_directory(
+                    snapshot_root_directory=resolved_snapshot_root_directory,
+                    snapshot_directory=matching_snapshot_directory,
+                )
+            return load_pca_kmeans_snapshot_by_directory(
+                snapshot_directory=matching_snapshot_directory,
+            )
 
     saved_snapshot = save_pca_kmeans_snapshot(
         snapshot_root_directory=resolved_snapshot_root_directory,

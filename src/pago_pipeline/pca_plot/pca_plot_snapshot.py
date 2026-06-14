@@ -629,6 +629,27 @@ def latest_pca_plot_snapshot_is_available(
     return True
 
 
+def _pca_plot_snapshot_matches_source_pca_kmeans(
+    *,
+    pca_plot_snapshot_payload: dict[str, object],
+    source_pca_kmeans_snapshot_payload: dict[str, object],
+) -> bool:
+    pca_plot_manifest = pca_plot_snapshot_payload.get("manifest")
+    source_manifest_file_path = source_pca_kmeans_snapshot_payload.get(
+        "manifest_file_path"
+    )
+    if not isinstance(pca_plot_manifest, Mapping) or not isinstance(
+        source_manifest_file_path,
+        (str, Path),
+    ):
+        return False
+
+    return (
+        pca_plot_manifest.get("source_pca_kmeans_manifest_sha256")
+        == sha256_of_file(input_file_path=Path(source_manifest_file_path))
+    )
+
+
 def resolve_pca_plot_snapshot(
     *,
     snapshot_mode: SnapshotMode | str,
@@ -659,15 +680,6 @@ def resolve_pca_plot_snapshot(
             snapshot_root_directory=resolved_snapshot_root_directory
         )
 
-    if (
-        resolved_snapshot_mode == SnapshotMode.reuse_latest_or_create
-        and latest_is_available
-    ):
-        print("Latest PCA plot snapshot is available. Reusing frozen snapshot.")
-        return load_latest_pca_plot_snapshot(
-            snapshot_root_directory=resolved_snapshot_root_directory
-        )
-
     if resolved_snapshot_mode not in {
         SnapshotMode.create_new,
         SnapshotMode.reuse_latest_or_create,
@@ -686,6 +698,25 @@ def resolve_pca_plot_snapshot(
             "No reusable PCA/KMeans snapshot was found for the PCA plot workflow. "
             "Create the upstream PCA/KMeans snapshot before running this step."
         ) from exc
+
+    if (
+        resolved_snapshot_mode == SnapshotMode.reuse_latest_or_create
+        and latest_is_available
+    ):
+        latest_snapshot_payload = load_latest_pca_plot_snapshot(
+            snapshot_root_directory=resolved_snapshot_root_directory
+        )
+        if _pca_plot_snapshot_matches_source_pca_kmeans(
+            pca_plot_snapshot_payload=latest_snapshot_payload,
+            source_pca_kmeans_snapshot_payload=source_pca_kmeans_snapshot_payload,
+        ):
+            print("Latest PCA plot snapshot is available. Reusing frozen snapshot.")
+            return latest_snapshot_payload
+
+        print(
+            "Latest PCA plot snapshot is available but does not match the latest "
+            "source PCA/KMeans snapshot. Creating a new frozen snapshot."
+        )
 
     saved_snapshot = save_pca_plot_snapshot(
         snapshot_root_directory=resolved_snapshot_root_directory,

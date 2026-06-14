@@ -1,0 +1,16 @@
+{
+  "attempt_count": 1,
+  "average_throughput_bytes_per_second": 843885.4721399215,
+  "batch_end_index": 299,
+  "batch_index": 6,
+  "batch_start_index": 250,
+  "open_latency_seconds": 0.542047700000694,
+  "protein_uid_count": 50,
+  "protein_uids_sha256": "e585832f0921d9b0f5bf9f1cd23eda80fb1cfc716d62076c8a55559c41d47e8a",
+  "read_latency_seconds": 0.5846681999973953,
+  "record_count": 50,
+  "recorded_at_utc": "2026-06-01T20:43:53Z",
+  "response_byte_count": 493393,
+  "total_latency_seconds": 1.1267867000133265,
+  "xml_payload_sha256": "5d6258a103110dcb62b429498eb00e017298578d128835d7d22b50d3045b72ad"
+}
