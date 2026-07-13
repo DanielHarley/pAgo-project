@@ -674,9 +674,10 @@ def _validate_loaded_sweep_genes_snapshot_payload(
     )
 
 
-def load_sweep_genes_snapshot_by_directory(
+def load_sweep_genes_snapshot_manifest_by_directory(
     *,
     snapshot_directory: PathLike,
+    require_profiling_log: bool = False,
 ) -> dict[str, object]:
     resolved_snapshot_directory = _as_path(snapshot_directory)
     manifest_file_path = resolved_snapshot_directory / "manifest.json"
@@ -690,6 +691,7 @@ def load_sweep_genes_snapshot_by_directory(
         _validate_loaded_sweep_genes_snapshot_payload(
             snapshot_directory=resolved_snapshot_directory,
             manifest_payload=manifest_payload,
+            require_profiling_log=require_profiling_log,
         )
     )
 
@@ -697,6 +699,37 @@ def load_sweep_genes_snapshot_by_directory(
         "snapshot_directory": resolved_snapshot_directory,
         "manifest_file_path": manifest_file_path,
         "manifest": dict(manifest_payload),
+        "embeddings_file_path": embeddings_file_path,
+        "sequence_metadata_file_path": sequence_metadata_file_path,
+        "profiling_log_file_path": profiling_log_file_path,
+    }
+
+
+def load_sweep_genes_snapshot_by_directory(
+    *,
+    snapshot_directory: PathLike,
+) -> dict[str, object]:
+    manifest_only_payload = load_sweep_genes_snapshot_manifest_by_directory(
+        snapshot_directory=snapshot_directory,
+    )
+    resolved_snapshot_directory = Path(manifest_only_payload["snapshot_directory"])
+    manifest_file_path = Path(manifest_only_payload["manifest_file_path"])
+    manifest_payload = manifest_only_payload["manifest"]
+    embeddings_file_path = Path(manifest_only_payload["embeddings_file_path"])
+    sequence_metadata_file_path = Path(
+        manifest_only_payload["sequence_metadata_file_path"]
+    )
+    profiling_log_payload = manifest_only_payload["profiling_log_file_path"]
+    profiling_log_file_path = (
+        Path(profiling_log_payload)
+        if profiling_log_payload is not None
+        else None
+    )
+
+    return {
+        "snapshot_directory": resolved_snapshot_directory,
+        "manifest_file_path": manifest_file_path,
+        "manifest": manifest_payload,
         "embeddings_file_path": embeddings_file_path,
         "sequence_metadata_file_path": sequence_metadata_file_path,
         "profiling_log_file_path": profiling_log_file_path,
@@ -731,18 +764,149 @@ def latest_sweep_genes_snapshot_is_available(
         return False
 
     try:
-        manifest_payload = read_json_file(input_file_path=manifest_file_path)
-        if not isinstance(manifest_payload, Mapping):
-            return False
-        _validate_loaded_sweep_genes_snapshot_payload(
+        load_sweep_genes_snapshot_manifest_by_directory(
             snapshot_directory=latest_directory,
-            manifest_payload=manifest_payload,
             require_profiling_log=True,
         )
     except (FileNotFoundError, RuntimeError, OSError, ValueError):
         return False
 
     return True
+
+
+def _sweep_genes_snapshot_manifest_matches_request(
+    *,
+    manifest_payload: Mapping[str, object],
+    source_fasta_snapshot_payload: Mapping[str, object],
+    masks: Sequence[Sequence[int]],
+    projected_dimensions_per_mask: int,
+    composition: str,
+    projection: bool,
+    random_seed: int,
+    chunk_size: int,
+    n_jobs: int,
+) -> bool:
+    source_fasta_manifest = source_fasta_snapshot_payload.get("manifest")
+    if not isinstance(source_fasta_manifest, Mapping):
+        return False
+
+    source_fasta_manifest_file_path = source_fasta_snapshot_payload.get(
+        "manifest_file_path"
+    )
+    if not isinstance(source_fasta_manifest_file_path, Path):
+        source_fasta_manifest_file_path = Path(str(source_fasta_manifest_file_path))
+
+    expected_masks = _normalize_masks(masks)
+    expected_source_values = {
+        "source_fasta_snapshot_relative_path": source_fasta_manifest.get(
+            "immutable_snapshot_relative_path"
+        ),
+        "source_fasta_snapshot_directory_name": source_fasta_manifest.get(
+            "immutable_snapshot_directory_name"
+        ),
+        "source_fasta_file_name": source_fasta_manifest.get("fasta_file_name"),
+        "source_fasta_file_sha256": source_fasta_manifest.get("fasta_file_sha256"),
+        "source_fasta_manifest_sha256": sha256_of_file(
+            input_file_path=source_fasta_manifest_file_path
+        ),
+    }
+    for key, expected_value in expected_source_values.items():
+        if manifest_payload.get(key) != expected_value:
+            return False
+
+    expected_total_embedding_dimensions = (
+        len(expected_masks) * projected_dimensions_per_mask
+    )
+    return (
+        manifest_payload.get("artifact_type") == "sweep_genes_embedding_snapshot"
+        and manifest_payload.get("masks") == expected_masks
+        and manifest_payload.get("projected_dimensions_per_mask")
+        == projected_dimensions_per_mask
+        and manifest_payload.get("embedding_dimension")
+        == expected_total_embedding_dimensions
+        and manifest_payload.get("composition") == composition
+        and manifest_payload.get("projection") == projection
+        and manifest_payload.get("random_seed") == random_seed
+        and manifest_payload.get("chunk_size") == chunk_size
+        and manifest_payload.get("n_jobs") == n_jobs
+    )
+
+
+def _find_matching_immutable_sweep_genes_snapshot_directory(
+    *,
+    snapshot_root_directory: PathLike,
+    source_fasta_snapshot_payload: Mapping[str, object],
+    masks: Sequence[Sequence[int]],
+    projected_dimensions_per_mask: int,
+    composition: str,
+    projection: bool,
+    random_seed: int,
+    chunk_size: int,
+    n_jobs: int,
+) -> Optional[Path]:
+    for snapshot_directory in reversed(
+        list_saved_sweep_genes_snapshot_directories(
+            snapshot_root_directory=snapshot_root_directory
+        )
+    ):
+        try:
+            manifest_only_payload = load_sweep_genes_snapshot_manifest_by_directory(
+                snapshot_directory=snapshot_directory,
+                require_profiling_log=True,
+            )
+        except (FileNotFoundError, RuntimeError, OSError, ValueError):
+            continue
+
+        manifest_payload = manifest_only_payload.get("manifest")
+        if not isinstance(manifest_payload, Mapping):
+            continue
+        if _sweep_genes_snapshot_manifest_matches_request(
+            manifest_payload=manifest_payload,
+            source_fasta_snapshot_payload=source_fasta_snapshot_payload,
+            masks=masks,
+            projected_dimensions_per_mask=projected_dimensions_per_mask,
+            composition=composition,
+            projection=projection,
+            random_seed=random_seed,
+            chunk_size=chunk_size,
+            n_jobs=n_jobs,
+        ):
+            return snapshot_directory
+
+    return None
+
+
+def _publish_sweep_genes_snapshot_as_latest(
+    *,
+    snapshot_root_directory: PathLike,
+    snapshot_directory: PathLike,
+) -> None:
+    resolved_snapshot_root_directory = _as_path(snapshot_root_directory)
+    manifest_only_payload = load_sweep_genes_snapshot_manifest_by_directory(
+        snapshot_directory=snapshot_directory,
+        require_profiling_log=True,
+    )
+    _replace_latest_directory(
+        latest_directory=resolved_snapshot_root_directory / "latest",
+        files_to_copy=[
+            (
+                Path(manifest_only_payload["embeddings_file_path"]),
+                Path(manifest_only_payload["embeddings_file_path"]).name,
+            ),
+            (
+                Path(manifest_only_payload["sequence_metadata_file_path"]),
+                Path(manifest_only_payload["sequence_metadata_file_path"]).name,
+            ),
+            (
+                Path(manifest_only_payload["profiling_log_file_path"]),
+                Path(manifest_only_payload["profiling_log_file_path"]).name,
+            ),
+            (
+                Path(manifest_only_payload["manifest_file_path"]),
+                Path(manifest_only_payload["manifest_file_path"]).name,
+            ),
+        ],
+    )
 
 
 def resolve_sweep_genes_snapshot(
@@ -766,27 +930,16 @@ def resolve_sweep_genes_snapshot(
         source_fasta_snapshot_root_directory
     )
 
-    latest_is_available = latest_sweep_genes_snapshot_is_available(
-        snapshot_root_directory=resolved_snapshot_root_directory
-    )
-
     if resolved_snapshot_mode == SnapshotMode.reuse_latest:
+        latest_is_available = latest_sweep_genes_snapshot_is_available(
+            snapshot_root_directory=resolved_snapshot_root_directory
+        )
         if not latest_is_available:
             raise FileNotFoundError(
                 "No latest SWeeP Genes snapshot directory was found. Run the workflow once "
                 "with snapshot_mode='create_new' before using 'reuse_latest'."
             )
 
-        latest_snapshot_payload = load_latest_sweep_genes_snapshot(
-            snapshot_root_directory=resolved_snapshot_root_directory
-        )
-        return latest_snapshot_payload
-
-    if (
-        resolved_snapshot_mode == SnapshotMode.reuse_latest_or_create
-        and latest_is_available
-    ):
-        print("Latest SWeeP Genes snapshot is available. Reusing frozen snapshot.")
         latest_snapshot_payload = load_latest_sweep_genes_snapshot(
             snapshot_root_directory=resolved_snapshot_root_directory
         )
@@ -810,6 +963,63 @@ def resolve_sweep_genes_snapshot(
             "No reusable source FASTA snapshot was found for the SWeeP Genes workflow. "
             "Create the upstream FASTA snapshot before running the SWeeP Genes step."
         ) from exc
+
+    if (
+        resolved_snapshot_mode == SnapshotMode.reuse_latest_or_create
+        and latest_sweep_genes_snapshot_is_available(
+            snapshot_root_directory=resolved_snapshot_root_directory
+        )
+    ):
+        latest_manifest_only_payload = load_sweep_genes_snapshot_manifest_by_directory(
+            snapshot_directory=resolved_snapshot_root_directory / "latest",
+            require_profiling_log=True,
+        )
+        latest_manifest_payload = latest_manifest_only_payload.get("manifest")
+        if isinstance(
+            latest_manifest_payload, Mapping
+        ) and _sweep_genes_snapshot_manifest_matches_request(
+            manifest_payload=latest_manifest_payload,
+            source_fasta_snapshot_payload=source_fasta_snapshot_payload,
+            masks=masks,
+            projected_dimensions_per_mask=projected_dimensions_per_mask,
+            composition=composition,
+            projection=projection,
+            random_seed=random_seed,
+            chunk_size=chunk_size,
+            n_jobs=n_jobs,
+        ):
+            print("Latest SWeeP Genes snapshot is compatible. Reusing frozen snapshot.")
+            latest_snapshot_payload = load_latest_sweep_genes_snapshot(
+                snapshot_root_directory=resolved_snapshot_root_directory
+            )
+            return latest_snapshot_payload
+
+    if resolved_snapshot_mode == SnapshotMode.reuse_latest_or_create:
+        matching_snapshot_directory = (
+            _find_matching_immutable_sweep_genes_snapshot_directory(
+                snapshot_root_directory=resolved_snapshot_root_directory,
+                source_fasta_snapshot_payload=source_fasta_snapshot_payload,
+                masks=masks,
+                projected_dimensions_per_mask=projected_dimensions_per_mask,
+                composition=composition,
+                projection=projection,
+                random_seed=random_seed,
+                chunk_size=chunk_size,
+                n_jobs=n_jobs,
+            )
+        )
+        if matching_snapshot_directory is not None:
+            print(
+                "Found a compatible immutable SWeeP Genes snapshot. Reusing frozen snapshot."
+            )
+            if update_latest_directory:
+                _publish_sweep_genes_snapshot_as_latest(
+                    snapshot_root_directory=resolved_snapshot_root_directory,
+                    snapshot_directory=matching_snapshot_directory,
+                )
+            return load_sweep_genes_snapshot_by_directory(
+                snapshot_directory=matching_snapshot_directory
+            )
 
     saved_snapshot = save_sweep_genes_snapshot(
         snapshot_root_directory=resolved_snapshot_root_directory,
