@@ -70,6 +70,7 @@ def _write_minimal_sweep_genes_snapshot(
     *,
     snapshot_directory: Path,
     source_fasta_snapshot_directory: Path,
+    scripts_sweep_root_directory: Path,
     source_fasta_manifest_override: dict[str, object] | None = None,
 ) -> Path:
     snapshot_directory.mkdir(parents=True, exist_ok=True)
@@ -116,6 +117,7 @@ def _write_minimal_sweep_genes_snapshot(
         "dtype": "float32",
         "immutable_snapshot_directory_name": snapshot_directory.name,
         "immutable_snapshot_relative_path": f"snapshots/{snapshot_directory.name}",
+        "sweep_package_root_directory": str(scripts_sweep_root_directory),
         "source_fasta_snapshot_relative_path": source_manifest_payload.get(
             "immutable_snapshot_relative_path"
         ),
@@ -144,6 +146,77 @@ def _write_minimal_sweep_genes_snapshot(
 
 
 class ResolveSweepGenesSnapshotTests(unittest.TestCase):
+    def test_latest_availability_requires_sweep_artifact_hashes(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory_name:
+            temporary_directory = Path(temporary_directory_name)
+            source_fasta_snapshot_directory = _write_minimal_fasta_latest_snapshot(
+                temporary_directory
+            )
+            sweep_snapshot_root_directory = temporary_directory / "sweep_genes_snapshot"
+            latest_directory = sweep_snapshot_root_directory / "latest"
+
+            _write_minimal_sweep_genes_snapshot(
+                snapshot_directory=latest_directory,
+                source_fasta_snapshot_directory=source_fasta_snapshot_directory,
+                scripts_sweep_root_directory=temporary_directory / "unused_sweep",
+            )
+            manifest_file_path = latest_directory / "manifest.json"
+            manifest_payload = json.loads(manifest_file_path.read_text(encoding="utf-8"))
+            manifest_payload.pop("embeddings_file_sha256")
+            manifest_file_path.write_text(
+                json.dumps(manifest_payload, indent=2) + "\n",
+                encoding="utf-8",
+            )
+
+            self.assertFalse(
+                sweep_genes_snapshot_module.latest_sweep_genes_snapshot_is_available(
+                    snapshot_root_directory=sweep_snapshot_root_directory
+                )
+            )
+
+    def test_manifest_compatibility_rejects_different_sweep_package_root(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory_name:
+            temporary_directory = Path(temporary_directory_name)
+            source_fasta_snapshot_directory = _write_minimal_fasta_latest_snapshot(
+                temporary_directory
+            )
+            snapshot_directory = (
+                temporary_directory / "sweep_genes_snapshot" / "snapshots" / "candidate"
+            )
+            saved_sweep_root_directory = temporary_directory / "saved_sweep"
+            requested_sweep_root_directory = temporary_directory / "requested_sweep"
+
+            _write_minimal_sweep_genes_snapshot(
+                snapshot_directory=snapshot_directory,
+                source_fasta_snapshot_directory=source_fasta_snapshot_directory,
+                scripts_sweep_root_directory=saved_sweep_root_directory,
+            )
+            source_manifest_file_path = source_fasta_snapshot_directory / "manifest.json"
+            manifest_payload = json.loads(
+                (snapshot_directory / "manifest.json").read_text(encoding="utf-8")
+            )
+            source_fasta_snapshot_payload = {
+                "manifest": json.loads(
+                    source_manifest_file_path.read_text(encoding="utf-8")
+                ),
+                "manifest_file_path": source_manifest_file_path,
+            }
+
+            self.assertFalse(
+                sweep_genes_snapshot_module._sweep_genes_snapshot_manifest_matches_request(
+                    manifest_payload=manifest_payload,
+                    source_fasta_snapshot_payload=source_fasta_snapshot_payload,
+                    scripts_sweep_root_directory=requested_sweep_root_directory,
+                    masks=[[1, 0, 1]],
+                    projected_dimensions_per_mask=2,
+                    composition="binary",
+                    projection=True,
+                    random_seed=7,
+                    chunk_size=1,
+                    n_jobs=1,
+                )
+            )
+
     def test_reuse_latest_or_create_republishes_matching_immutable_without_loading_stale_latest_array(
         self,
     ) -> None:
@@ -161,11 +234,13 @@ class ResolveSweepGenesSnapshotTests(unittest.TestCase):
             _write_minimal_sweep_genes_snapshot(
                 snapshot_directory=stale_latest_directory,
                 source_fasta_snapshot_directory=source_fasta_snapshot_directory,
+                scripts_sweep_root_directory=temporary_directory / "unused_sweep",
                 source_fasta_manifest_override={"fasta_file_sha256": "stale"},
             )
             _write_minimal_sweep_genes_snapshot(
                 snapshot_directory=matching_snapshot_directory,
                 source_fasta_snapshot_directory=source_fasta_snapshot_directory,
+                scripts_sweep_root_directory=temporary_directory / "unused_sweep",
             )
 
             real_numpy_load = np.load

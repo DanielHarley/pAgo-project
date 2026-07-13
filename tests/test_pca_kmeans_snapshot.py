@@ -249,6 +249,39 @@ def _write_minimal_pca_kmeans_snapshot(
 
 
 class ResolvePcaKMeansSnapshotTests(unittest.TestCase):
+    def test_latest_availability_requires_pca_kmeans_artifact_hashes(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory_name:
+            temporary_directory = Path(temporary_directory_name)
+            source_sweep_snapshot_directory = _write_minimal_source_sweep_latest_snapshot(
+                temporary_directory / "sweep_genes"
+            )
+            source_metadata_snapshot_directory = (
+                _write_minimal_source_metadata_latest_snapshot(
+                    temporary_directory / "metadata"
+                )
+            )
+            pca_snapshot_root_directory = temporary_directory / "pca_kmeans"
+            latest_directory = pca_snapshot_root_directory / "latest"
+
+            _write_minimal_pca_kmeans_snapshot(
+                snapshot_directory=latest_directory,
+                source_sweep_snapshot_directory=source_sweep_snapshot_directory,
+                source_metadata_snapshot_directory=source_metadata_snapshot_directory,
+            )
+            manifest_file_path = latest_directory / "manifest.json"
+            manifest_payload = json.loads(manifest_file_path.read_text(encoding="utf-8"))
+            manifest_payload.pop("pca_coordinates_file_sha256")
+            manifest_file_path.write_text(
+                json.dumps(manifest_payload, indent=2) + "\n",
+                encoding="utf-8",
+            )
+
+            self.assertFalse(
+                pca_kmeans_snapshot_module.latest_pca_kmeans_snapshot_is_available(
+                    snapshot_root_directory=pca_snapshot_root_directory
+                )
+            )
+
     def test_reuse_latest_or_create_republishes_matching_immutable_without_loading_stale_latest_arrays(
         self,
     ) -> None:

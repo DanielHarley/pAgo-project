@@ -853,6 +853,7 @@ def _validate_loaded_pca_kmeans_snapshot_payload(
     *,
     snapshot_directory: PathLike,
     manifest_payload: Mapping[str, object],
+    require_artifact_hashes: bool = False,
 ) -> tuple[Path, Path, Path, Path, Path, Path]:
     resolved_snapshot_directory = _as_path(snapshot_directory)
     artifact_type = manifest_payload.get("artifact_type")
@@ -896,6 +897,10 @@ def _validate_loaded_pca_kmeans_snapshot_payload(
     for file_name_key, hash_key in hash_key_map.items():
         expected_sha256 = manifest_payload.get(hash_key)
         if expected_sha256 is None:
+            if require_artifact_hashes:
+                raise RuntimeError(
+                    f"Saved PCA/KMeans snapshot manifest must define {hash_key}."
+                )
             continue
         actual_sha256 = sha256_of_file(
             input_file_path=resolved_file_paths[file_name_key]
@@ -919,6 +924,7 @@ def _validate_loaded_pca_kmeans_snapshot_payload(
 def load_pca_kmeans_snapshot_manifest_by_directory(
     *,
     snapshot_directory: PathLike,
+    require_artifact_hashes: bool = False,
 ) -> dict[str, object]:
     resolved_snapshot_directory = _as_path(snapshot_directory)
     manifest_file_path = resolved_snapshot_directory / "manifest.json"
@@ -938,6 +944,7 @@ def load_pca_kmeans_snapshot_manifest_by_directory(
     ) = _validate_loaded_pca_kmeans_snapshot_payload(
         snapshot_directory=resolved_snapshot_directory,
         manifest_payload=manifest_payload,
+        require_artifact_hashes=require_artifact_hashes,
     )
 
     return {
@@ -1023,7 +1030,8 @@ def latest_pca_kmeans_snapshot_is_available(
 
     try:
         load_pca_kmeans_snapshot_manifest_by_directory(
-            snapshot_directory=latest_directory
+            snapshot_directory=latest_directory,
+            require_artifact_hashes=True,
         )
     except (FileNotFoundError, RuntimeError, OSError, ValueError):
         return False
@@ -1184,6 +1192,7 @@ def _find_matching_immutable_pca_kmeans_snapshot_directory(
         try:
             manifest_only_payload = load_pca_kmeans_snapshot_manifest_by_directory(
                 snapshot_directory=snapshot_directory,
+                require_artifact_hashes=True,
             )
         except (FileNotFoundError, RuntimeError, OSError, ValueError):
             continue
@@ -1223,6 +1232,7 @@ def _publish_pca_kmeans_snapshot_as_latest(
     resolved_snapshot_root_directory = _as_path(snapshot_root_directory)
     manifest_only_payload = load_pca_kmeans_snapshot_manifest_by_directory(
         snapshot_directory=snapshot_directory,
+        require_artifact_hashes=True,
     )
     _replace_latest_directory(
         latest_directory=resolved_snapshot_root_directory / "latest",
@@ -1346,6 +1356,7 @@ def resolve_pca_kmeans_snapshot(
     ):
         latest_manifest_only_payload = load_pca_kmeans_snapshot_manifest_by_directory(
             snapshot_directory=resolved_snapshot_root_directory / "latest",
+            require_artifact_hashes=True,
         )
         latest_manifest_payload = latest_manifest_only_payload.get("manifest")
         if isinstance(
