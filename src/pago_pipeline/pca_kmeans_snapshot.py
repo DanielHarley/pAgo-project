@@ -47,7 +47,7 @@ from src.pago_pipeline.pca_kmeans import (
 )
 from src.pago_pipeline.storage import read_json_file, sha256_of_file, write_json_atomic
 from src.pago_pipeline.sweep_genes_snapshot import (
-    load_latest_sweep_genes_snapshot,
+    load_sweep_genes_snapshot_manifest_by_directory,
     load_sweep_genes_snapshot_by_directory,
 )
 
@@ -853,6 +853,7 @@ def _validate_loaded_pca_kmeans_snapshot_payload(
     *,
     snapshot_directory: PathLike,
     manifest_payload: Mapping[str, object],
+    require_artifact_hashes: bool = False,
 ) -> tuple[Path, Path, Path, Path, Path, Path]:
     resolved_snapshot_directory = _as_path(snapshot_directory)
     artifact_type = manifest_payload.get("artifact_type")
@@ -896,6 +897,10 @@ def _validate_loaded_pca_kmeans_snapshot_payload(
     for file_name_key, hash_key in hash_key_map.items():
         expected_sha256 = manifest_payload.get(hash_key)
         if expected_sha256 is None:
+            if require_artifact_hashes:
+                raise RuntimeError(
+                    f"Saved PCA/KMeans snapshot manifest must define {hash_key}."
+                )
             continue
         actual_sha256 = sha256_of_file(
             input_file_path=resolved_file_paths[file_name_key]
@@ -916,9 +921,10 @@ def _validate_loaded_pca_kmeans_snapshot_payload(
     )
 
 
-def load_pca_kmeans_snapshot_by_directory(
+def load_pca_kmeans_snapshot_manifest_by_directory(
     *,
     snapshot_directory: PathLike,
+    require_artifact_hashes: bool = False,
 ) -> dict[str, object]:
     resolved_snapshot_directory = _as_path(snapshot_directory)
     manifest_file_path = resolved_snapshot_directory / "manifest.json"
@@ -938,12 +944,49 @@ def load_pca_kmeans_snapshot_by_directory(
     ) = _validate_loaded_pca_kmeans_snapshot_payload(
         snapshot_directory=resolved_snapshot_directory,
         manifest_payload=manifest_payload,
+        require_artifact_hashes=require_artifact_hashes,
     )
 
     return {
         "snapshot_directory": resolved_snapshot_directory,
         "manifest_file_path": manifest_file_path,
         "manifest": dict(manifest_payload),
+        "pca_coordinates_file_path": pca_coordinates_file_path,
+        "explained_variance_ratio_file_path": explained_variance_ratio_file_path,
+        "cluster_assignments_file_path": cluster_assignments_file_path,
+        "stability_grid_file_path": stability_grid_file_path,
+        "profiling_log_file_path": profiling_log_file_path,
+        "alignment_report_file_path": alignment_report_file_path,
+    }
+
+
+def load_pca_kmeans_snapshot_by_directory(
+    *,
+    snapshot_directory: PathLike,
+) -> dict[str, object]:
+    manifest_only_payload = load_pca_kmeans_snapshot_manifest_by_directory(
+        snapshot_directory=snapshot_directory,
+    )
+    resolved_snapshot_directory = Path(manifest_only_payload["snapshot_directory"])
+    manifest_file_path = Path(manifest_only_payload["manifest_file_path"])
+    manifest_payload = manifest_only_payload["manifest"]
+    pca_coordinates_file_path = Path(manifest_only_payload["pca_coordinates_file_path"])
+    explained_variance_ratio_file_path = Path(
+        manifest_only_payload["explained_variance_ratio_file_path"]
+    )
+    cluster_assignments_file_path = Path(
+        manifest_only_payload["cluster_assignments_file_path"]
+    )
+    stability_grid_file_path = Path(manifest_only_payload["stability_grid_file_path"])
+    profiling_log_file_path = Path(manifest_only_payload["profiling_log_file_path"])
+    alignment_report_file_path = Path(
+        manifest_only_payload["alignment_report_file_path"]
+    )
+
+    return {
+        "snapshot_directory": resolved_snapshot_directory,
+        "manifest_file_path": manifest_file_path,
+        "manifest": manifest_payload,
         "pca_coordinates_file_path": pca_coordinates_file_path,
         "explained_variance_ratio_file_path": explained_variance_ratio_file_path,
         "cluster_assignments_file_path": cluster_assignments_file_path,
@@ -988,16 +1031,22 @@ def latest_pca_kmeans_snapshot_is_available(
         return False
 
     try:
-        manifest_payload = read_json_file(input_file_path=manifest_file_path)
+        manifest_only_payload = load_pca_kmeans_snapshot_manifest_by_directory(
+            snapshot_directory=latest_directory,
+            require_artifact_hashes=True,
+        )
+        manifest_payload = manifest_only_payload.get("manifest")
         if not isinstance(manifest_payload, Mapping):
             return False
-        _validate_loaded_pca_kmeans_snapshot_payload(
-            snapshot_directory=latest_directory,
-            manifest_payload=manifest_payload,
-        )
         if source_sweep_snapshot_root_directory is not None:
-            source_sweep_snapshot_payload = load_latest_sweep_genes_snapshot(
-                snapshot_root_directory=source_sweep_snapshot_root_directory,
+            source_sweep_snapshot_payload = (
+                load_sweep_genes_snapshot_manifest_by_directory(
+                    snapshot_directory=(
+                        _as_path(source_sweep_snapshot_root_directory) / "latest"
+                    ),
+                    require_profiling_log=True,
+                    require_artifact_hashes=True,
+                )
             )
             if not _source_snapshot_manifest_identity_matches(
                 manifest_payload=manifest_payload,
@@ -1019,6 +1068,238 @@ def latest_pca_kmeans_snapshot_is_available(
         return False
 
     return True
+
+
+def _effective_pca_component_count_grid_from_sweep_manifest(
+    *,
+    source_sweep_manifest: Mapping[str, object],
+    requested_pca_component_count_grid: Sequence[int],
+) -> tuple[int, ...]:
+    sequence_count = int(source_sweep_manifest["sequence_count"])
+    embedding_dimension = int(source_sweep_manifest["embedding_dimension"])
+    maximum_valid_component_count = min(sequence_count, embedding_dimension)
+    return tuple(
+        int(requested_component_count)
+        for requested_component_count in requested_pca_component_count_grid
+        if 1 <= int(requested_component_count) <= maximum_valid_component_count
+    )
+
+
+def _pca_kmeans_snapshot_manifest_matches_request(
+    *,
+    manifest_payload: Mapping[str, object],
+    source_sweep_snapshot_payload: Mapping[str, object],
+    source_metadata_snapshot_payload: Mapping[str, object],
+    pca_component_count_grid: Sequence[int],
+    kmeans_cluster_count_grid: Sequence[int],
+    pca_svd_solver: str,
+    pca_random_state: int,
+    kmeans_n_init: int | str,
+    silhouette_sample_size: int,
+    silhouette_random_state: int,
+    kmeans_initialization_repeat_count: int,
+    subsample_repeat_count: int,
+    subsample_fraction: float,
+    subsample_random_state: int,
+    minimum_acceptable_init_ari_min: float,
+    minimum_acceptable_subsample_ari_min: float,
+    export_projection_component_count: int,
+) -> bool:
+    source_sweep_manifest = source_sweep_snapshot_payload.get("manifest")
+    source_metadata_manifest = source_metadata_snapshot_payload.get("manifest")
+    if not isinstance(source_sweep_manifest, Mapping):
+        return False
+    if not isinstance(source_metadata_manifest, Mapping):
+        return False
+
+    source_sweep_manifest_file_path = source_sweep_snapshot_payload.get(
+        "manifest_file_path"
+    )
+    if not isinstance(source_sweep_manifest_file_path, Path):
+        source_sweep_manifest_file_path = Path(str(source_sweep_manifest_file_path))
+    source_metadata_manifest_file_path = source_metadata_snapshot_payload.get(
+        "manifest_file_path"
+    )
+    if not isinstance(source_metadata_manifest_file_path, Path):
+        source_metadata_manifest_file_path = Path(
+            str(source_metadata_manifest_file_path)
+        )
+
+    expected_source_values = {
+        "source_sweep_snapshot_relative_path": source_sweep_manifest.get(
+            "immutable_snapshot_relative_path"
+        ),
+        "source_sweep_snapshot_directory_name": source_sweep_manifest.get(
+            "immutable_snapshot_directory_name"
+        ),
+        "source_sweep_manifest_sha256": sha256_of_file(
+            input_file_path=source_sweep_manifest_file_path
+        ),
+        "source_metadata_snapshot_relative_path": source_metadata_manifest.get(
+            "immutable_snapshot_relative_path"
+        ),
+        "source_metadata_snapshot_directory_name": source_metadata_manifest.get(
+            "immutable_snapshot_directory_name"
+        ),
+        "source_metadata_manifest_sha256": sha256_of_file(
+            input_file_path=source_metadata_manifest_file_path
+        ),
+    }
+    for key, expected_value in expected_source_values.items():
+        if manifest_payload.get(key) != expected_value:
+            return False
+
+    parameter_search_configuration = manifest_payload.get(
+        "parameter_search_configuration"
+    )
+    if not isinstance(parameter_search_configuration, Mapping):
+        return False
+
+    try:
+        expected_effective_pca_component_count_grid = (
+            _effective_pca_component_count_grid_from_sweep_manifest(
+                source_sweep_manifest=source_sweep_manifest,
+                requested_pca_component_count_grid=pca_component_count_grid,
+            )
+        )
+    except (KeyError, TypeError, ValueError):
+        return False
+    expected_parameter_search_configuration = {
+        "pca_component_count_grid": [
+            int(value) for value in expected_effective_pca_component_count_grid
+        ],
+        "kmeans_cluster_count_grid": [
+            int(value) for value in kmeans_cluster_count_grid
+        ],
+        "kmeans_initialization_repeat_count": int(
+            kmeans_initialization_repeat_count
+        ),
+        "subsample_repeat_count": int(subsample_repeat_count),
+        "subsample_fraction": float(subsample_fraction),
+        "pca_svd_solver": str(pca_svd_solver),
+        "pca_random_state": int(pca_random_state),
+        "kmeans_n_init": kmeans_n_init,
+        "silhouette_sample_size": int(silhouette_sample_size),
+        "silhouette_random_state": int(silhouette_random_state),
+        "subsample_random_state": int(subsample_random_state),
+        "minimum_acceptable_init_ari_min": float(minimum_acceptable_init_ari_min),
+        "minimum_acceptable_subsample_ari_min": float(
+            minimum_acceptable_subsample_ari_min
+        ),
+        "export_projection_component_count": int(export_projection_component_count),
+    }
+    return (
+        manifest_payload.get("artifact_type") == "pca_kmeans_snapshot"
+        and dict(parameter_search_configuration)
+        == expected_parameter_search_configuration
+    )
+
+
+def _find_matching_immutable_pca_kmeans_snapshot_directory(
+    *,
+    snapshot_root_directory: PathLike,
+    source_sweep_snapshot_payload: Mapping[str, object],
+    source_metadata_snapshot_payload: Mapping[str, object],
+    pca_component_count_grid: Sequence[int],
+    kmeans_cluster_count_grid: Sequence[int],
+    pca_svd_solver: str,
+    pca_random_state: int,
+    kmeans_n_init: int | str,
+    silhouette_sample_size: int,
+    silhouette_random_state: int,
+    kmeans_initialization_repeat_count: int,
+    subsample_repeat_count: int,
+    subsample_fraction: float,
+    subsample_random_state: int,
+    minimum_acceptable_init_ari_min: float,
+    minimum_acceptable_subsample_ari_min: float,
+    export_projection_component_count: int,
+) -> Optional[Path]:
+    for snapshot_directory in reversed(
+        list_saved_pca_kmeans_snapshot_directories(
+            snapshot_root_directory=snapshot_root_directory
+        )
+    ):
+        try:
+            manifest_only_payload = load_pca_kmeans_snapshot_manifest_by_directory(
+                snapshot_directory=snapshot_directory,
+                require_artifact_hashes=True,
+            )
+        except (FileNotFoundError, RuntimeError, OSError, ValueError):
+            continue
+
+        manifest_payload = manifest_only_payload.get("manifest")
+        if not isinstance(manifest_payload, Mapping):
+            continue
+        if _pca_kmeans_snapshot_manifest_matches_request(
+            manifest_payload=manifest_payload,
+            source_sweep_snapshot_payload=source_sweep_snapshot_payload,
+            source_metadata_snapshot_payload=source_metadata_snapshot_payload,
+            pca_component_count_grid=pca_component_count_grid,
+            kmeans_cluster_count_grid=kmeans_cluster_count_grid,
+            pca_svd_solver=pca_svd_solver,
+            pca_random_state=pca_random_state,
+            kmeans_n_init=kmeans_n_init,
+            silhouette_sample_size=silhouette_sample_size,
+            silhouette_random_state=silhouette_random_state,
+            kmeans_initialization_repeat_count=kmeans_initialization_repeat_count,
+            subsample_repeat_count=subsample_repeat_count,
+            subsample_fraction=subsample_fraction,
+            subsample_random_state=subsample_random_state,
+            minimum_acceptable_init_ari_min=minimum_acceptable_init_ari_min,
+            minimum_acceptable_subsample_ari_min=minimum_acceptable_subsample_ari_min,
+            export_projection_component_count=export_projection_component_count,
+        ):
+            return snapshot_directory
+
+    return None
+
+
+def _publish_pca_kmeans_snapshot_as_latest(
+    *,
+    snapshot_root_directory: PathLike,
+    snapshot_directory: PathLike,
+) -> None:
+    resolved_snapshot_root_directory = _as_path(snapshot_root_directory)
+    manifest_only_payload = load_pca_kmeans_snapshot_manifest_by_directory(
+        snapshot_directory=snapshot_directory,
+        require_artifact_hashes=True,
+    )
+    _replace_latest_directory(
+        latest_directory=resolved_snapshot_root_directory / "latest",
+        files_to_copy=[
+            (
+                Path(manifest_only_payload["pca_coordinates_file_path"]),
+                Path(manifest_only_payload["pca_coordinates_file_path"]).name,
+            ),
+            (
+                Path(manifest_only_payload["explained_variance_ratio_file_path"]),
+                Path(
+                    manifest_only_payload["explained_variance_ratio_file_path"]
+                ).name,
+            ),
+            (
+                Path(manifest_only_payload["cluster_assignments_file_path"]),
+                Path(manifest_only_payload["cluster_assignments_file_path"]).name,
+            ),
+            (
+                Path(manifest_only_payload["stability_grid_file_path"]),
+                Path(manifest_only_payload["stability_grid_file_path"]).name,
+            ),
+            (
+                Path(manifest_only_payload["profiling_log_file_path"]),
+                Path(manifest_only_payload["profiling_log_file_path"]).name,
+            ),
+            (
+                Path(manifest_only_payload["alignment_report_file_path"]),
+                Path(manifest_only_payload["alignment_report_file_path"]).name,
+            ),
+            (
+                Path(manifest_only_payload["manifest_file_path"]),
+                Path(manifest_only_payload["manifest_file_path"]).name,
+            ),
+        ],
+    )
 
 
 def _source_snapshot_manifest_identity_matches(
@@ -1072,31 +1353,22 @@ def resolve_pca_kmeans_snapshot(
         source_metadata_snapshot_root_directory
     )
 
-    latest_is_available = latest_pca_kmeans_snapshot_is_available(
-        snapshot_root_directory=resolved_snapshot_root_directory,
-        source_sweep_snapshot_root_directory=(
-            resolved_source_sweep_snapshot_root_directory
-        ),
-        source_metadata_snapshot_root_directory=(
-            resolved_source_metadata_snapshot_root_directory
-        ),
-    )
     if resolved_snapshot_mode == SnapshotMode.reuse_latest:
+        latest_is_available = latest_pca_kmeans_snapshot_is_available(
+            snapshot_root_directory=resolved_snapshot_root_directory,
+            source_sweep_snapshot_root_directory=(
+                resolved_source_sweep_snapshot_root_directory
+            ),
+            source_metadata_snapshot_root_directory=(
+                resolved_source_metadata_snapshot_root_directory
+            ),
+        )
         if not latest_is_available:
             raise FileNotFoundError(
                 "No latest PCA/KMeans snapshot directory was found for the current "
                 "source SWeeP and metadata snapshots. Run the workflow once with "
                 "snapshot_mode='create_new' before using 'reuse_latest'."
             )
-        return load_latest_pca_kmeans_snapshot(
-            snapshot_root_directory=resolved_snapshot_root_directory
-        )
-
-    if (
-        resolved_snapshot_mode == SnapshotMode.reuse_latest_or_create
-        and latest_is_available
-    ):
-        print("Latest PCA/KMeans snapshot is available. Reusing frozen snapshot.")
         return load_latest_pca_kmeans_snapshot(
             snapshot_root_directory=resolved_snapshot_root_directory
         )
@@ -1111,8 +1383,12 @@ def resolve_pca_kmeans_snapshot(
         )
 
     try:
-        source_sweep_snapshot_payload = load_latest_sweep_genes_snapshot(
-            snapshot_root_directory=resolved_source_sweep_snapshot_root_directory
+        source_sweep_manifest_payload = (
+            load_sweep_genes_snapshot_manifest_by_directory(
+                snapshot_directory=resolved_source_sweep_snapshot_root_directory
+                / "latest",
+                require_profiling_log=True,
+            )
         )
     except FileNotFoundError as exc:
         raise FileNotFoundError(
@@ -1130,10 +1406,82 @@ def resolve_pca_kmeans_snapshot(
             "Create the upstream metadata snapshot before running this step."
         ) from exc
 
+    if (
+        resolved_snapshot_mode == SnapshotMode.reuse_latest_or_create
+        and latest_pca_kmeans_snapshot_is_available(
+            snapshot_root_directory=resolved_snapshot_root_directory
+        )
+    ):
+        latest_manifest_only_payload = load_pca_kmeans_snapshot_manifest_by_directory(
+            snapshot_directory=resolved_snapshot_root_directory / "latest",
+            require_artifact_hashes=True,
+        )
+        latest_manifest_payload = latest_manifest_only_payload.get("manifest")
+        if isinstance(
+            latest_manifest_payload, Mapping
+        ) and _pca_kmeans_snapshot_manifest_matches_request(
+            manifest_payload=latest_manifest_payload,
+            source_sweep_snapshot_payload=source_sweep_manifest_payload,
+            source_metadata_snapshot_payload=source_metadata_snapshot_payload,
+            pca_component_count_grid=pca_component_count_grid,
+            kmeans_cluster_count_grid=kmeans_cluster_count_grid,
+            pca_svd_solver=pca_svd_solver,
+            pca_random_state=pca_random_state,
+            kmeans_n_init=kmeans_n_init,
+            silhouette_sample_size=silhouette_sample_size,
+            silhouette_random_state=silhouette_random_state,
+            kmeans_initialization_repeat_count=kmeans_initialization_repeat_count,
+            subsample_repeat_count=subsample_repeat_count,
+            subsample_fraction=subsample_fraction,
+            subsample_random_state=subsample_random_state,
+            minimum_acceptable_init_ari_min=minimum_acceptable_init_ari_min,
+            minimum_acceptable_subsample_ari_min=minimum_acceptable_subsample_ari_min,
+            export_projection_component_count=export_projection_component_count,
+        ):
+            print("Latest PCA/KMeans snapshot is compatible. Reusing frozen snapshot.")
+            return load_latest_pca_kmeans_snapshot(
+                snapshot_root_directory=resolved_snapshot_root_directory
+            )
+
+    if resolved_snapshot_mode == SnapshotMode.reuse_latest_or_create:
+        matching_snapshot_directory = (
+            _find_matching_immutable_pca_kmeans_snapshot_directory(
+                snapshot_root_directory=resolved_snapshot_root_directory,
+                source_sweep_snapshot_payload=source_sweep_manifest_payload,
+                source_metadata_snapshot_payload=source_metadata_snapshot_payload,
+                pca_component_count_grid=pca_component_count_grid,
+                kmeans_cluster_count_grid=kmeans_cluster_count_grid,
+                pca_svd_solver=pca_svd_solver,
+                pca_random_state=pca_random_state,
+                kmeans_n_init=kmeans_n_init,
+                silhouette_sample_size=silhouette_sample_size,
+                silhouette_random_state=silhouette_random_state,
+                kmeans_initialization_repeat_count=kmeans_initialization_repeat_count,
+                subsample_repeat_count=subsample_repeat_count,
+                subsample_fraction=subsample_fraction,
+                subsample_random_state=subsample_random_state,
+                minimum_acceptable_init_ari_min=minimum_acceptable_init_ari_min,
+                minimum_acceptable_subsample_ari_min=minimum_acceptable_subsample_ari_min,
+                export_projection_component_count=export_projection_component_count,
+            )
+        )
+        if matching_snapshot_directory is not None:
+            print(
+                "Found a compatible immutable PCA/KMeans snapshot. Reusing frozen snapshot."
+            )
+            if update_latest_directory:
+                _publish_pca_kmeans_snapshot_as_latest(
+                    snapshot_root_directory=resolved_snapshot_root_directory,
+                    snapshot_directory=matching_snapshot_directory,
+                )
+            return load_pca_kmeans_snapshot_by_directory(
+                snapshot_directory=matching_snapshot_directory
+            )
+
     saved_snapshot = save_pca_kmeans_snapshot(
         snapshot_root_directory=resolved_snapshot_root_directory,
         source_sweep_snapshot_directory=Path(
-            source_sweep_snapshot_payload["snapshot_directory"]
+            source_sweep_manifest_payload["snapshot_directory"]
         ),
         source_metadata_snapshot_directory=Path(
             source_metadata_snapshot_payload["snapshot_directory"]
