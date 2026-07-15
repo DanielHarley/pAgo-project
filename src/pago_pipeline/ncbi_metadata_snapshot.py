@@ -442,22 +442,103 @@ def get_most_recent_metadata_snapshot_directory(
 def latest_metadata_snapshot_is_available(
     *,
     snapshot_root_directory: PathLike,
+    source_xml_snapshot_root_directory: Optional[PathLike] = None,
+    reference_metadata_manifest_file_path: Optional[PathLike] = None,
 ) -> bool:
     """
     Return True only if the convenience latest metadata snapshot copy is complete.
+
+    When source_xml_snapshot_root_directory is provided, the latest metadata
+    snapshot must also match the current latest XML input snapshot and the
+    current optional reference metadata manifest.
     """
 
     resolved_snapshot_root_directory = _as_path(snapshot_root_directory)
     latest_directory = resolved_snapshot_root_directory / "latest"
     latest_manifest_file_path = latest_directory / "manifest.json"
-    latest_csv_file_path = latest_directory / "protein_metadata.csv"
-    latest_qc_report_file_path = latest_directory / "qc_report.json"
+    if not latest_directory.exists() or not latest_manifest_file_path.exists():
+        return False
+
+    try:
+        manifest_payload = read_json_file(input_file_path=latest_manifest_file_path)
+        if not isinstance(manifest_payload, Mapping):
+            return False
+        _validate_loaded_metadata_snapshot_payload(
+            snapshot_directory=latest_directory,
+            manifest_payload=manifest_payload,
+        )
+        if source_xml_snapshot_root_directory is not None:
+            source_xml_snapshot_payload = load_latest_xml_snapshot(
+                snapshot_root_directory=source_xml_snapshot_root_directory,
+            )
+            if not _source_xml_snapshot_identity_matches(
+                manifest_payload=manifest_payload,
+                source_xml_snapshot_payload=source_xml_snapshot_payload,
+            ):
+                return False
+            if not _reference_metadata_manifest_identity_matches(
+                manifest_payload=manifest_payload,
+                reference_metadata_manifest_file_path=(
+                    reference_metadata_manifest_file_path
+                ),
+            ):
+                return False
+    except (FileNotFoundError, RuntimeError, OSError, ValueError):
+        return False
+
+    return True
+
+
+def _source_xml_snapshot_identity_matches(
+    *,
+    manifest_payload: Mapping[str, object],
+    source_xml_snapshot_payload: Mapping[str, object],
+) -> bool:
+    expected_manifest_sha256 = manifest_payload.get(
+        "source_xml_snapshot_manifest_sha256"
+    )
+    expected_xml_sha256 = manifest_payload.get("source_xml_file_sha256")
+    source_manifest_file_path = source_xml_snapshot_payload.get("manifest_file_path")
+    source_xml_file_path = source_xml_snapshot_payload.get("xml_file_path")
+
+    if not isinstance(expected_manifest_sha256, str) or not expected_manifest_sha256:
+        return False
+    if not isinstance(expected_xml_sha256, str) or not expected_xml_sha256:
+        return False
+    if not isinstance(source_manifest_file_path, Path):
+        return False
+    if not isinstance(source_xml_file_path, Path):
+        return False
 
     return (
-        latest_directory.exists()
-        and latest_manifest_file_path.exists()
-        and latest_csv_file_path.exists()
-        and latest_qc_report_file_path.exists()
+        sha256_of_file(input_file_path=source_manifest_file_path)
+        == expected_manifest_sha256
+        and sha256_of_file(input_file_path=source_xml_file_path)
+        == expected_xml_sha256
+    )
+
+
+def _reference_metadata_manifest_identity_matches(
+    *,
+    manifest_payload: Mapping[str, object],
+    reference_metadata_manifest_file_path: Optional[PathLike],
+) -> bool:
+    expected_reference_sha256 = manifest_payload.get(
+        "reference_metadata_manifest_sha256"
+    )
+    snapshot_has_reference_manifest = (
+        "reference_metadata_manifest_sha256" in manifest_payload
+    )
+
+    if reference_metadata_manifest_file_path is None:
+        return not snapshot_has_reference_manifest
+
+    if not isinstance(expected_reference_sha256, str) or not expected_reference_sha256:
+        return False
+
+    return (
+        sha256_of_file(input_file_path=_as_path(reference_metadata_manifest_file_path))
+        == expected_reference_sha256
     )
 
 
@@ -481,40 +562,17 @@ def resolve_ncbi_protein_metadata_snapshot(
 
     latest_is_available = latest_metadata_snapshot_is_available(
         snapshot_root_directory=resolved_snapshot_root_directory,
+        source_xml_snapshot_root_directory=resolved_source_xml_snapshot_root_directory,
+        reference_metadata_manifest_file_path=reference_metadata_manifest_file_path,
     )
 
     if resolved_snapshot_mode == SnapshotMode.reuse_latest:
         if not latest_is_available:
-            latest_directory = resolved_snapshot_root_directory / "latest"
-            latest_manifest_file_path = latest_directory / "manifest.json"
-            latest_csv_file_path = latest_directory / "protein_metadata.csv"
-            latest_qc_report_file_path = latest_directory / "qc_report.json"
-
-            if not latest_directory.exists():
-                raise FileNotFoundError(
-                    "No latest metadata snapshot directory was found. Run the "
-                    "workflow once with snapshot_mode='create_new' before using "
-                    "'reuse_latest'."
-                )
-
-            if not latest_manifest_file_path.exists():
-                raise FileNotFoundError(
-                    f"Latest metadata snapshot manifest not found: "
-                    f"{latest_manifest_file_path}. Run the workflow once with "
-                    f"snapshot_mode='create_new' to create it."
-                )
-
-            if not latest_csv_file_path.exists():
-                raise FileNotFoundError(
-                    f"Latest metadata snapshot CSV file not found: "
-                    f"{latest_csv_file_path}. Run the workflow once with "
-                    f"snapshot_mode='create_new' to create it."
-                )
-
             raise FileNotFoundError(
-                "Latest metadata snapshot QC report file not found: "
-                f"{latest_qc_report_file_path}. Run the workflow once with "
-                f"snapshot_mode='create_new' to create it."
+                "No latest metadata snapshot directory was found for the current "
+                "source XML snapshot and reference metadata manifest. Run the "
+                "workflow once with snapshot_mode='create_new' before using "
+                "'reuse_latest'."
             )
 
         return load_latest_metadata_snapshot(

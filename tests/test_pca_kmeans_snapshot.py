@@ -282,6 +282,80 @@ class ResolvePcaKMeansSnapshotTests(unittest.TestCase):
                 )
             )
 
+    def test_reuse_latest_rejects_changed_upstream_without_loading_numpy_arrays(
+        self,
+    ) -> None:
+        for changed_source in ("sweep", "metadata"):
+            with self.subTest(changed_source=changed_source):
+                with tempfile.TemporaryDirectory() as temporary_directory_name:
+                    temporary_directory = Path(temporary_directory_name)
+                    source_sweep_snapshot_root_directory = (
+                        temporary_directory / "sweep_genes"
+                    )
+                    source_metadata_snapshot_root_directory = (
+                        temporary_directory / "metadata"
+                    )
+                    source_sweep_snapshot_directory = (
+                        _write_minimal_source_sweep_latest_snapshot(
+                            source_sweep_snapshot_root_directory
+                        )
+                    )
+                    source_metadata_snapshot_directory = (
+                        _write_minimal_source_metadata_latest_snapshot(
+                            source_metadata_snapshot_root_directory
+                        )
+                    )
+                    pca_snapshot_root_directory = temporary_directory / "pca_kmeans"
+                    _write_minimal_pca_kmeans_snapshot(
+                        snapshot_directory=pca_snapshot_root_directory / "latest",
+                        source_sweep_snapshot_directory=(
+                            source_sweep_snapshot_directory
+                        ),
+                        source_metadata_snapshot_directory=(
+                            source_metadata_snapshot_directory
+                        ),
+                    )
+
+                    changed_manifest_file_path = (
+                        source_sweep_snapshot_directory / "manifest.json"
+                        if changed_source == "sweep"
+                        else source_metadata_snapshot_directory / "manifest.json"
+                    )
+                    changed_manifest_payload = json.loads(
+                        changed_manifest_file_path.read_text(encoding="utf-8")
+                    )
+                    changed_manifest_payload[
+                        "immutable_snapshot_directory_name"
+                    ] = f"replacement_{changed_source}_snapshot"
+                    changed_manifest_payload[
+                        "immutable_snapshot_relative_path"
+                    ] = f"snapshots/replacement_{changed_source}_snapshot"
+                    changed_manifest_file_path.write_text(
+                        json.dumps(changed_manifest_payload, indent=2) + "\n",
+                        encoding="utf-8",
+                    )
+
+                    with patch(
+                        "src.pago_pipeline.pca_kmeans_snapshot.np.load"
+                    ) as numpy_load_mock:
+                        with self.assertRaisesRegex(
+                            FileNotFoundError,
+                            "current source SWeeP and metadata snapshots",
+                        ):
+                            resolve_pca_kmeans_snapshot(
+                                snapshot_mode="reuse_latest",
+                                snapshot_root_directory=pca_snapshot_root_directory,
+                                source_sweep_snapshot_root_directory=(
+                                    source_sweep_snapshot_root_directory
+                                ),
+                                source_metadata_snapshot_root_directory=(
+                                    source_metadata_snapshot_root_directory
+                                ),
+                                pca_component_count_grid=(2,),
+                            )
+
+                    numpy_load_mock.assert_not_called()
+
     def test_reuse_latest_or_create_republishes_matching_immutable_without_loading_stale_latest_arrays(
         self,
     ) -> None:

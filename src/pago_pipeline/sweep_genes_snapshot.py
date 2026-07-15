@@ -776,6 +776,7 @@ def load_latest_sweep_genes_snapshot(
 def latest_sweep_genes_snapshot_is_available(
     *,
     snapshot_root_directory: PathLike,
+    source_fasta_snapshot_root_directory: Optional[PathLike] = None,
 ) -> bool:
     resolved_snapshot_root_directory = _as_path(snapshot_root_directory)
     latest_directory = resolved_snapshot_root_directory / "latest"
@@ -784,11 +785,23 @@ def latest_sweep_genes_snapshot_is_available(
         return False
 
     try:
-        load_sweep_genes_snapshot_manifest_by_directory(
+        manifest_only_payload = load_sweep_genes_snapshot_manifest_by_directory(
             snapshot_directory=latest_directory,
             require_profiling_log=True,
             require_artifact_hashes=True,
         )
+        manifest_payload = manifest_only_payload.get("manifest")
+        if not isinstance(manifest_payload, Mapping):
+            return False
+        if source_fasta_snapshot_root_directory is not None:
+            source_fasta_snapshot_payload = load_latest_fasta_snapshot(
+                snapshot_root_directory=source_fasta_snapshot_root_directory,
+            )
+            if not _source_fasta_snapshot_identity_matches(
+                manifest_payload=manifest_payload,
+                source_fasta_snapshot_payload=source_fasta_snapshot_payload,
+            ):
+                return False
     except (FileNotFoundError, RuntimeError, OSError, ValueError):
         return False
 
@@ -950,6 +963,33 @@ def _publish_sweep_genes_snapshot_as_latest(
     )
 
 
+def _source_fasta_snapshot_identity_matches(
+    *,
+    manifest_payload: Mapping[str, object],
+    source_fasta_snapshot_payload: Mapping[str, object],
+) -> bool:
+    expected_manifest_sha256 = manifest_payload.get("source_fasta_manifest_sha256")
+    expected_fasta_sha256 = manifest_payload.get("source_fasta_file_sha256")
+    source_manifest_file_path = source_fasta_snapshot_payload.get("manifest_file_path")
+    source_fasta_file_path = source_fasta_snapshot_payload.get("fasta_file_path")
+
+    if not isinstance(expected_manifest_sha256, str) or not expected_manifest_sha256:
+        return False
+    if not isinstance(expected_fasta_sha256, str) or not expected_fasta_sha256:
+        return False
+    if not isinstance(source_manifest_file_path, Path):
+        return False
+    if not isinstance(source_fasta_file_path, Path):
+        return False
+
+    return (
+        sha256_of_file(input_file_path=source_manifest_file_path)
+        == expected_manifest_sha256
+        and sha256_of_file(input_file_path=source_fasta_file_path)
+        == expected_fasta_sha256
+    )
+
+
 def resolve_sweep_genes_snapshot(
     *,
     snapshot_mode: SnapshotMode | str,
@@ -973,12 +1013,16 @@ def resolve_sweep_genes_snapshot(
 
     if resolved_snapshot_mode == SnapshotMode.reuse_latest:
         latest_is_available = latest_sweep_genes_snapshot_is_available(
-            snapshot_root_directory=resolved_snapshot_root_directory
+            snapshot_root_directory=resolved_snapshot_root_directory,
+            source_fasta_snapshot_root_directory=(
+                resolved_source_fasta_snapshot_root_directory
+            ),
         )
         if not latest_is_available:
             raise FileNotFoundError(
-                "No latest SWeeP Genes snapshot directory was found. Run the workflow once "
-                "with snapshot_mode='create_new' before using 'reuse_latest'."
+                "No latest SWeeP Genes snapshot directory was found for the "
+                "current source FASTA snapshot. Run the workflow once with "
+                "snapshot_mode='create_new' before using 'reuse_latest'."
             )
 
         latest_snapshot_payload = load_latest_sweep_genes_snapshot(

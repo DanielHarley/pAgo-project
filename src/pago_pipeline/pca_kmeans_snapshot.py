@@ -1021,6 +1021,8 @@ def load_latest_pca_kmeans_snapshot(
 def latest_pca_kmeans_snapshot_is_available(
     *,
     snapshot_root_directory: PathLike,
+    source_sweep_snapshot_root_directory: Optional[PathLike] = None,
+    source_metadata_snapshot_root_directory: Optional[PathLike] = None,
 ) -> bool:
     resolved_snapshot_root_directory = _as_path(snapshot_root_directory)
     latest_directory = resolved_snapshot_root_directory / "latest"
@@ -1029,10 +1031,39 @@ def latest_pca_kmeans_snapshot_is_available(
         return False
 
     try:
-        load_pca_kmeans_snapshot_manifest_by_directory(
+        manifest_only_payload = load_pca_kmeans_snapshot_manifest_by_directory(
             snapshot_directory=latest_directory,
             require_artifact_hashes=True,
         )
+        manifest_payload = manifest_only_payload.get("manifest")
+        if not isinstance(manifest_payload, Mapping):
+            return False
+        if source_sweep_snapshot_root_directory is not None:
+            source_sweep_snapshot_payload = (
+                load_sweep_genes_snapshot_manifest_by_directory(
+                    snapshot_directory=(
+                        _as_path(source_sweep_snapshot_root_directory) / "latest"
+                    ),
+                    require_profiling_log=True,
+                    require_artifact_hashes=True,
+                )
+            )
+            if not _source_snapshot_manifest_identity_matches(
+                manifest_payload=manifest_payload,
+                source_snapshot_payload=source_sweep_snapshot_payload,
+                expected_manifest_sha256_key="source_sweep_manifest_sha256",
+            ):
+                return False
+        if source_metadata_snapshot_root_directory is not None:
+            source_metadata_snapshot_payload = load_latest_metadata_snapshot(
+                snapshot_root_directory=source_metadata_snapshot_root_directory,
+            )
+            if not _source_snapshot_manifest_identity_matches(
+                manifest_payload=manifest_payload,
+                source_snapshot_payload=source_metadata_snapshot_payload,
+                expected_manifest_sha256_key="source_metadata_manifest_sha256",
+            ):
+                return False
     except (FileNotFoundError, RuntimeError, OSError, ValueError):
         return False
 
@@ -1271,6 +1302,26 @@ def _publish_pca_kmeans_snapshot_as_latest(
     )
 
 
+def _source_snapshot_manifest_identity_matches(
+    *,
+    manifest_payload: Mapping[str, object],
+    source_snapshot_payload: Mapping[str, object],
+    expected_manifest_sha256_key: str,
+) -> bool:
+    expected_manifest_sha256 = manifest_payload.get(expected_manifest_sha256_key)
+    source_manifest_file_path = source_snapshot_payload.get("manifest_file_path")
+
+    if not isinstance(expected_manifest_sha256, str) or not expected_manifest_sha256:
+        return False
+    if not isinstance(source_manifest_file_path, Path):
+        return False
+
+    return (
+        sha256_of_file(input_file_path=source_manifest_file_path)
+        == expected_manifest_sha256
+    )
+
+
 def resolve_pca_kmeans_snapshot(
     *,
     snapshot_mode: SnapshotMode | str,
@@ -1304,12 +1355,19 @@ def resolve_pca_kmeans_snapshot(
 
     if resolved_snapshot_mode == SnapshotMode.reuse_latest:
         latest_is_available = latest_pca_kmeans_snapshot_is_available(
-            snapshot_root_directory=resolved_snapshot_root_directory
+            snapshot_root_directory=resolved_snapshot_root_directory,
+            source_sweep_snapshot_root_directory=(
+                resolved_source_sweep_snapshot_root_directory
+            ),
+            source_metadata_snapshot_root_directory=(
+                resolved_source_metadata_snapshot_root_directory
+            ),
         )
         if not latest_is_available:
             raise FileNotFoundError(
-                "No latest PCA/KMeans snapshot directory was found. Run the workflow "
-                "once with snapshot_mode='create_new' before using 'reuse_latest'."
+                "No latest PCA/KMeans snapshot directory was found for the current "
+                "source SWeeP and metadata snapshots. Run the workflow once with "
+                "snapshot_mode='create_new' before using 'reuse_latest'."
             )
         return load_latest_pca_kmeans_snapshot(
             snapshot_root_directory=resolved_snapshot_root_directory

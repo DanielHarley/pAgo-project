@@ -217,6 +217,44 @@ class ResolveSweepGenesSnapshotTests(unittest.TestCase):
                 )
             )
 
+    def test_reuse_latest_rejects_changed_source_fasta_snapshot(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory_name:
+            temporary_directory = Path(temporary_directory_name)
+            source_fasta_snapshot_directory = _write_minimal_fasta_latest_snapshot(
+                temporary_directory
+            )
+            sweep_snapshot_root_directory = temporary_directory / "sweep_genes_snapshot"
+            _write_minimal_sweep_genes_snapshot(
+                snapshot_directory=sweep_snapshot_root_directory / "latest",
+                source_fasta_snapshot_directory=source_fasta_snapshot_directory,
+                scripts_sweep_root_directory=temporary_directory / "unused_sweep",
+            )
+
+            source_manifest_file_path = source_fasta_snapshot_directory / "manifest.json"
+            source_manifest_payload = json.loads(
+                source_manifest_file_path.read_text(encoding="utf-8")
+            )
+            source_manifest_payload["immutable_snapshot_directory_name"] = (
+                "replacement_fasta_snapshot"
+            )
+            source_manifest_payload["immutable_snapshot_relative_path"] = (
+                "snapshots/replacement_fasta_snapshot"
+            )
+            source_manifest_file_path.write_text(
+                json.dumps(source_manifest_payload, indent=2) + "\n",
+                encoding="utf-8",
+            )
+
+            with self.assertRaisesRegex(FileNotFoundError, "current source FASTA"):
+                resolve_sweep_genes_snapshot(
+                    snapshot_mode="reuse_latest",
+                    snapshot_root_directory=sweep_snapshot_root_directory,
+                    source_fasta_snapshot_root_directory=(
+                        temporary_directory / "fasta_snapshot"
+                    ),
+                    scripts_sweep_root_directory=temporary_directory / "unused_sweep",
+                )
+
     def test_reuse_latest_or_create_republishes_matching_immutable_without_loading_stale_latest_array(
         self,
     ) -> None:
