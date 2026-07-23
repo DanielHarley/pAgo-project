@@ -16,6 +16,7 @@ from src.pago_pipeline.ncbi_api import (
     NCBIProteinXmlFetchResult,
     fetch_ncbi_protein_uid_snapshot,
     fetch_ncbi_protein_xml_batches,
+    get_default_ncbi_xml_circuit_breaker,
 )
 from src.pago_pipeline.storage import (
     read_json_file,
@@ -1113,6 +1114,13 @@ def resolve_ncbi_protein_xml_snapshot(
     xml_batch_size: int = 100,
     max_retry_attempts: int = 5,
     xml_request_delay_seconds: Optional[float] = None,
+    fetch_timeout_seconds: float = 30.0,
+    batch_deadline_seconds: float = 300.0,
+    retry_backoff_initial_seconds: Optional[float] = None,
+    retry_backoff_multiplier: float = 2.0,
+    retry_backoff_max_seconds: float = 30.0,
+    circuit_breaker_failure_threshold: int = 3,
+    circuit_breaker_cooldown_seconds: float = 60.0,
     ncbi_email: Optional[str] = None,
     ncbi_api_key: Optional[str] = None,
     update_latest_directory: bool = True,
@@ -1123,6 +1131,10 @@ def resolve_ncbi_protein_xml_snapshot(
     If snapshot creation is needed, the XML retrieval is performed strictly from an
     already-frozen upstream UID snapshot. This function does not create the source
     UID snapshot; that upstream step must have been run previously.
+
+    Circuit-breaker state is retained by the NCBI API infrastructure across
+    repeated snapshot workflow invocations for the same threshold and cooldown.
+    Callers configure the policy here but do not need to own its mutable state.
     """
     resolved_snapshot_mode = _coerce_snapshot_mode(snapshot_mode)
     resolved_snapshot_root_directory = _as_path(snapshot_root_directory)
@@ -1219,6 +1231,17 @@ def resolve_ncbi_protein_xml_snapshot(
         batch_size=xml_batch_size,
         max_retry_attempts=max_retry_attempts,
         request_delay_seconds=xml_request_delay_seconds,
+        fetch_timeout_seconds=fetch_timeout_seconds,
+        batch_deadline_seconds=batch_deadline_seconds,
+        retry_backoff_initial_seconds=retry_backoff_initial_seconds,
+        retry_backoff_multiplier=retry_backoff_multiplier,
+        retry_backoff_max_seconds=retry_backoff_max_seconds,
+        circuit_breaker_failure_threshold=circuit_breaker_failure_threshold,
+        circuit_breaker_cooldown_seconds=circuit_breaker_cooldown_seconds,
+        circuit_breaker=get_default_ncbi_xml_circuit_breaker(
+            failure_threshold=circuit_breaker_failure_threshold,
+            cooldown_seconds=circuit_breaker_cooldown_seconds,
+        ),
     )
 
     saved_snapshot_directory = save_ncbi_protein_xml_snapshot(

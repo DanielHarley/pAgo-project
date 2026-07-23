@@ -1,22 +1,25 @@
 from __future__ import annotations
 
+import hashlib
+import json
 import os
 import platform
 import random
 import socket
 import ssl
+import threading
 import time
-import json
 import xml.etree.ElementTree as ET
 from contextlib import contextmanager
-from contextvars import ContextVar
-from dataclasses import dataclass
+from contextvars import ContextVar, copy_context
+from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import List, Optional
+from typing import Any, List, Optional
 from urllib.error import HTTPError, URLError
-from urllib.request import urlopen as _urllib_urlopen
-import hashlib
+from urllib.parse import urlencode
+from urllib.request import Request, urlopen as _urllib_urlopen
+
 import Bio
 from Bio import Entrez
 
@@ -46,6 +49,11 @@ _active_ncbi_network_timeout_seconds: ContextVar[Optional[float]] = ContextVar(
     default=None,
 )
 _ncbi_entrez_delegate_urlopen = getattr(Entrez, "urlopen", None)
+_default_ncbi_xml_circuit_breakers_lock = threading.RLock()
+_default_ncbi_xml_circuit_breakers: dict[
+    tuple[int, float],
+    "NCBIXmlCircuitBreaker",
+] = {}
 
 
 def _first_configured_environment_variable(
@@ -213,30 +221,52 @@ def _ncbi_entrez_request_timeout(
         _active_ncbi_network_timeout_seconds.reset(network_timeout_token)
 
 
-@contextmanager
-def _temporary_ncbi_entrez_retry_policy(
+def _open_ncbi_entrez_efetch_once(
     *,
-    max_tries: int,
-    sleep_between_tries: float,
+    database_name: str,
+    protein_uids: List[str],
+    retmode: str,
 ):
     """
-    Temporarily make Bio.Entrez retry behavior explicit for this fetch layer.
+    Open one EFetch request without Bio.Entrez's module-global retry policy.
+
+    Bio.Entrez.efetch delegates to a private retry loop configured through the
+    module-global ``max_tries`` and ``sleep_between_tries`` values. Building the
+    equivalent EFetch request here and opening it once keeps retry ownership in
+    this layer without mutating process-global Bio.Entrez state.
     """
-    original_max_tries = getattr(Entrez, "max_tries", None)
-    original_sleep_between_tries = getattr(Entrez, "sleep_between_tries", None)
+    request_parameters = {
+        "db": database_name,
+        "id": ",".join(protein_uids),
+        "retmode": retmode,
+        "tool": "biopython",
+        "email": getattr(Entrez, "email", None),
+        "api_key": getattr(Entrez, "api_key", None),
+    }
+    encoded_parameters = urlencode(
+        {
+            parameter_name: parameter_value
+            for parameter_name, parameter_value in request_parameters.items()
+            if parameter_value is not None
+        }
+    )
+    efetch_url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi"
+    use_post_request = (
+        len(encoded_parameters) > 1000 or len(protein_uids) >= 200
+    )
+    if use_post_request:
+        request = Request(
+            efetch_url,
+            data=encoded_parameters.encode("utf-8"),
+            method="POST",
+        )
+    else:
+        request = Request(
+            f"{efetch_url}?{encoded_parameters}",
+            method="GET",
+        )
 
-    if original_max_tries is not None:
-        Entrez.max_tries = max_tries
-    if original_sleep_between_tries is not None:
-        Entrez.sleep_between_tries = sleep_between_tries
-
-    try:
-        yield
-    finally:
-        if original_max_tries is not None:
-            Entrez.max_tries = original_max_tries
-        if original_sleep_between_tries is not None:
-            Entrez.sleep_between_tries = original_sleep_between_tries
+    return Entrez.urlopen(request)
 
 
 def _is_ncbi_tls_configuration_error(error: Exception) -> bool:
@@ -683,6 +713,12 @@ class NCBIXmlBatchFetchError(RuntimeError):
     """
 
 
+class NCBIXmlResponseValidationError(RuntimeError):
+    """
+    Error raised when an XML response is complete enough to read but invalid.
+    """
+
+
 @dataclass
 class NCBIXmlCircuitBreaker:
     """
@@ -692,6 +728,12 @@ class NCBIXmlCircuitBreaker:
     cooldown_seconds: float
     consecutive_failure_count: int = 0
     opened_at_seconds: Optional[float] = None
+    _state_lock: threading.RLock = field(
+        default_factory=threading.RLock,
+        init=False,
+        repr=False,
+        compare=False,
+    )
 
     def __post_init__(self) -> None:
         _validate_positive_integer(
@@ -709,29 +751,59 @@ class NCBIXmlCircuitBreaker:
         current_time_seconds: float,
         batch_context: str,
     ) -> None:
-        if self.opened_at_seconds is None:
-            return
+        with self._state_lock:
+            if self.opened_at_seconds is None:
+                return
 
-        elapsed_cooldown_seconds = current_time_seconds - self.opened_at_seconds
-        if elapsed_cooldown_seconds < self.cooldown_seconds:
-            remaining_cooldown_seconds = (
-                self.cooldown_seconds - elapsed_cooldown_seconds
+            elapsed_cooldown_seconds = (
+                current_time_seconds - self.opened_at_seconds
             )
-            raise NCBICircuitBreakerOpen(
-                "NCBI XML circuit breaker is open after "
-                f"{self.consecutive_failure_count} consecutive failed batches; "
-                f"cooldown has {remaining_cooldown_seconds:.3f} seconds remaining "
-                f"before {batch_context} can be requested."
-            )
+            if elapsed_cooldown_seconds < self.cooldown_seconds:
+                remaining_cooldown_seconds = (
+                    self.cooldown_seconds - elapsed_cooldown_seconds
+                )
+                raise NCBICircuitBreakerOpen(
+                    "NCBI XML circuit breaker is open after "
+                    f"{self.consecutive_failure_count} consecutive failed batches; "
+                    f"cooldown has {remaining_cooldown_seconds:.3f} seconds remaining "
+                    f"before {batch_context} can be requested."
+                )
 
     def record_success(self) -> None:
-        self.consecutive_failure_count = 0
-        self.opened_at_seconds = None
+        with self._state_lock:
+            self.consecutive_failure_count = 0
+            self.opened_at_seconds = None
 
     def record_failure(self, *, current_time_seconds: float) -> None:
-        self.consecutive_failure_count += 1
-        if self.consecutive_failure_count >= self.failure_threshold:
-            self.opened_at_seconds = current_time_seconds
+        with self._state_lock:
+            self.consecutive_failure_count += 1
+            if self.consecutive_failure_count >= self.failure_threshold:
+                self.opened_at_seconds = current_time_seconds
+
+
+def get_default_ncbi_xml_circuit_breaker(
+    *,
+    failure_threshold: int,
+    cooldown_seconds: float,
+) -> NCBIXmlCircuitBreaker:
+    """
+    Return process-persistent circuit-breaker state for one fetch policy.
+
+    The default state is shared across fetch calls, so repeated workflow
+    invocations accumulate failures without requiring application callers to
+    construct and retain a circuit-breaker instance themselves.
+    """
+    breaker_key = (failure_threshold, float(cooldown_seconds))
+    with _default_ncbi_xml_circuit_breakers_lock:
+        circuit_breaker = _default_ncbi_xml_circuit_breakers.get(breaker_key)
+        if circuit_breaker is None:
+            circuit_breaker = NCBIXmlCircuitBreaker(
+                failure_threshold=failure_threshold,
+                cooldown_seconds=cooldown_seconds,
+            )
+            _default_ncbi_xml_circuit_breakers[breaker_key] = circuit_breaker
+
+    return circuit_breaker
 
 
 @dataclass(frozen=True)
@@ -1036,6 +1108,145 @@ def _raise_xml_batch_deadline_exceeded(
     raise NCBIXmlBatchDeadlineExceeded(message)
 
 
+def _fetch_ncbi_xml_attempt_with_deadline(
+    *,
+    database_name: str,
+    protein_uids: List[str],
+    retmode: str,
+    effective_fetch_timeout_seconds: float,
+    batch_deadline_at_seconds: float,
+    batch_started_at_seconds: float,
+    batch_deadline_seconds: float,
+    batch_context: str,
+) -> tuple[str | bytes, Any, Any]:
+    """
+    Open, read, and close one EFetch response within an absolute deadline.
+
+    ``urllib`` timeouts bound individual blocking network operations, but they
+    do not provide a scheduler-level deadline for the complete response. The
+    request therefore runs in a daemon worker while the calling thread waits
+    only until the remaining batch deadline. On deadline exhaustion, the
+    handle is closed asynchronously when available so a blocked read is asked
+    to stop without delaying the caller beyond the configured total deadline.
+    """
+    attempt_completed = threading.Event()
+    cancellation_requested = threading.Event()
+    handle_closed = threading.Event()
+    attempt_state_lock = threading.Lock()
+    handle_close_lock = threading.Lock()
+    attempt_state: dict[str, Any] = {}
+
+    def close_fetch_handle_once() -> None:
+        with handle_close_lock:
+            if handle_closed.is_set():
+                return
+
+            with attempt_state_lock:
+                fetch_handle = attempt_state.get("fetch_handle")
+
+            if fetch_handle is None:
+                return
+
+            try:
+                fetch_handle.close()
+            finally:
+                handle_closed.set()
+
+    def execute_attempt() -> None:
+        try:
+            with _ncbi_entrez_request_timeout(
+                network_timeout_seconds=effective_fetch_timeout_seconds,
+            ):
+                fetch_handle = _open_ncbi_entrez_efetch_once(
+                    database_name=database_name,
+                    protein_uids=protein_uids,
+                    retmode=retmode,
+                )
+                with attempt_state_lock:
+                    attempt_state["fetch_handle"] = fetch_handle
+                    attempt_state["response_url"] = getattr(
+                        fetch_handle,
+                        "url",
+                        None,
+                    )
+                    attempt_state["response_headers"] = getattr(
+                        fetch_handle,
+                        "headers",
+                        None,
+                    )
+
+                if cancellation_requested.is_set():
+                    return
+
+                raw_xml_payload = fetch_handle.read()
+                with attempt_state_lock:
+                    attempt_state["raw_xml_payload"] = raw_xml_payload
+        except BaseException as error:
+            with attempt_state_lock:
+                attempt_state["error"] = error
+        finally:
+            try:
+                close_fetch_handle_once()
+            except BaseException as close_error:
+                with attempt_state_lock:
+                    if "error" not in attempt_state:
+                        attempt_state["error"] = close_error
+            finally:
+                attempt_completed.set()
+
+    def cancel_attempt() -> None:
+        try:
+            close_fetch_handle_once()
+        except BaseException:
+            # Deadline exhaustion is the primary failure. The worker records
+            # close errors when it owns normal cleanup; asynchronous
+            # cancellation must not emit an unhandled background exception.
+            pass
+
+    attempt_context = copy_context()
+    attempt_thread = threading.Thread(
+        target=attempt_context.run,
+        args=(execute_attempt,),
+        name="ncbi-xml-fetch-attempt",
+        daemon=True,
+    )
+    attempt_thread.start()
+
+    remaining_batch_seconds = (
+        batch_deadline_at_seconds - time.monotonic()
+    )
+    attempt_finished_before_deadline = (
+        remaining_batch_seconds > 0
+        and attempt_completed.wait(timeout=remaining_batch_seconds)
+    )
+    if not attempt_finished_before_deadline:
+        cancellation_requested.set()
+        threading.Thread(
+            target=cancel_attempt,
+            name="ncbi-xml-fetch-canceller",
+            daemon=True,
+        ).start()
+        deadline_detected_at_seconds = time.monotonic()
+        _raise_xml_batch_deadline_exceeded(
+            batch_context=batch_context,
+            batch_deadline_seconds=batch_deadline_seconds,
+            elapsed_seconds=(
+                deadline_detected_at_seconds - batch_started_at_seconds
+            ),
+        )
+
+    with attempt_state_lock:
+        attempt_error = attempt_state.get("error")
+        raw_xml_payload = attempt_state.get("raw_xml_payload")
+        response_url = attempt_state.get("response_url")
+        response_headers = attempt_state.get("response_headers")
+
+    if attempt_error is not None:
+        raise attempt_error
+
+    return raw_xml_payload, response_url, response_headers
+
+
 def fetch_ncbi_protein_xml_batches(
     *,
     ncbi_email: str,
@@ -1088,7 +1299,9 @@ def fetch_ncbi_protein_xml_batches(
             Optional directory used to persist and validate individual XML
             batches before reusing them in later runs.
         fetch_timeout_seconds:
-            Socket/network idle timeout applied to each NCBI EFetch request.
+            Socket/network idle timeout applied to opening and reading each
+            NCBI EFetch response. A blocked response read is interrupted by
+            the underlying socket timeout.
         batch_deadline_seconds:
             Maximum total time allowed for one complete XML batch operation,
             including retries and backoff delays.
@@ -1104,8 +1317,16 @@ def fetch_ncbi_protein_xml_batches(
         circuit_breaker_cooldown_seconds:
             Cooldown interval before another request is allowed after opening.
         circuit_breaker:
-            Optional shared circuit breaker state. Supplying the same instance
-            across calls lets sustained failures block later fetch operations.
+            Optional explicitly scoped circuit breaker. When omitted, a
+            process-persistent breaker for the configured threshold and
+            cooldown is reused automatically across calls.
+
+    Partial responses:
+        NCBI may omit an invalid, removed, or otherwise unavailable UID while
+        returning syntactically valid XML. A batch with fewer or more direct
+        XML records than requested UIDs is treated as a permanent response
+        validation failure. It is neither retried nor persisted as reusable
+        batch state because retrying cannot establish which UID was omitted.
 
     Returns:
         NCBIProteinXmlFetchResult:
@@ -1168,7 +1389,7 @@ def fetch_ncbi_protein_xml_batches(
 
     active_circuit_breaker = circuit_breaker
     if active_circuit_breaker is None:
-        active_circuit_breaker = NCBIXmlCircuitBreaker(
+        active_circuit_breaker = get_default_ncbi_xml_circuit_breaker(
             failure_threshold=circuit_breaker_failure_threshold,
             cooldown_seconds=circuit_breaker_cooldown_seconds,
         )
@@ -1263,7 +1484,6 @@ def fetch_ncbi_protein_xml_batches(
                             attempt_count=batch_metadata.get("attempt_count"),
                         )
                     )
-                    active_circuit_breaker.record_success()
                     continue
 
             batch_context = _build_xml_batch_context(
@@ -1310,24 +1530,22 @@ def fetch_ncbi_protein_xml_batches(
                     )
 
                     request_started_at = time.perf_counter()
-                    with _ncbi_entrez_request_timeout(
-                        network_timeout_seconds=effective_fetch_timeout_seconds,
-                    ):
-                        with _temporary_ncbi_entrez_retry_policy(
-                            max_tries=1,
-                            sleep_between_tries=0.0,
-                        ):
-                            fetch_handle = Entrez.efetch(
-                                db=database_name,
-                                id=",".join(current_batch_protein_uids),
-                                retmode=retmode,
-                            )
-                    response_url = getattr(fetch_handle, "url", None)
-                    response_headers = getattr(fetch_handle, "headers", None)
-                    try:
-                        raw_xml_payload = fetch_handle.read()
-                    finally:
-                        fetch_handle.close()
+                    (
+                        raw_xml_payload,
+                        response_url,
+                        response_headers,
+                    ) = _fetch_ncbi_xml_attempt_with_deadline(
+                        database_name=database_name,
+                        protein_uids=current_batch_protein_uids,
+                        retmode=retmode,
+                        effective_fetch_timeout_seconds=(
+                            effective_fetch_timeout_seconds
+                        ),
+                        batch_deadline_at_seconds=batch_deadline_at_seconds,
+                        batch_started_at_seconds=batch_started_at_seconds,
+                        batch_deadline_seconds=batch_deadline_seconds,
+                        batch_context=batch_context,
+                    )
 
                     round_trip_latency_seconds = (
                         time.perf_counter() - request_started_at
@@ -1381,11 +1599,12 @@ def fetch_ncbi_protein_xml_batches(
                         xml_payload_bytes=xml_payload_bytes,
                     )
                     if record_count != len(current_batch_protein_uids):
-                        raise RuntimeError(
-                            "NCBI XML batch record count does not match the "
-                            "requested identifier count. "
+                        raise NCBIXmlResponseValidationError(
+                            "NCBI returned a partial or mismatched XML batch; "
+                            "the direct XML record count does not match the "
+                            "requested protein UID count. "
                             f"Expected {len(current_batch_protein_uids)}, "
-                            f"got {record_count}."
+                            f"got {record_count}; {batch_context}."
                         )
 
                     response_byte_count = len(xml_payload_bytes)
@@ -1525,6 +1744,22 @@ def fetch_ncbi_protein_xml_batches(
                     if retry_backoff_seconds >= remaining_batch_seconds:
                         active_circuit_breaker.record_failure(
                             current_time_seconds=retry_scheduled_at_seconds,
+                        )
+                        _record_xml_latency_event(
+                            workspace_directory=workspace_directory,
+                            event_payload={
+                                "batch_index": batch_index,
+                                "attempt_index": retry_attempt_index + 1,
+                                "status": "deadline_exhausted",
+                                "error_type": (
+                                    NCBIXmlBatchDeadlineExceeded.__name__
+                                ),
+                                "error_message": (
+                                    "Remaining batch deadline cannot "
+                                    "accommodate the next retry backoff for "
+                                    f"{batch_context}."
+                                ),
+                            },
                         )
                         _raise_xml_batch_deadline_exceeded(
                             batch_context=batch_context,

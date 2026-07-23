@@ -1,12 +1,15 @@
+import json
 import os
+import socket
 import sys
 import tempfile
+import threading
+import time
 import types
 import unittest
-import json
 from pathlib import Path
-from unittest.mock import Mock, patch
-from urllib.error import URLError
+from unittest.mock import Mock, call, patch
+from urllib.error import HTTPError, URLError
 
 if "Bio" not in sys.modules:
     fake_bio_module = types.ModuleType("Bio")
@@ -32,13 +35,14 @@ from src.pago_pipeline.ncbi_api import (
     NCBICircuitBreakerOpen,
     NCBIXmlBatchDeadlineExceeded,
     NCBIXmlBatchFetchError,
-    NCBIXmlCircuitBreaker,
+    NCBIXmlResponseValidationError,
     NCBIProteinXmlBatchFetchResult,
     NCBIProteinXmlFetchResult,
     _configured_ncbi_entrez_urlopen,
     _resolve_ncbi_ssl_ca_configuration,
     fetch_ncbi_protein_xml_batches,
     fetch_ncbi_protein_uid_snapshot,
+    get_default_ncbi_xml_circuit_breaker,
 )
 from src.pago_pipeline.storage import sha256_of_lines
 
@@ -437,16 +441,18 @@ class SaveNcbiProteinXmlSnapshotTests(unittest.TestCase):
 
 
 class NCBIXmlFetchInfrastructureTests(unittest.TestCase):
+    def setUp(self) -> None:
+        with ncbi_api._default_ncbi_xml_circuit_breakers_lock:
+            ncbi_api._default_ncbi_xml_circuit_breakers.clear()
+
     def test_xml_fetch_retries_transient_failure_and_returns_batch(self) -> None:
         fetch_error = URLError("timed out")
         successful_payload = b"<GBSet><GBSeq /><GBSeq /></GBSet>"
         successful_handle = FakeFetchHandle(successful_payload)
 
-        with patch.object(
-            ncbi_api.Entrez,
-            "efetch",
+        with patch(
+            "src.pago_pipeline.ncbi_api._open_ncbi_entrez_efetch_once",
             side_effect=[fetch_error, successful_handle],
-            create=True,
         ) as efetch_mock:
             with patch(
                 "src.pago_pipeline.ncbi_api.random.uniform",
@@ -474,6 +480,160 @@ class NCBIXmlFetchInfrastructureTests(unittest.TestCase):
         sleep_mock.assert_any_call(0.25)
         sleep_mock.assert_any_call(0.01)
 
+    def test_xml_fetch_retries_socket_timeout_raised_during_response_read(
+        self,
+    ) -> None:
+        timed_out_handle = FakeFetchHandle(
+            b"",
+            read_callback=lambda: (_ for _ in ()).throw(
+                socket.timeout("response read timed out")
+            ),
+        )
+        successful_payload = b"<GBSet><GBSeq /></GBSet>"
+
+        with patch(
+            "src.pago_pipeline.ncbi_api._open_ncbi_entrez_efetch_once",
+            side_effect=[
+                timed_out_handle,
+                FakeFetchHandle(successful_payload),
+            ],
+        ) as efetch_mock:
+            with patch(
+                "src.pago_pipeline.ncbi_api.random.uniform",
+                return_value=0.0,
+            ):
+                with patch("src.pago_pipeline.ncbi_api.time.sleep") as sleep_mock:
+                    fetch_result = fetch_ncbi_protein_xml_batches(
+                        ncbi_email="test@example.org",
+                        ncbi_api_key=None,
+                        protein_uids=["1001"],
+                        batch_size=1,
+                        max_retry_attempts=2,
+                        request_delay_seconds=0.0,
+                        fetch_timeout_seconds=0.25,
+                        batch_deadline_seconds=5.0,
+                        retry_backoff_initial_seconds=0.1,
+                    )
+
+        self.assertTrue(timed_out_handle.closed)
+        self.assertEqual(efetch_mock.call_count, 2)
+        self.assertEqual(
+            fetch_result.xml_batches[0].xml_payload_bytes,
+            successful_payload,
+        )
+        sleep_mock.assert_any_call(0.1)
+
+    def test_xml_fetch_applies_exponential_backoff_with_configured_cap(
+        self,
+    ) -> None:
+        successful_payload = b"<GBSet><GBSeq /></GBSet>"
+
+        with patch(
+            "src.pago_pipeline.ncbi_api._open_ncbi_entrez_efetch_once",
+            side_effect=[
+                URLError("temporary failure 1"),
+                URLError("temporary failure 2"),
+                URLError("temporary failure 3"),
+                FakeFetchHandle(successful_payload),
+            ],
+        ) as efetch_mock:
+            with patch(
+                "src.pago_pipeline.ncbi_api.random.uniform",
+                return_value=0.0,
+            ):
+                with patch("src.pago_pipeline.ncbi_api.time.sleep") as sleep_mock:
+                    fetch_ncbi_protein_xml_batches(
+                        ncbi_email="test@example.org",
+                        ncbi_api_key=None,
+                        protein_uids=["1001"],
+                        batch_size=1,
+                        max_retry_attempts=4,
+                        request_delay_seconds=0.0,
+                        fetch_timeout_seconds=1.0,
+                        batch_deadline_seconds=10.0,
+                        retry_backoff_initial_seconds=0.25,
+                        retry_backoff_multiplier=2.0,
+                        retry_backoff_max_seconds=0.6,
+                    )
+
+        self.assertEqual(efetch_mock.call_count, 4)
+        self.assertEqual(
+            sleep_mock.call_args_list[:3],
+            [call(0.25), call(0.5), call(0.6)],
+        )
+
+    def test_xml_fetch_retries_transient_http_429_and_503(self) -> None:
+        http_429 = HTTPError(
+            "https://ncbi.example.test/efetch",
+            429,
+            "Too Many Requests",
+            None,
+            None,
+        )
+        http_503 = HTTPError(
+            "https://ncbi.example.test/efetch",
+            503,
+            "Service Unavailable",
+            None,
+            None,
+        )
+        self.addCleanup(http_429.close)
+        self.addCleanup(http_503.close)
+
+        with patch(
+            "src.pago_pipeline.ncbi_api._open_ncbi_entrez_efetch_once",
+            side_effect=[
+                http_429,
+                http_503,
+                FakeFetchHandle(b"<GBSet><GBSeq /></GBSet>"),
+            ],
+        ) as efetch_mock:
+            with patch(
+                "src.pago_pipeline.ncbi_api.random.uniform",
+                return_value=0.0,
+            ):
+                with patch("src.pago_pipeline.ncbi_api.time.sleep"):
+                    fetch_ncbi_protein_xml_batches(
+                        ncbi_email="test@example.org",
+                        ncbi_api_key=None,
+                        protein_uids=["1001"],
+                        max_retry_attempts=3,
+                        request_delay_seconds=0.0,
+                        retry_backoff_initial_seconds=0.1,
+                    )
+
+        self.assertEqual(efetch_mock.call_count, 3)
+
+    def test_xml_fetch_does_not_retry_permanent_http_error(self) -> None:
+        http_400 = HTTPError(
+            "https://ncbi.example.test/efetch",
+            400,
+            "Bad Request",
+            None,
+            None,
+        )
+        self.addCleanup(http_400.close)
+
+        with patch(
+            "src.pago_pipeline.ncbi_api._open_ncbi_entrez_efetch_once",
+            side_effect=http_400,
+        ) as efetch_mock:
+            with patch("src.pago_pipeline.ncbi_api.time.sleep") as sleep_mock:
+                with self.assertRaisesRegex(
+                    RuntimeError,
+                    "Permanent NCBI XML batch failure; not retrying",
+                ):
+                    fetch_ncbi_protein_xml_batches(
+                        ncbi_email="test@example.org",
+                        ncbi_api_key=None,
+                        protein_uids=["1001"],
+                        max_retry_attempts=3,
+                        request_delay_seconds=0.0,
+                    )
+
+        efetch_mock.assert_called_once()
+        sleep_mock.assert_not_called()
+
     def test_xml_fetch_saves_and_reuses_validated_workspace_batches(self) -> None:
         temporary_directory = tempfile.TemporaryDirectory()
         self.addCleanup(temporary_directory.cleanup)
@@ -481,14 +641,12 @@ class NCBIXmlFetchInfrastructureTests(unittest.TestCase):
         first_payload = b"<GBSet><GBSeq><GBSeqid>1001</GBSeqid></GBSeq></GBSet>"
         second_payload = b"<GBSet><GBSeq><GBSeqid>1002</GBSeqid></GBSeq></GBSet>"
 
-        with patch.object(
-            ncbi_api.Entrez,
-            "efetch",
+        with patch(
+            "src.pago_pipeline.ncbi_api._open_ncbi_entrez_efetch_once",
             side_effect=[
                 FakeFetchHandle(first_payload),
                 FakeFetchHandle(second_payload),
             ],
-            create=True,
         ) as efetch_mock:
             with patch(
                 "src.pago_pipeline.ncbi_api.random.uniform",
@@ -532,7 +690,15 @@ class NCBIXmlFetchInfrastructureTests(unittest.TestCase):
         self.assertEqual(batch_metadata["response_byte_count"], len(first_payload))
         self.assertEqual(batch_metadata["attempt_count"], 1)
 
-        with patch.object(ncbi_api.Entrez, "efetch", create=True) as refetch_mock:
+        circuit_breaker = get_default_ncbi_xml_circuit_breaker(
+            failure_threshold=3,
+            cooldown_seconds=60.0,
+        )
+        circuit_breaker.record_failure(current_time_seconds=1.0)
+
+        with patch(
+            "src.pago_pipeline.ncbi_api._open_ncbi_entrez_efetch_once",
+        ) as refetch_mock:
             with patch("src.pago_pipeline.ncbi_api.time.sleep"):
                 second_result = fetch_ncbi_protein_xml_batches(
                     ncbi_email="test@example.org",
@@ -546,6 +712,7 @@ class NCBIXmlFetchInfrastructureTests(unittest.TestCase):
                 )
 
         refetch_mock.assert_not_called()
+        self.assertEqual(circuit_breaker.consecutive_failure_count, 1)
         self.assertEqual(second_result.batch_count, 2)
         self.assertEqual(second_result.xml_batches[0].xml_payload_bytes, first_payload)
         self.assertEqual(
@@ -572,42 +739,32 @@ class NCBIXmlFetchInfrastructureTests(unittest.TestCase):
 
         def fake_urlopen(*args, **kwargs):
             captured_urlopen_timeout["timeout"] = kwargs.get("timeout")
-            return object()
-
-        def fake_efetch(*args, **kwargs):
-            ncbi_api.Entrez.urlopen("request-object")
             return FakeFetchHandle(b"<GBSet><GBSeq /></GBSet>")
 
         with patch.object(ncbi_api.Entrez, "urlopen", fake_urlopen, create=True):
-            with patch.object(
-                ncbi_api.Entrez,
-                "efetch",
-                side_effect=fake_efetch,
-                create=True,
+            with patch(
+                "src.pago_pipeline.ncbi_api.random.uniform",
+                return_value=0.0,
             ):
-                with patch(
-                    "src.pago_pipeline.ncbi_api.random.uniform",
-                    return_value=0.0,
-                ):
-                    with patch("src.pago_pipeline.ncbi_api.time.sleep"):
-                        fetch_ncbi_protein_xml_batches(
-                            ncbi_email="test@example.org",
-                            ncbi_api_key=None,
-                            protein_uids=["1001"],
-                            batch_size=1,
-                            request_delay_seconds=0.0,
-                            fetch_timeout_seconds=12.5,
-                            batch_deadline_seconds=30.0,
-                        )
+                with patch("src.pago_pipeline.ncbi_api.time.sleep"):
+                    fetch_ncbi_protein_xml_batches(
+                        ncbi_email="test@example.org",
+                        ncbi_api_key=None,
+                        protein_uids=["1001"],
+                        batch_size=1,
+                        request_delay_seconds=0.0,
+                        fetch_timeout_seconds=12.5,
+                        batch_deadline_seconds=30.0,
+                    )
 
         self.assertEqual(captured_urlopen_timeout["timeout"], 12.5)
 
-    def test_xml_fetch_disables_hidden_biopython_retries_during_attempt(
+    def test_xml_fetch_does_not_mutate_global_biopython_retry_policy(
         self,
     ) -> None:
         captured_entrez_retry_policy: dict[str, float | int | None] = {}
 
-        def fake_efetch(*args, **kwargs):
+        def fake_urlopen(*args, **kwargs):
             captured_entrez_retry_policy["max_tries"] = getattr(
                 ncbi_api.Entrez,
                 "max_tries",
@@ -629,8 +786,8 @@ class NCBIXmlFetchInfrastructureTests(unittest.TestCase):
             ):
                 with patch.object(
                     ncbi_api.Entrez,
-                    "efetch",
-                    side_effect=fake_efetch,
+                    "urlopen",
+                    fake_urlopen,
                     create=True,
                 ):
                     with patch(
@@ -651,15 +808,13 @@ class NCBIXmlFetchInfrastructureTests(unittest.TestCase):
                 self.assertEqual(ncbi_api.Entrez.max_tries, 3)
                 self.assertEqual(ncbi_api.Entrez.sleep_between_tries, 15)
 
-        self.assertEqual(captured_entrez_retry_policy["max_tries"], 1)
-        self.assertEqual(captured_entrez_retry_policy["sleep_between_tries"], 0.0)
+        self.assertEqual(captured_entrez_retry_policy["max_tries"], 3)
+        self.assertEqual(captured_entrez_retry_policy["sleep_between_tries"], 15)
 
     def test_xml_fetch_raises_explicit_error_after_retry_limit(self) -> None:
-        with patch.object(
-            ncbi_api.Entrez,
-            "efetch",
+        with patch(
+            "src.pago_pipeline.ncbi_api._open_ncbi_entrez_efetch_once",
             side_effect=URLError("temporarily unavailable"),
-            create=True,
         ):
             with patch("src.pago_pipeline.ncbi_api.time.sleep") as sleep_mock:
                 with self.assertRaisesRegex(
@@ -681,23 +836,29 @@ class NCBIXmlFetchInfrastructureTests(unittest.TestCase):
         sleep_mock.assert_called_once_with(0.5)
 
     def test_xml_fetch_deadline_aborts_slow_read(self) -> None:
-        fake_time = {"value": 0.0}
+        read_started = threading.Event()
+        release_blocked_read = threading.Event()
+        blocked_handle_closed = threading.Event()
 
-        def advance_past_deadline() -> None:
-            fake_time["value"] = 5.0
+        def block_response_read() -> None:
+            read_started.set()
+            release_blocked_read.wait(timeout=2.0)
 
-        with patch(
-            "src.pago_pipeline.ncbi_api.time.monotonic",
-            side_effect=lambda: fake_time["value"],
-        ):
-            with patch.object(
-                ncbi_api.Entrez,
-                "efetch",
-                return_value=FakeFetchHandle(
-                    b"<GBSet><GBSeq /></GBSet>",
-                    read_callback=advance_past_deadline,
-                ),
-                create=True,
+        blocked_handle = FakeFetchHandle(
+            b"<GBSet><GBSeq /></GBSet>",
+            read_callback=block_response_read,
+        )
+
+        def close_blocked_handle() -> None:
+            blocked_handle.closed = True
+            blocked_handle_closed.set()
+
+        blocked_handle.close = close_blocked_handle
+        deadline_test_started_at = time.perf_counter()
+        try:
+            with patch(
+                "src.pago_pipeline.ncbi_api._open_ncbi_entrez_efetch_once",
+                return_value=blocked_handle,
             ):
                 with self.assertRaisesRegex(
                     NCBIXmlBatchDeadlineExceeded,
@@ -708,62 +869,191 @@ class NCBIXmlFetchInfrastructureTests(unittest.TestCase):
                         ncbi_api_key=None,
                         protein_uids=["1001"],
                         batch_size=1,
-                        max_retry_attempts=2,
-                        request_delay_seconds=0.0,
-                        fetch_timeout_seconds=5.0,
-                        batch_deadline_seconds=1.0,
-                    )
-
-    def test_xml_fetch_circuit_breaker_blocks_requests_during_cooldown(self) -> None:
-        circuit_breaker = NCBIXmlCircuitBreaker(
-            failure_threshold=1,
-            cooldown_seconds=30.0,
-        )
-
-        with patch(
-            "src.pago_pipeline.ncbi_api.time.monotonic",
-            return_value=0.0,
-        ):
-            with patch.object(
-                ncbi_api.Entrez,
-                "efetch",
-                side_effect=URLError("temporarily unavailable"),
-                create=True,
-            ):
-                with self.assertRaises(NCBIXmlBatchFetchError):
-                    fetch_ncbi_protein_xml_batches(
-                        ncbi_email="test@example.org",
-                        ncbi_api_key=None,
-                        protein_uids=["1001"],
-                        batch_size=1,
                         max_retry_attempts=1,
                         request_delay_seconds=0.0,
-                        fetch_timeout_seconds=5.0,
-                        batch_deadline_seconds=30.0,
-                        circuit_breaker=circuit_breaker,
+                        fetch_timeout_seconds=1.0,
+                        batch_deadline_seconds=0.05,
                     )
+        finally:
+            release_blocked_read.set()
+
+        deadline_test_elapsed_seconds = (
+            time.perf_counter() - deadline_test_started_at
+        )
+        self.assertTrue(read_started.is_set())
+        self.assertTrue(blocked_handle_closed.wait(timeout=0.5))
+        self.assertLess(deadline_test_elapsed_seconds, 1.0)
+
+    def test_xml_fetch_logs_deadline_exhaustion_when_backoff_will_not_fit(
+        self,
+    ) -> None:
+        temporary_directory = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary_directory.cleanup)
+        workspace_directory = Path(temporary_directory.name) / "xml_workspace"
+
+        fake_time = {"value": 0.0}
+
+        def fail_after_consuming_deadline(*args, **kwargs):
+            fake_time["value"] = 0.75
+            raise URLError("temporarily unavailable")
 
         with patch(
             "src.pago_pipeline.ncbi_api.time.monotonic",
-            return_value=1.0,
+            side_effect=lambda: fake_time["value"],
         ):
-            with patch.object(ncbi_api.Entrez, "efetch", create=True) as efetch_mock:
-                with self.assertRaisesRegex(
-                    NCBICircuitBreakerOpen,
-                    "circuit breaker is open",
-                ):
+            with patch(
+                "src.pago_pipeline.ncbi_api._open_ncbi_entrez_efetch_once",
+                side_effect=fail_after_consuming_deadline,
+            ):
+                with self.assertRaises(NCBIXmlBatchDeadlineExceeded):
                     fetch_ncbi_protein_xml_batches(
                         ncbi_email="test@example.org",
                         ncbi_api_key=None,
                         protein_uids=["1001"],
-                        batch_size=1,
+                        max_retry_attempts=2,
                         request_delay_seconds=0.0,
-                        fetch_timeout_seconds=5.0,
-                        batch_deadline_seconds=30.0,
-                        circuit_breaker=circuit_breaker,
+                        batch_workspace_directory=workspace_directory,
+                        fetch_timeout_seconds=1.0,
+                        batch_deadline_seconds=1.0,
+                        retry_backoff_initial_seconds=0.5,
                     )
 
-        efetch_mock.assert_not_called()
+        latency_events = [
+            json.loads(line)
+            for line in (
+                workspace_directory / "latency_events.jsonl"
+            ).read_text(encoding="utf-8").splitlines()
+        ]
+        self.assertEqual(
+            [event["status"] for event in latency_events],
+            ["transient_failure", "deadline_exhausted"],
+        )
+
+    def test_default_circuit_breaker_accumulates_failures_and_recovers(
+        self,
+    ) -> None:
+        clock = {"value": 0.0}
+        successful_payload = b"<GBSet><GBSeq /></GBSet>"
+
+        with patch(
+            "src.pago_pipeline.ncbi_api.time.monotonic",
+            side_effect=lambda: clock["value"],
+        ):
+            with patch(
+                "src.pago_pipeline.ncbi_api._open_ncbi_entrez_efetch_once",
+                side_effect=[
+                    URLError("first degraded batch"),
+                    URLError("second degraded batch"),
+                    FakeFetchHandle(successful_payload),
+                    URLError("failure after recovery"),
+                ],
+            ) as efetch_mock:
+                with patch(
+                    "src.pago_pipeline.ncbi_api.random.uniform",
+                    return_value=0.0,
+                ):
+                    with patch("src.pago_pipeline.ncbi_api.time.sleep"):
+                        for expected_failure_count in (1, 2):
+                            with self.assertRaises(NCBIXmlBatchFetchError):
+                                fetch_ncbi_protein_xml_batches(
+                                    ncbi_email="test@example.org",
+                                    ncbi_api_key=None,
+                                    protein_uids=["1001"],
+                                    max_retry_attempts=1,
+                                    request_delay_seconds=0.0,
+                                    circuit_breaker_failure_threshold=2,
+                                    circuit_breaker_cooldown_seconds=30.0,
+                                )
+                            circuit_breaker = (
+                                get_default_ncbi_xml_circuit_breaker(
+                                    failure_threshold=2,
+                                    cooldown_seconds=30.0,
+                                )
+                            )
+                            self.assertEqual(
+                                circuit_breaker.consecutive_failure_count,
+                                expected_failure_count,
+                            )
+
+                        clock["value"] = 1.0
+                        request_count_before_open_call = efetch_mock.call_count
+                        with self.assertRaisesRegex(
+                            NCBICircuitBreakerOpen,
+                            "circuit breaker is open",
+                        ):
+                            fetch_ncbi_protein_xml_batches(
+                                ncbi_email="test@example.org",
+                                ncbi_api_key=None,
+                                protein_uids=["1001"],
+                                max_retry_attempts=1,
+                                request_delay_seconds=0.0,
+                                circuit_breaker_failure_threshold=2,
+                                circuit_breaker_cooldown_seconds=30.0,
+                            )
+                        self.assertEqual(
+                            efetch_mock.call_count,
+                            request_count_before_open_call,
+                        )
+
+                        clock["value"] = 31.0
+                        fetch_ncbi_protein_xml_batches(
+                            ncbi_email="test@example.org",
+                            ncbi_api_key=None,
+                            protein_uids=["1001"],
+                            max_retry_attempts=1,
+                            request_delay_seconds=0.0,
+                            circuit_breaker_failure_threshold=2,
+                            circuit_breaker_cooldown_seconds=30.0,
+                        )
+                        self.assertEqual(
+                            circuit_breaker.consecutive_failure_count,
+                            0,
+                        )
+                        self.assertIsNone(circuit_breaker.opened_at_seconds)
+
+                        clock["value"] = 32.0
+                        with self.assertRaises(NCBIXmlBatchFetchError):
+                            fetch_ncbi_protein_xml_batches(
+                                ncbi_email="test@example.org",
+                                ncbi_api_key=None,
+                                protein_uids=["1001"],
+                                max_retry_attempts=1,
+                                request_delay_seconds=0.0,
+                                circuit_breaker_failure_threshold=2,
+                                circuit_breaker_cooldown_seconds=30.0,
+                            )
+
+        self.assertEqual(efetch_mock.call_count, 4)
+        self.assertEqual(circuit_breaker.consecutive_failure_count, 1)
+        self.assertIsNone(circuit_breaker.opened_at_seconds)
+
+    def test_xml_fetch_rejects_partial_response_without_retrying(self) -> None:
+        partial_payload = b"<GBSet><GBSeq><GBSeqid>1001</GBSeqid></GBSeq></GBSet>"
+
+        with patch(
+            "src.pago_pipeline.ncbi_api._open_ncbi_entrez_efetch_once",
+            return_value=FakeFetchHandle(partial_payload),
+        ) as efetch_mock:
+            with patch("src.pago_pipeline.ncbi_api.time.sleep") as sleep_mock:
+                with self.assertRaisesRegex(
+                    RuntimeError,
+                    "partial or mismatched XML batch",
+                ) as raised_error:
+                    fetch_ncbi_protein_xml_batches(
+                        ncbi_email="test@example.org",
+                        ncbi_api_key=None,
+                        protein_uids=["1001", "removed-uid"],
+                        batch_size=2,
+                        max_retry_attempts=3,
+                        request_delay_seconds=0.0,
+                    )
+
+        self.assertIsInstance(
+            raised_error.exception.__cause__,
+            NCBIXmlResponseValidationError,
+        )
+        efetch_mock.assert_called_once()
+        sleep_mock.assert_not_called()
 
     def test_xml_fetch_configuration_rejects_invalid_controls(self) -> None:
         invalid_control_cases = [
@@ -1089,7 +1379,9 @@ class ResolveNcbiSnapshotSslPropagationTests(unittest.TestCase):
             "corporate-certs",
         )
 
-    def test_xml_snapshot_resolve_propagates_ssl_ca_arguments(self) -> None:
+    def test_xml_snapshot_resolve_propagates_fetch_policy_and_shared_breaker(
+        self,
+    ) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory_name:
             temporary_directory = Path(temporary_directory_name)
             snapshot_root_directory = temporary_directory / "xml_snapshot"
@@ -1120,19 +1412,62 @@ class ResolveNcbiSnapshotSslPropagationTests(unittest.TestCase):
                             resolve_ncbi_protein_xml_snapshot(
                                 snapshot_mode="create_new",
                                 snapshot_root_directory=snapshot_root_directory,
-                                source_uid_snapshot_root_directory=source_uid_snapshot_root_directory,
+                                source_uid_snapshot_root_directory=(
+                                    source_uid_snapshot_root_directory
+                                ),
                                 ssl_ca_file="corporate-ca.pem",
                                 ssl_ca_directory="corporate-certs",
+                                fetch_timeout_seconds=12.0,
+                                batch_deadline_seconds=45.0,
+                                retry_backoff_initial_seconds=0.25,
+                                retry_backoff_multiplier=3.0,
+                                retry_backoff_max_seconds=4.0,
+                                circuit_breaker_failure_threshold=2,
+                                circuit_breaker_cooldown_seconds=30.0,
+                                ncbi_email="test@example.org",
+                            )
+                            resolve_ncbi_protein_xml_snapshot(
+                                snapshot_mode="create_new",
+                                snapshot_root_directory=snapshot_root_directory,
+                                source_uid_snapshot_root_directory=(
+                                    source_uid_snapshot_root_directory
+                                ),
+                                circuit_breaker_failure_threshold=2,
+                                circuit_breaker_cooldown_seconds=30.0,
                                 ncbi_email="test@example.org",
                             )
 
         self.assertEqual(
-            fetch_mock.call_args.kwargs["ssl_ca_file"],
+            fetch_mock.call_args_list[0].kwargs["ssl_ca_file"],
             "corporate-ca.pem",
         )
         self.assertEqual(
-            fetch_mock.call_args.kwargs["ssl_ca_directory"],
+            fetch_mock.call_args_list[0].kwargs["ssl_ca_directory"],
             "corporate-certs",
+        )
+        self.assertEqual(
+            fetch_mock.call_args_list[0].kwargs["fetch_timeout_seconds"],
+            12.0,
+        )
+        self.assertEqual(
+            fetch_mock.call_args_list[0].kwargs["batch_deadline_seconds"],
+            45.0,
+        )
+        self.assertEqual(
+            fetch_mock.call_args_list[0].kwargs["retry_backoff_initial_seconds"],
+            0.25,
+        )
+        self.assertEqual(
+            fetch_mock.call_args_list[0].kwargs["retry_backoff_multiplier"],
+            3.0,
+        )
+        self.assertEqual(
+            fetch_mock.call_args_list[0].kwargs["retry_backoff_max_seconds"],
+            4.0,
+        )
+        self.assertIs(
+            fetch_mock.call_args_list[0].kwargs["circuit_breaker"],
+            fetch_mock.call_args_list[1].kwargs["circuit_breaker"],
         )
 
 
