@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import hashlib
-import json
 import os
 import platform
 import random
@@ -23,13 +22,7 @@ from urllib.request import Request, urlopen as _urllib_urlopen
 import Bio
 from Bio import Entrez
 
-from src.pago_pipeline.storage import (
-    read_json_file,
-    sha256_of_file,
-    sha256_of_lines,
-    write_bytes_atomic,
-    write_json_atomic,
-)
+from src.pago_pipeline.storage import sha256_of_lines
 
 
 NCBI_SSL_CERT_FILE_ENV_VARS = (
@@ -683,10 +676,6 @@ class NCBIProteinXmlBatchFetchResult:
     protein_uid_count: int
     xml_payload_bytes: bytes
     xml_payload_sha256: str
-    xml_payload_file_path: Optional[str] = None
-    response_byte_count: Optional[int] = None
-    round_trip_latency_seconds: Optional[float] = None
-    attempt_count: Optional[int] = None
 
 
 class NCBITransientFetchError(RuntimeError):
@@ -829,7 +818,6 @@ class NCBIProteinXmlFetchResult:
     python_version: str
     biopython_version: str
     xml_batches: List[NCBIProteinXmlBatchFetchResult]
-    batch_workspace_directory: Optional[str] = None
     fetch_timeout_seconds: Optional[float] = None
     batch_deadline_seconds: Optional[float] = None
     retry_backoff_initial_seconds: Optional[float] = None
@@ -853,102 +841,12 @@ def _coerce_payload_to_bytes(
     return payload.encode(encoding)
 
 
-def _utc_now_string() -> str:
-    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-
-
-def _xml_batch_file_paths(
-    *,
-    workspace_directory: Path,
-    batch_index: int,
-) -> tuple[Path, Path]:
-    batch_file_stem = f"batch_{batch_index:06d}"
-    batch_directory = workspace_directory / "batches"
-    return (
-        batch_directory / f"{batch_file_stem}.xml",
-        batch_directory / f"{batch_file_stem}.json",
-    )
-
-
 def _count_xml_batch_records(
     *,
     xml_payload_bytes: bytes,
 ) -> int:
     batch_root = ET.fromstring(xml_payload_bytes)
     return len(list(batch_root))
-
-
-def _record_xml_latency_event(
-    *,
-    workspace_directory: Optional[Path],
-    event_payload: dict,
-) -> None:
-    if workspace_directory is None:
-        return
-
-    latency_events_file_path = workspace_directory / "latency_events.jsonl"
-    latency_events_file_path.parent.mkdir(parents=True, exist_ok=True)
-    event_payload = {
-        **event_payload,
-        "recorded_at_utc": _utc_now_string(),
-    }
-
-    with latency_events_file_path.open("a", encoding="utf-8", newline="\n") as handle:
-        handle.write(json.dumps(event_payload, sort_keys=True) + "\n")
-
-
-def _validate_persisted_xml_batch(
-    *,
-    batch_xml_file_path: Path,
-    batch_metadata_file_path: Path,
-    expected_batch_index: int,
-    expected_batch_start_index: int,
-    expected_batch_end_index: int,
-    expected_protein_uids: List[str],
-) -> Optional[tuple[dict, bytes]]:
-    if not batch_xml_file_path.exists() or not batch_metadata_file_path.exists():
-        return None
-
-    try:
-        batch_metadata = read_json_file(input_file_path=batch_metadata_file_path)
-    except Exception:
-        return None
-
-    expected_uid_sha256 = sha256_of_lines(
-        text_lines=expected_protein_uids,
-        deduplicate_lines_preserving_order=False,
-        sort_lines=False,
-    )
-    if (
-        batch_metadata.get("batch_index") != expected_batch_index
-        or batch_metadata.get("batch_start_index") != expected_batch_start_index
-        or batch_metadata.get("batch_end_index") != expected_batch_end_index
-        or batch_metadata.get("protein_uid_count") != len(expected_protein_uids)
-        or batch_metadata.get("protein_uids_sha256") != expected_uid_sha256
-    ):
-        return None
-
-    try:
-        xml_payload_sha256 = sha256_of_file(input_file_path=batch_xml_file_path)
-        if batch_metadata.get("xml_payload_sha256") != xml_payload_sha256:
-            return None
-
-        xml_payload_bytes = batch_xml_file_path.read_bytes()
-        if _xml_payload_contains_server_error_marker(
-            xml_payload_bytes=xml_payload_bytes,
-        ):
-            return None
-
-        record_count = _count_xml_batch_records(
-            xml_payload_bytes=xml_payload_bytes,
-        )
-    except Exception:
-        return None
-
-    if record_count != len(expected_protein_uids):
-        return None
-
-    return batch_metadata, xml_payload_bytes
 
 
 def _validate_positive_integer(
@@ -1257,7 +1155,6 @@ def fetch_ncbi_protein_xml_batches(
     batch_size: int = 100,
     max_retry_attempts: int = 5,
     request_delay_seconds: Optional[float] = None,
-    batch_workspace_directory: Optional[str | Path] = None,
     fetch_timeout_seconds: float = 30.0,
     batch_deadline_seconds: float = 300.0,
     retry_backoff_initial_seconds: Optional[float] = None,
@@ -1295,9 +1192,6 @@ def fetch_ncbi_protein_xml_batches(
             If None, defaults to:
             - 0.10 seconds when an API key is provided
             - 0.34 seconds otherwise
-        batch_workspace_directory:
-            Optional directory used to persist and validate individual XML
-            batches before reusing them in later runs.
         fetch_timeout_seconds:
             Socket/network idle timeout applied to opening and reading each
             NCBI EFetch response. A blocked response read is interrupted by
@@ -1325,8 +1219,8 @@ def fetch_ncbi_protein_xml_batches(
         NCBI may omit an invalid, removed, or otherwise unavailable UID while
         returning syntactically valid XML. A batch with fewer or more direct
         XML records than requested UIDs is treated as a permanent response
-        validation failure. It is neither retried nor persisted as reusable
-        batch state because retrying cannot establish which UID was omitted.
+        validation failure and is not retried because retrying cannot establish
+        which UID was omitted.
 
     Returns:
         NCBIProteinXmlFetchResult:
@@ -1401,12 +1295,6 @@ def fetch_ncbi_protein_xml_batches(
         deduplicate_lines_preserving_order=False,
         sort_lines=False,
     )
-    workspace_directory = (
-        Path(batch_workspace_directory).expanduser()
-        if batch_workspace_directory is not None
-        else None
-    )
-
     with _configured_ncbi_entrez_urlopen(
         ssl_ca_file=ssl_ca_file,
         ssl_ca_directory=ssl_ca_directory,
@@ -1426,66 +1314,6 @@ def fetch_ncbi_protein_xml_batches(
             current_batch_end_index = (
                 batch_start_index + len(current_batch_protein_uids) - 1
             )
-            current_batch_uid_sha256 = sha256_of_lines(
-                text_lines=current_batch_protein_uids,
-                deduplicate_lines_preserving_order=False,
-                sort_lines=False,
-            )
-            batch_xml_file_path: Optional[Path] = None
-            batch_metadata_file_path: Optional[Path] = None
-            if workspace_directory is not None:
-                batch_xml_file_path, batch_metadata_file_path = _xml_batch_file_paths(
-                    workspace_directory=workspace_directory,
-                    batch_index=batch_index,
-                )
-                persisted_batch = _validate_persisted_xml_batch(
-                    batch_xml_file_path=batch_xml_file_path,
-                    batch_metadata_file_path=batch_metadata_file_path,
-                    expected_batch_index=batch_index,
-                    expected_batch_start_index=batch_start_index,
-                    expected_batch_end_index=current_batch_end_index,
-                    expected_protein_uids=current_batch_protein_uids,
-                )
-                if persisted_batch is not None:
-                    batch_metadata, xml_payload_bytes = persisted_batch
-                    print(
-                        f"Skipping validated XML batch "
-                        f"{batch_index}/{total_batch_count}."
-                    )
-                    _record_xml_latency_event(
-                        workspace_directory=workspace_directory,
-                        event_payload={
-                            "batch_index": batch_index,
-                            "attempt_index": 0,
-                            "status": "reused_validated_batch",
-                            "response_byte_count": batch_metadata.get(
-                                "response_byte_count"
-                            ),
-                        },
-                    )
-                    xml_batches.append(
-                        NCBIProteinXmlBatchFetchResult(
-                            batch_index=batch_index,
-                            batch_start_index=batch_start_index,
-                            batch_end_index=current_batch_end_index,
-                            protein_uids=current_batch_protein_uids,
-                            protein_uid_count=len(current_batch_protein_uids),
-                            xml_payload_bytes=xml_payload_bytes,
-                            xml_payload_sha256=batch_metadata[
-                                "xml_payload_sha256"
-                            ],
-                            xml_payload_file_path=str(batch_xml_file_path),
-                            response_byte_count=batch_metadata.get(
-                                "response_byte_count"
-                            ),
-                            round_trip_latency_seconds=batch_metadata.get(
-                                "round_trip_latency_seconds"
-                            ),
-                            attempt_count=batch_metadata.get("attempt_count"),
-                        )
-                    )
-                    continue
-
             batch_context = _build_xml_batch_context(
                 batch_index=batch_index,
                 total_batch_count=total_batch_count,
@@ -1607,50 +1435,6 @@ def fetch_ncbi_protein_xml_batches(
                             f"got {record_count}; {batch_context}."
                         )
 
-                    response_byte_count = len(xml_payload_bytes)
-                    attempt_count = retry_attempt_index + 1
-                    returned_xml_payload_file_path: Optional[str] = None
-
-                    if (
-                        batch_xml_file_path is not None
-                        and batch_metadata_file_path is not None
-                    ):
-                        write_bytes_atomic(
-                            binary_payload=xml_payload_bytes,
-                            output_file_path=batch_xml_file_path,
-                        )
-                        batch_metadata_payload = {
-                            "batch_index": batch_index,
-                            "batch_start_index": batch_start_index,
-                            "batch_end_index": current_batch_end_index,
-                            "protein_uid_count": len(current_batch_protein_uids),
-                            "protein_uids_sha256": current_batch_uid_sha256,
-                            "xml_payload_sha256": xml_payload_sha256,
-                            "record_count": record_count,
-                            "response_byte_count": response_byte_count,
-                            "round_trip_latency_seconds": round_trip_latency_seconds,
-                            "attempt_count": attempt_count,
-                            "fetch_timeout_seconds": effective_fetch_timeout_seconds,
-                            "batch_deadline_seconds": batch_deadline_seconds,
-                            "recorded_at_utc": _utc_now_string(),
-                        }
-                        write_json_atomic(
-                            payload=batch_metadata_payload,
-                            output_file_path=batch_metadata_file_path,
-                        )
-                        returned_xml_payload_file_path = str(batch_xml_file_path)
-
-                    _record_xml_latency_event(
-                        workspace_directory=workspace_directory,
-                        event_payload={
-                            "batch_index": batch_index,
-                            "attempt_index": attempt_count,
-                            "status": "success",
-                            "round_trip_latency_seconds": round_trip_latency_seconds,
-                            "response_byte_count": response_byte_count,
-                        },
-                    )
-
                     xml_batches.append(
                         NCBIProteinXmlBatchFetchResult(
                             batch_index=batch_index,
@@ -1660,10 +1444,6 @@ def fetch_ncbi_protein_xml_batches(
                             protein_uid_count=len(current_batch_protein_uids),
                             xml_payload_bytes=xml_payload_bytes,
                             xml_payload_sha256=xml_payload_sha256,
-                            xml_payload_file_path=returned_xml_payload_file_path,
-                            response_byte_count=response_byte_count,
-                            round_trip_latency_seconds=round_trip_latency_seconds,
-                            attempt_count=attempt_count,
                         )
                     )
                     active_circuit_breaker.record_success()
@@ -1686,24 +1466,6 @@ def fetch_ncbi_protein_xml_batches(
                                 ssl_ca_directory=resolved_ssl_ca_directory,
                             )
                         ) from error
-
-                    if isinstance(error, NCBIXmlBatchDeadlineExceeded):
-                        failure_status = "deadline_exhausted"
-                    elif _is_transient_ncbi_fetch_error(error):
-                        failure_status = "transient_failure"
-                    else:
-                        failure_status = "permanent_failure"
-
-                    _record_xml_latency_event(
-                        workspace_directory=workspace_directory,
-                        event_payload={
-                            "batch_index": batch_index,
-                            "attempt_index": retry_attempt_index + 1,
-                            "status": failure_status,
-                            "error_type": type(error).__name__,
-                            "error_message": str(error),
-                        },
-                    )
 
                     if isinstance(error, NCBIXmlBatchDeadlineExceeded):
                         active_circuit_breaker.record_failure(
@@ -1745,22 +1507,6 @@ def fetch_ncbi_protein_xml_batches(
                         active_circuit_breaker.record_failure(
                             current_time_seconds=retry_scheduled_at_seconds,
                         )
-                        _record_xml_latency_event(
-                            workspace_directory=workspace_directory,
-                            event_payload={
-                                "batch_index": batch_index,
-                                "attempt_index": retry_attempt_index + 1,
-                                "status": "deadline_exhausted",
-                                "error_type": (
-                                    NCBIXmlBatchDeadlineExceeded.__name__
-                                ),
-                                "error_message": (
-                                    "Remaining batch deadline cannot "
-                                    "accommodate the next retry backoff for "
-                                    f"{batch_context}."
-                                ),
-                            },
-                        )
                         _raise_xml_batch_deadline_exceeded(
                             batch_context=batch_context,
                             batch_deadline_seconds=batch_deadline_seconds,
@@ -1792,9 +1538,6 @@ def fetch_ncbi_protein_xml_batches(
             python_version=platform.python_version(),
             biopython_version=getattr(Bio, "__version__", "unknown"),
             xml_batches=xml_batches,
-            batch_workspace_directory=(
-                str(workspace_directory) if workspace_directory is not None else None
-            ),
             fetch_timeout_seconds=fetch_timeout_seconds,
             batch_deadline_seconds=batch_deadline_seconds,
             retry_backoff_initial_seconds=resolved_retry_backoff_initial_seconds,

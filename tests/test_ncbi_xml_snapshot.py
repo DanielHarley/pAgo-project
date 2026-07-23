@@ -36,6 +36,7 @@ from src.pago_pipeline.ncbi_api import (
     NCBIXmlBatchDeadlineExceeded,
     NCBIXmlBatchFetchError,
     NCBIXmlResponseValidationError,
+    NCBIXmlCircuitBreaker,
     NCBIProteinXmlBatchFetchResult,
     NCBIProteinXmlFetchResult,
     _configured_ncbi_entrez_urlopen,
@@ -634,106 +635,6 @@ class NCBIXmlFetchInfrastructureTests(unittest.TestCase):
         efetch_mock.assert_called_once()
         sleep_mock.assert_not_called()
 
-    def test_xml_fetch_saves_and_reuses_validated_workspace_batches(self) -> None:
-        temporary_directory = tempfile.TemporaryDirectory()
-        self.addCleanup(temporary_directory.cleanup)
-        workspace_directory = Path(temporary_directory.name) / "xml_workspace"
-        first_payload = b"<GBSet><GBSeq><GBSeqid>1001</GBSeqid></GBSeq></GBSet>"
-        second_payload = b"<GBSet><GBSeq><GBSeqid>1002</GBSeqid></GBSeq></GBSet>"
-
-        with patch(
-            "src.pago_pipeline.ncbi_api._open_ncbi_entrez_efetch_once",
-            side_effect=[
-                FakeFetchHandle(first_payload),
-                FakeFetchHandle(second_payload),
-            ],
-        ) as efetch_mock:
-            with patch(
-                "src.pago_pipeline.ncbi_api.random.uniform",
-                return_value=0.0,
-            ):
-                with patch("src.pago_pipeline.ncbi_api.time.sleep"):
-                    first_result = fetch_ncbi_protein_xml_batches(
-                        ncbi_email="test@example.org",
-                        ncbi_api_key=None,
-                        protein_uids=["1001", "1002"],
-                        batch_size=1,
-                        request_delay_seconds=0.0,
-                        fetch_timeout_seconds=5.0,
-                        batch_deadline_seconds=30.0,
-                        batch_workspace_directory=workspace_directory,
-                    )
-
-        self.assertEqual(efetch_mock.call_count, 2)
-        self.assertEqual(first_result.batch_workspace_directory, str(workspace_directory))
-        self.assertEqual(first_result.fetch_timeout_seconds, 5.0)
-        self.assertEqual(first_result.batch_deadline_seconds, 30.0)
-        self.assertEqual(first_result.circuit_breaker_failure_threshold, 3)
-        self.assertEqual(first_result.circuit_breaker_cooldown_seconds, 60.0)
-
-        first_batch = first_result.xml_batches[0]
-        first_batch_xml_path = workspace_directory / "batches" / "batch_000001.xml"
-        first_batch_metadata_path = workspace_directory / "batches" / "batch_000001.json"
-        latency_events_path = workspace_directory / "latency_events.jsonl"
-
-        self.assertEqual(first_batch.xml_payload_bytes, first_payload)
-        self.assertEqual(first_batch.xml_payload_file_path, str(first_batch_xml_path))
-        self.assertEqual(first_batch.response_byte_count, len(first_payload))
-        self.assertEqual(first_batch.attempt_count, 1)
-        self.assertTrue(first_batch_xml_path.exists())
-        self.assertTrue(first_batch_metadata_path.exists())
-        self.assertTrue(latency_events_path.exists())
-
-        batch_metadata = json.loads(first_batch_metadata_path.read_text(encoding="utf-8"))
-        self.assertEqual(batch_metadata["protein_uid_count"], 1)
-        self.assertEqual(batch_metadata["record_count"], 1)
-        self.assertEqual(batch_metadata["response_byte_count"], len(first_payload))
-        self.assertEqual(batch_metadata["attempt_count"], 1)
-
-        circuit_breaker = get_default_ncbi_xml_circuit_breaker(
-            failure_threshold=3,
-            cooldown_seconds=60.0,
-        )
-        circuit_breaker.record_failure(current_time_seconds=1.0)
-
-        with patch(
-            "src.pago_pipeline.ncbi_api._open_ncbi_entrez_efetch_once",
-        ) as refetch_mock:
-            with patch("src.pago_pipeline.ncbi_api.time.sleep"):
-                second_result = fetch_ncbi_protein_xml_batches(
-                    ncbi_email="test@example.org",
-                    ncbi_api_key=None,
-                    protein_uids=["1001", "1002"],
-                    batch_size=1,
-                    request_delay_seconds=0.0,
-                    fetch_timeout_seconds=5.0,
-                    batch_deadline_seconds=30.0,
-                    batch_workspace_directory=workspace_directory,
-                )
-
-        refetch_mock.assert_not_called()
-        self.assertEqual(circuit_breaker.consecutive_failure_count, 1)
-        self.assertEqual(second_result.batch_count, 2)
-        self.assertEqual(second_result.xml_batches[0].xml_payload_bytes, first_payload)
-        self.assertEqual(
-            second_result.xml_batches[0].xml_payload_file_path,
-            str(first_batch_xml_path),
-        )
-
-        latency_events = [
-            json.loads(line)
-            for line in latency_events_path.read_text(encoding="utf-8").splitlines()
-        ]
-        self.assertEqual(
-            [event["status"] for event in latency_events],
-            [
-                "success",
-                "success",
-                "reused_validated_batch",
-                "reused_validated_batch",
-            ],
-        )
-
     def test_xml_fetch_passes_network_timeout_to_entrez_urlopen(self) -> None:
         captured_urlopen_timeout: dict[str, float | None] = {"timeout": None}
 
@@ -884,14 +785,14 @@ class NCBIXmlFetchInfrastructureTests(unittest.TestCase):
         self.assertTrue(blocked_handle_closed.wait(timeout=0.5))
         self.assertLess(deadline_test_elapsed_seconds, 1.0)
 
-    def test_xml_fetch_logs_deadline_exhaustion_when_backoff_will_not_fit(
+    def test_xml_fetch_raises_deadline_when_next_backoff_will_not_fit(
         self,
     ) -> None:
-        temporary_directory = tempfile.TemporaryDirectory()
-        self.addCleanup(temporary_directory.cleanup)
-        workspace_directory = Path(temporary_directory.name) / "xml_workspace"
-
         fake_time = {"value": 0.0}
+        circuit_breaker = NCBIXmlCircuitBreaker(
+            failure_threshold=3,
+            cooldown_seconds=60.0,
+        )
 
         def fail_after_consuming_deadline(*args, **kwargs):
             fake_time["value"] = 0.75
@@ -904,30 +805,30 @@ class NCBIXmlFetchInfrastructureTests(unittest.TestCase):
             with patch(
                 "src.pago_pipeline.ncbi_api._open_ncbi_entrez_efetch_once",
                 side_effect=fail_after_consuming_deadline,
-            ):
-                with self.assertRaises(NCBIXmlBatchDeadlineExceeded):
-                    fetch_ncbi_protein_xml_batches(
-                        ncbi_email="test@example.org",
-                        ncbi_api_key=None,
-                        protein_uids=["1001"],
-                        max_retry_attempts=2,
-                        request_delay_seconds=0.0,
-                        batch_workspace_directory=workspace_directory,
-                        fetch_timeout_seconds=1.0,
-                        batch_deadline_seconds=1.0,
-                        retry_backoff_initial_seconds=0.5,
-                    )
+            ) as efetch_mock:
+                with patch(
+                    "src.pago_pipeline.ncbi_api.time.sleep",
+                ) as sleep_mock:
+                    with self.assertRaisesRegex(
+                        NCBIXmlBatchDeadlineExceeded,
+                        "deadline exhausted",
+                    ):
+                        fetch_ncbi_protein_xml_batches(
+                            ncbi_email="test@example.org",
+                            ncbi_api_key=None,
+                            protein_uids=["1001"],
+                            max_retry_attempts=2,
+                            request_delay_seconds=0.0,
+                            fetch_timeout_seconds=1.0,
+                            batch_deadline_seconds=1.0,
+                            retry_backoff_initial_seconds=0.5,
+                            circuit_breaker=circuit_breaker,
+                        )
 
-        latency_events = [
-            json.loads(line)
-            for line in (
-                workspace_directory / "latency_events.jsonl"
-            ).read_text(encoding="utf-8").splitlines()
-        ]
-        self.assertEqual(
-            [event["status"] for event in latency_events],
-            ["transient_failure", "deadline_exhausted"],
-        )
+        efetch_mock.assert_called_once()
+        sleep_mock.assert_not_called()
+        self.assertEqual(circuit_breaker.consecutive_failure_count, 1)
+        self.assertIsNone(circuit_breaker.opened_at_seconds)
 
     def test_default_circuit_breaker_accumulates_failures_and_recovers(
         self,
