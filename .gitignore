@@ -26,6 +26,12 @@ data/*
 !data/01-raw/
 !data/01-raw/**
 
+# Resumable NCBI XML batch workspace: large, regenerable, and never an artifact.
+# This must follow the data/01-raw negations above, because the last matching
+# pattern wins and those negations would otherwise re-include it. It also has to
+# stay out of git-lfs, which claims every .xml under protein_xml_snapshots.
+**/.batch_workspace/
+
 # Test runtime artifacts
 .pytest_cache/
 .coverage
