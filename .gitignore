@@ -32,6 +32,20 @@ data/*
 # stay out of git-lfs, which claims every .xml under protein_xml_snapshots.
 **/.batch_workspace/
 
+# Immutable NCBI snapshot runs. Every pipeline run leaves one directory here,
+# each a regenerable multi-hundred-MB artifact routed into git-lfs. Only the
+# curated runs that latest/ points at belong in the repository, so they are
+# re-included by name below. Like the rule above, this must follow the
+# data/01-raw negations, because the last matching pattern wins.
+#
+# Publishing a run is deliberate: add a "!" line for it here, then git add it.
+# The pattern excludes each RUN directory rather than the snapshots/ parent, so
+# that these negations can take effect at all -- git cannot re-include anything
+# beneath an excluded directory.
+data/01-raw/*/snapshots/*/
+!data/01-raw/protein_uid_snapshots/snapshots/2026-04-06T20-42-12Z__q_891f443d754c/
+!data/01-raw/protein_xml_snapshots/snapshots/2026-04-09T00-51-02Z__q_891f443d754c/
+
 # Test runtime artifacts
 .pytest_cache/
 .coverage

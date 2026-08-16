@@ -5,8 +5,15 @@ from the same source records.
 
 ## Tracking policy
 
-- Commit UID snapshots and manifests with normal Git.
-- Track raw XML snapshots with Git LFS.
+- `latest/` is tracked with normal Git and always reflects the published dataset.
+- Runs under `snapshots/` are ignored by default: each one is a regenerable
+  multi-hundred-MB artifact, and the repository publishes only curated runs.
+  Publishing one is deliberate -- add a `!` line for its directory in
+  `.gitignore`, then commit it together with the `latest/` update that points
+  at it. The two must land in the same commit, because `latest/manifest.json`
+  names its source run in `immutable_snapshot_relative_path`.
+- Track raw XML snapshots with Git LFS. Pushed LFS storage is never reclaimed,
+  which is the other reason snapshot runs are published one at a time.
 - Keep SHA-256 hashes in the manifests as the authority for dataset identity.
 
 The XML files are required for strong reproducibility. Re-fetching records from
