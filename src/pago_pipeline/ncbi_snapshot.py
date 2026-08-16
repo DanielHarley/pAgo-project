@@ -1,22 +1,31 @@
 from __future__ import annotations
 
 import hashlib
-import re
 import shutil
 import tempfile
-from dataclasses import asdict
+import time
+from contextlib import contextmanager
+from dataclasses import asdict, dataclass
 from enum import StrEnum
 import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Any, Dict, Optional, Union
-from collections import Counter
 
 from src.pago_pipeline.ncbi_api import (
+    NCBI_PROTEIN_GBSEQ_XML_RETTYPE,
     NCBIProteinUidFetchResult,
     NCBIProteinXmlFetchResult,
     fetch_ncbi_protein_uid_snapshot,
     fetch_ncbi_protein_xml_batches,
     get_default_ncbi_xml_circuit_breaker,
+)
+from src.pago_pipeline.ncbi_batch_workspace import purge_batch_workspace_directory
+from src.pago_pipeline.ncbi_telemetry import NCBIRetrievalTelemetry
+from src.pago_pipeline.ncbi_xml_stream import (
+    XmlBatchPayloadSource,
+    extract_protein_uid_from_gbseq_element,
+    validate_consolidated_xml_file,
+    write_consolidated_xml_document,
 )
 from src.pago_pipeline.storage import (
     read_json_file,
@@ -24,17 +33,38 @@ from src.pago_pipeline.storage import (
     save_ncbi_protein_uids_as_txt,
     sha256_of_file,
     sha256_of_lines,
-    write_bytes_atomic,
     write_json_atomic,
 )
 
 PathLike = Union[str, Path]
+
+UID_SNAPSHOT_FORMAT_VERSION = "1.1"
+XML_SNAPSHOT_FORMAT_VERSION = "1.1"
+SUPPORTED_XML_SNAPSHOT_FORMAT_VERSIONS = frozenset({"1.0", "1.1"})
+BATCH_WORKSPACE_DIRECTORY_NAME = ".batch_workspace"
 
 
 class SnapshotMode(StrEnum):
     create_new = "create_new"
     reuse_latest = "reuse_latest"
     reuse_latest_or_create = "reuse_latest_or_create"
+
+
+@contextmanager
+def _measure_local_phase(
+    *,
+    telemetry: Optional[NCBIRetrievalTelemetry],
+    phase_name: str,
+):
+    """
+    Measure one local processing phase when a telemetry collector is present.
+    """
+    if telemetry is None:
+        yield
+        return
+
+    with telemetry.measure_local_phase(phase_name=phase_name):
+        yield
 
 
 def _as_path(path_like: PathLike) -> Path:
@@ -88,60 +118,41 @@ def _build_query_hash(search_query: str, hash_length: int = 12) -> str:
     return full_hash[:hash_length]
 
 
-def _build_consolidated_xml_payload(
+def _build_xml_batch_payload_sources(
     *,
     fetch_result: NCBIProteinXmlFetchResult,
-) -> tuple[bytes, int]:
+) -> list[XmlBatchPayloadSource]:
     """
-    Merge all XML batches into one valid XML document with a single root.
+    Order fetched batches by plan index and expose them as consolidation inputs.
 
-    Returns:
-        tuple[bytes, int]:
-            - consolidated XML payload as UTF-8 bytes with XML declaration
-            - total number of child records appended under the root
+    Ordering is taken from the batch index rather than from arrival order,
+    because concurrent retrieval completes batches out of order while the
+    consolidated snapshot hash is defined by plan order alone.
     """
     if not fetch_result.xml_batches:
         raise ValueError("fetch_result.xml_batches must contain at least one batch.")
 
-    consolidated_root: Optional[ET.Element] = None
-    expected_root_tag: Optional[str] = None
-    total_record_count = 0
+    return [
+        XmlBatchPayloadSource(
+            batch_index=xml_batch.batch_index,
+            payload_bytes=xml_batch.xml_payload_bytes,
+            payload_file_path=xml_batch.xml_payload_file_path,
+        )
+        for xml_batch in sorted(
+            fetch_result.xml_batches,
+            key=lambda xml_batch: xml_batch.batch_index,
+        )
+    ]
 
-    for xml_batch in fetch_result.xml_batches:
-        try:
-            batch_root = ET.fromstring(xml_batch.xml_payload_bytes)
-        except ET.ParseError as error:
-            raise RuntimeError(
-                f"Failed to parse XML batch {xml_batch.batch_index}: {error}"
-            ) from error
 
-        if consolidated_root is None:
-            consolidated_root = ET.Element(batch_root.tag, batch_root.attrib)
-            expected_root_tag = batch_root.tag
-        else:
-            if batch_root.tag != expected_root_tag:
-                raise RuntimeError(
-                    "XML batch root tag mismatch during consolidation. "
-                    f"Expected {expected_root_tag}, got {batch_root.tag} "
-                    f"in batch {xml_batch.batch_index}."
-                )
-
-        batch_children = list(batch_root)
-        for child in batch_children:
-            consolidated_root.append(child)
-
-        total_record_count += len(batch_children)
-
-    if consolidated_root is None:
-        raise RuntimeError("Failed to create consolidated XML root.")
-
-    consolidated_xml_payload = ET.tostring(
-        consolidated_root,
-        encoding="utf-8",
-        xml_declaration=True,
-    )
-
-    return consolidated_xml_payload, total_record_count
+def _extract_ncbi_protein_uid_from_gbseq_element(
+    *,
+    gbseq_element: ET.Element,
+) -> str:
+    """
+    Extract one protein UID from a GBSeq record using its GBSeqid fields.
+    """
+    return extract_protein_uid_from_gbseq_element(gbseq_element=gbseq_element)
 
 
 def _validate_saved_consolidated_xml_snapshot(
@@ -152,82 +163,18 @@ def _validate_saved_consolidated_xml_snapshot(
     expected_record_count: Optional[int] = None,
 ) -> int:
     """
-    Parse a saved consolidated XML snapshot and validate basic structural invariants.
+    Validate the structure of a saved consolidated XML snapshot in one pass.
 
     Returns:
         int:
             Number of direct child records found under the root element.
     """
-    resolved_xml_file_path = _as_path(xml_file_path)
-
-    try:
-        parsed_tree = ET.parse(resolved_xml_file_path)
-    except ET.ParseError as error:
-        raise RuntimeError(
-            f"Saved consolidated XML snapshot is not well-formed: {error}"
-        ) from error
-
-    root_element = parsed_tree.getroot()
-    if root_element.tag != expected_root_tag:
-        raise RuntimeError(
-            "Saved consolidated XML snapshot root tag mismatch. "
-            f"Expected {expected_root_tag}, got {root_element.tag}."
-        )
-
-    child_elements = list(root_element)
-    record_count = len(child_elements)
-
-    invalid_child_tags = sorted(
-        {child.tag for child in child_elements if child.tag != expected_record_tag}
-    )
-    if invalid_child_tags:
-        raise RuntimeError(
-            "Saved consolidated XML snapshot contains unexpected child tags "
-            f"under {expected_root_tag}: {invalid_child_tags}."
-        )
-
-    if (
-        expected_record_count is not None
-        and record_count != expected_record_count
-    ):
-        raise RuntimeError(
-            "Saved consolidated XML snapshot record count mismatch. "
-            f"Expected {expected_record_count}, got {record_count}."
-        )
-
-    return record_count
-
-
-def _extract_ncbi_protein_uid_from_gbseq_element(
-    *,
-    gbseq_element: ET.Element,
-) -> str:
-    """
-    Extract one protein UID from a GBSeq record using its GBSeqid fields.
-    """
-    uid_candidates: set[str] = set()
-
-    for gbseqid_element in gbseq_element.findall(".//GBSeqid"):
-        gbseqid_text = (gbseqid_element.text or "").strip()
-        if not gbseqid_text:
-            continue
-
-        uid_match = re.fullmatch(r"gi\|(\d+)\|?", gbseqid_text)
-        if uid_match is not None:
-            uid_candidates.add(uid_match.group(1))
-
-    if not uid_candidates:
-        raise RuntimeError(
-            "Failed to extract a protein UID from GBSeqid fields in one XML record."
-        )
-
-    if len(uid_candidates) != 1:
-        raise RuntimeError(
-            "Found multiple conflicting protein UID candidates in one XML record: "
-            f"{sorted(uid_candidates)}."
-        )
-
-    return next(iter(uid_candidates))
+    return validate_consolidated_xml_file(
+        xml_file_path=xml_file_path,
+        expected_root_tag=expected_root_tag,
+        expected_record_tag=expected_record_tag,
+        expected_record_count=expected_record_count,
+    ).record_count
 
 
 def _validate_xml_record_uids(
@@ -240,57 +187,13 @@ def _validate_xml_record_uids(
     """
     Validate that the XML record UIDs match the requested protein UIDs.
     """
-    resolved_xml_file_path = _as_path(xml_file_path)
-
-    try:
-        parsed_tree = ET.parse(resolved_xml_file_path)
-    except ET.ParseError as error:
-        raise RuntimeError(
-            f"Saved consolidated XML snapshot is not well-formed: {error}"
-        ) from error
-
-    root_element = parsed_tree.getroot()
-    if root_element.tag != expected_root_tag:
-        raise RuntimeError(
-            "Saved consolidated XML snapshot root tag mismatch during UID "
-            f"validation. Expected {expected_root_tag}, got {root_element.tag}."
-        )
-
-    child_elements = list(root_element)
-    invalid_child_tags = sorted(
-        {child.tag for child in child_elements if child.tag != expected_record_tag}
-    )
-    if invalid_child_tags:
-        raise RuntimeError(
-            "Saved consolidated XML snapshot contains unexpected child tags "
-            f"during UID validation: {invalid_child_tags}."
-        )
-
-    extracted_protein_uids = [
-        _extract_ncbi_protein_uid_from_gbseq_element(gbseq_element=child_element)
-        for child_element in child_elements
-    ]
-
-    expected_uid_counter = Counter(expected_protein_uids)
-    extracted_uid_counter = Counter(extracted_protein_uids)
-    if extracted_uid_counter != expected_uid_counter:
-        missing_uids = sorted(
-            (
-                expected_uid_counter - extracted_uid_counter
-            ).elements()
-        )
-        unexpected_uids = sorted(
-            (
-                extracted_uid_counter - expected_uid_counter
-            ).elements()
-        )
-        raise RuntimeError(
-            "Saved consolidated XML snapshot record UIDs do not match the "
-            "expected protein UIDs. "
-            f"Missing: {missing_uids[:5]}; Unexpected: {unexpected_uids[:5]}."
-        )
-
-    return extracted_protein_uids
+    return validate_consolidated_xml_file(
+        xml_file_path=xml_file_path,
+        expected_root_tag=expected_root_tag,
+        expected_record_tag=expected_record_tag,
+        expected_protein_uids=expected_protein_uids,
+        validation_context="during UID validation",
+    ).protein_uids
 
 
 def build_snapshot_directory_name(
@@ -339,7 +242,7 @@ def _build_snapshot_manifest(
     manifest_payload = asdict(fetch_result)
     manifest_payload.pop("protein_uids", None)
 
-    manifest_payload["snapshot_format_version"] = "1.0"
+    manifest_payload["snapshot_format_version"] = UID_SNAPSHOT_FORMAT_VERSION
     manifest_payload["snapshot_file_name"] = "protein_uids.txt"
     manifest_payload["manifest_file_name"] = "manifest.json"
     manifest_payload["immutable_snapshot_directory_name"] = (
@@ -352,6 +255,69 @@ def _build_snapshot_manifest(
     return manifest_payload
 
 
+SUPERSEDED_LATEST_DIRECTORY_PREFIX_SUFFIX = "_superseded_"
+STAGED_LATEST_DIRECTORY_PREFIX_SUFFIX = "_staged_"
+
+
+def _rename_directory_with_retries(
+    *,
+    source_directory: Path,
+    destination_directory: Path,
+    attempt_count: int = 5,
+    initial_retry_delay_seconds: float = 0.2,
+) -> bool:
+    """
+    Rename a directory, retrying while the filesystem still holds it.
+
+    On Windows a directory containing a file another process has open cannot be
+    renamed or removed until that handle closes. A virus scanner or indexer
+    reading a freshly written multi-hundred megabyte artifact routinely holds
+    one for a short while, so a bounded retry converts a hard failure into a
+    brief wait.
+    """
+    for attempt_index in range(attempt_count):
+        try:
+            source_directory.replace(destination_directory)
+            return True
+        except OSError:
+            if attempt_index == attempt_count - 1:
+                return False
+
+            time.sleep(initial_retry_delay_seconds * (2 ** attempt_index))
+
+    return False
+
+
+def _reserve_sibling_directory_name(
+    *,
+    parent_directory: Path,
+    name_prefix: str,
+) -> Path:
+    """
+    Reserve an unused sibling directory name for a rename target.
+    """
+    reserved_directory = Path(
+        tempfile.mkdtemp(prefix=name_prefix, dir=parent_directory)
+    )
+    reserved_directory.rmdir()
+    return reserved_directory
+
+
+def _sweep_superseded_latest_directories(
+    *,
+    parent_directory: Path,
+    latest_directory_name: str,
+) -> None:
+    """
+    Remove leftovers a previous interrupted publication could not delete.
+    """
+    for leftover_directory in parent_directory.glob(
+        f"{latest_directory_name}"
+        f"{SUPERSEDED_LATEST_DIRECTORY_PREFIX_SUFFIX}*"
+    ):
+        shutil.rmtree(leftover_directory, ignore_errors=True)
+
+
 def _replace_latest_directory(
     *,
     latest_directory: PathLike,
@@ -360,34 +326,90 @@ def _replace_latest_directory(
     """
     Replace the convenience latest directory from a fully prepared temp copy.
 
-    This avoids exposing a partially populated latest/ directory if copying one
-    of the snapshot artifacts fails midway through the publish step.
+    The previous directory is moved aside rather than deleted in place. Deleting
+    first means a failure part way through leaves no latest/ at all, which is
+    exactly what happens when a large artifact is briefly locked: the manifest
+    is removed, the payload is not, and the directory is left in a state no
+    reader can validate. Moving aside fails before anything is destroyed, and
+    the old directory is restored if the new one cannot be put in place.
     """
     resolved_latest_directory = _as_path(latest_directory)
-    resolved_latest_directory.parent.mkdir(parents=True, exist_ok=True)
+    parent_directory = resolved_latest_directory.parent
+    parent_directory.mkdir(parents=True, exist_ok=True)
 
-    temporary_latest_directory = Path(
+    _sweep_superseded_latest_directories(
+        parent_directory=parent_directory,
+        latest_directory_name=resolved_latest_directory.name,
+    )
+
+    staged_latest_directory = Path(
         tempfile.mkdtemp(
-            prefix=f"{resolved_latest_directory.name}_tmp_",
-            dir=resolved_latest_directory.parent,
+            prefix=(
+                f"{resolved_latest_directory.name}"
+                f"{STAGED_LATEST_DIRECTORY_PREFIX_SUFFIX}"
+            ),
+            dir=parent_directory,
         )
     )
+    superseded_latest_directory: Optional[Path] = None
 
     try:
         for source_file_path, destination_file_name in files_to_copy:
             shutil.copy2(
                 _as_path(source_file_path),
-                temporary_latest_directory / destination_file_name,
+                staged_latest_directory / destination_file_name,
             )
 
         if resolved_latest_directory.exists():
-            shutil.rmtree(resolved_latest_directory)
+            superseded_latest_directory = _reserve_sibling_directory_name(
+                parent_directory=parent_directory,
+                name_prefix=(
+                    f"{resolved_latest_directory.name}"
+                    f"{SUPERSEDED_LATEST_DIRECTORY_PREFIX_SUFFIX}"
+                ),
+            )
+            if not _rename_directory_with_retries(
+                source_directory=resolved_latest_directory,
+                destination_directory=superseded_latest_directory,
+            ):
+                superseded_latest_directory = None
+                raise RuntimeError(
+                    "Unable to move the existing latest snapshot directory "
+                    f"aside: {resolved_latest_directory}. The published "
+                    "immutable snapshot is unaffected and the existing "
+                    "latest/ directory was left intact. Close any process "
+                    "holding those files open and retry the publication."
+                )
 
-        temporary_latest_directory.replace(resolved_latest_directory)
+        if not _rename_directory_with_retries(
+            source_directory=staged_latest_directory,
+            destination_directory=resolved_latest_directory,
+        ):
+            if superseded_latest_directory is not None:
+                _rename_directory_with_retries(
+                    source_directory=superseded_latest_directory,
+                    destination_directory=resolved_latest_directory,
+                )
+                superseded_latest_directory = None
+
+            raise RuntimeError(
+                "Unable to publish the latest snapshot directory: "
+                f"{resolved_latest_directory}. The published immutable "
+                "snapshot is unaffected."
+            )
     except Exception:
-        if temporary_latest_directory.exists():
-            shutil.rmtree(temporary_latest_directory, ignore_errors=True)
+        if staged_latest_directory.exists():
+            shutil.rmtree(staged_latest_directory, ignore_errors=True)
         raise
+    finally:
+        if (
+            superseded_latest_directory is not None
+            and superseded_latest_directory.exists()
+        ):
+            # Best effort: latest/ is already correct, so a leftover that is
+            # still locked is swept by the next publication instead of failing
+            # one that has otherwise succeeded.
+            shutil.rmtree(superseded_latest_directory, ignore_errors=True)
 
 
 def _build_xml_snapshot_manifest(
@@ -401,12 +423,13 @@ def _build_xml_snapshot_manifest(
     consolidated_xml_file_sha256: str,
     consolidated_record_count: int,
     batch_metadata_records: list[Dict[str, Any]],
+    retrieval_telemetry: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
     """
     Build the manifest payload persisted alongside one consolidated XML file.
     """
     return {
-        "snapshot_format_version": "1.0",
+        "snapshot_format_version": XML_SNAPSHOT_FORMAT_VERSION,
         "artifact_type": "ncbi_protein_xml_snapshot",
         "database_name": fetch_result.database_name,
         "identifier_type": fetch_result.identifier_type,
@@ -414,13 +437,38 @@ def _build_xml_snapshot_manifest(
         "translated_query": source_uid_snapshot_manifest.get("translated_query"),
         "retrieved_at_utc": fetch_result.retrieved_at_utc,
         "retmode": fetch_result.retmode,
+        "rettype": fetch_result.rettype,
         "requested_protein_uid_count": fetch_result.requested_protein_uid_count,
         "normalized_protein_uid_count": fetch_result.normalized_protein_uid_count,
         "protein_uids_sha256": fetch_result.protein_uids_sha256,
         "batch_size": fetch_result.batch_size,
         "batch_count": fetch_result.batch_count,
+        "reused_batch_count": fetch_result.reused_batch_count,
+        "fetched_batch_count": fetch_result.fetched_batch_count,
         "request_delay_seconds": fetch_result.request_delay_seconds,
         "max_retry_attempts": fetch_result.max_retry_attempts,
+        "request_policy": {
+            "fetch_timeout_seconds": fetch_result.fetch_timeout_seconds,
+            "batch_deadline_seconds": fetch_result.batch_deadline_seconds,
+            "retry_backoff_initial_seconds": (
+                fetch_result.retry_backoff_initial_seconds
+            ),
+            "retry_backoff_multiplier": fetch_result.retry_backoff_multiplier,
+            "retry_backoff_max_seconds": fetch_result.retry_backoff_max_seconds,
+            "rate_limit_backoff_seconds": fetch_result.rate_limit_backoff_seconds,
+            "circuit_breaker_failure_threshold": (
+                fetch_result.circuit_breaker_failure_threshold
+            ),
+            "circuit_breaker_cooldown_seconds": (
+                fetch_result.circuit_breaker_cooldown_seconds
+            ),
+            "max_concurrent_requests": fetch_result.max_concurrent_requests,
+            "max_request_starts_per_second": (
+                fetch_result.max_request_starts_per_second
+            ),
+            "reuse_http_connection": fetch_result.reuse_http_connection,
+        },
+        "retrieval_telemetry": retrieval_telemetry,
         "python_version": fetch_result.python_version,
         "biopython_version": fetch_result.biopython_version,
         "manifest_file_name": "manifest.json",
@@ -507,6 +555,35 @@ def save_ncbi_protein_uid_snapshot(
     return immutable_snapshot_directory
 
 
+@dataclass(frozen=True)
+class SavedXmlSnapshot:
+    """
+    One published XML snapshot together with the state validated while writing.
+
+    The publication path already parsed, hashed, and UID-checked the artifact it
+    just wrote. Returning that state lets callers skip re-reading a multi-hundred
+    megabyte file only to reconstruct facts that are already known.
+    """
+    snapshot_directory: Path
+    manifest_file_path: Path
+    protein_uids_file_path: Path
+    xml_file_path: Path
+    manifest: Dict[str, Any]
+    protein_uids: list[str]
+    consolidated_record_count: int
+    xml_file_sha256: str
+
+    def as_snapshot_payload(self) -> Dict[str, Any]:
+        return {
+            "snapshot_directory": self.snapshot_directory,
+            "manifest_file_path": self.manifest_file_path,
+            "protein_uids_file_path": self.protein_uids_file_path,
+            "manifest": self.manifest,
+            "protein_uids": self.protein_uids,
+            "xml_file_path": self.xml_file_path,
+        }
+
+
 def save_ncbi_protein_xml_snapshot(
     *,
     fetch_result: NCBIProteinXmlFetchResult,
@@ -515,12 +592,17 @@ def save_ncbi_protein_xml_snapshot(
     source_uid_snapshot_manifest_file_path: PathLike,
     protein_uids: list[str],
     update_latest_directory: bool = True,
-) -> Path:
+    telemetry: Optional[NCBIRetrievalTelemetry] = None,
+) -> SavedXmlSnapshot:
     """
     Persist one immutable local snapshot of consolidated NCBI protein XML.
 
-    XML is fetched in batches upstream for robustness, then merged into one
-    valid XML document with a single root and persisted as one file.
+    XML is fetched in batches upstream for robustness, then streamed into one
+    valid XML document with a single root and persisted as one file. The
+    document is never held in memory: records are re-serialized straight into
+    the destination file, the SHA-256 is accumulated over the same bytes as they
+    are written, and one streaming pass afterwards validates structure, record
+    count, and the exact protein UID multiset.
     """
     resolved_snapshot_root_directory = _as_path(snapshot_root_directory)
     resolved_source_uid_snapshot_manifest_file_path = _as_path(
@@ -581,7 +663,10 @@ def save_ncbi_protein_xml_snapshot(
         )
 
         batch_metadata_records: list[Dict[str, Any]] = []
-        for xml_batch in fetch_result.xml_batches:
+        for xml_batch in sorted(
+            fetch_result.xml_batches,
+            key=lambda batch: batch.batch_index,
+        ):
             batch_metadata_records.append(
                 {
                     "batch_index": xml_batch.batch_index,
@@ -589,39 +674,43 @@ def save_ncbi_protein_xml_snapshot(
                     "batch_end_index": xml_batch.batch_end_index,
                     "protein_uid_count": xml_batch.protein_uid_count,
                     "xml_payload_sha256": xml_batch.xml_payload_sha256,
+                    "reused_from_workspace": xml_batch.reused_from_workspace,
                 }
             )
 
-        consolidated_xml_payload, consolidated_record_count = (
-            _build_consolidated_xml_payload(fetch_result=fetch_result)
-        )
         expected_record_count = fetch_result.normalized_protein_uid_count
 
-        if consolidated_record_count != expected_record_count:
+        with _measure_local_phase(
+            telemetry=telemetry,
+            phase_name="consolidated_xml_write",
+        ):
+            consolidated_write_result = write_consolidated_xml_document(
+                batch_payload_sources=_build_xml_batch_payload_sources(
+                    fetch_result=fetch_result,
+                ),
+                output_file_path=consolidated_xml_file_path,
+            )
+
+        if consolidated_write_result.record_count != expected_record_count:
             raise RuntimeError(
                 "Consolidated XML snapshot record count does not match the "
                 "expected protein UID count. "
                 f"Expected {expected_record_count}, got "
-                f"{consolidated_record_count}."
+                f"{consolidated_write_result.record_count}."
             )
 
-        write_bytes_atomic(
-            binary_payload=consolidated_xml_payload,
-            output_file_path=consolidated_xml_file_path,
-        )
+        with _measure_local_phase(
+            telemetry=telemetry,
+            phase_name="consolidated_xml_validation",
+        ):
+            consolidated_validation_result = validate_consolidated_xml_file(
+                xml_file_path=consolidated_xml_file_path,
+                expected_record_count=expected_record_count,
+                expected_protein_uids=protein_uids,
+            )
 
-        validated_record_count = _validate_saved_consolidated_xml_snapshot(
-            xml_file_path=consolidated_xml_file_path,
-            expected_record_count=expected_record_count,
-        )
-        _validate_xml_record_uids(
-            xml_file_path=consolidated_xml_file_path,
-            expected_protein_uids=protein_uids,
-        )
-
-        consolidated_xml_file_sha256 = sha256_of_file(
-            input_file_path=consolidated_xml_file_path,
-        )
+        validated_record_count = consolidated_validation_result.record_count
+        consolidated_xml_file_sha256 = consolidated_write_result.sha256
 
         manifest_payload = _build_xml_snapshot_manifest(
             fetch_result=fetch_result,
@@ -633,6 +722,11 @@ def save_ncbi_protein_xml_snapshot(
             consolidated_xml_file_sha256=consolidated_xml_file_sha256,
             consolidated_record_count=validated_record_count,
             batch_metadata_records=batch_metadata_records,
+            retrieval_telemetry=(
+                telemetry.build_summary()
+                if telemetry is not None
+                else fetch_result.retrieval_telemetry
+            ),
         )
 
         write_json_atomic(
@@ -642,20 +736,33 @@ def save_ncbi_protein_xml_snapshot(
         immutable_snapshot_complete = True
 
         if update_latest_directory:
-            _replace_latest_directory(
-                latest_directory=resolved_snapshot_root_directory / "latest",
-                files_to_copy=[
-                    (protein_uids_file_path, "protein_uids.txt"),
-                    (manifest_file_path, "manifest.json"),
-                    (consolidated_xml_file_path, consolidated_xml_file_name),
-                ],
-            )
+            with _measure_local_phase(
+                telemetry=telemetry,
+                phase_name="latest_directory_copy",
+            ):
+                _replace_latest_directory(
+                    latest_directory=resolved_snapshot_root_directory / "latest",
+                    files_to_copy=[
+                        (protein_uids_file_path, "protein_uids.txt"),
+                        (manifest_file_path, "manifest.json"),
+                        (consolidated_xml_file_path, consolidated_xml_file_name),
+                    ],
+                )
     except Exception:
         if not immutable_snapshot_complete and immutable_snapshot_directory.exists():
             shutil.rmtree(immutable_snapshot_directory, ignore_errors=True)
         raise
 
-    return immutable_snapshot_directory
+    return SavedXmlSnapshot(
+        snapshot_directory=immutable_snapshot_directory,
+        manifest_file_path=manifest_file_path,
+        protein_uids_file_path=protein_uids_file_path,
+        xml_file_path=consolidated_xml_file_path,
+        manifest=manifest_payload,
+        protein_uids=list(protein_uids),
+        consolidated_record_count=validated_record_count,
+        xml_file_sha256=consolidated_xml_file_sha256,
+    )
 
 
 def load_snapshot_manifest(
@@ -724,6 +831,15 @@ def _validate_loaded_xml_snapshot_payload(
             f"Expected 'ncbi_protein_xml_snapshot', got {artifact_type!r}."
         )
 
+    snapshot_format_version = manifest_payload.get("snapshot_format_version")
+    if snapshot_format_version not in SUPPORTED_XML_SNAPSHOT_FORMAT_VERSIONS:
+        raise RuntimeError(
+            "Saved XML snapshot manifest format version is not supported. "
+            f"Expected one of "
+            f"{sorted(SUPPORTED_XML_SNAPSHOT_FORMAT_VERSIONS)}, got "
+            f"{snapshot_format_version!r}."
+        )
+
     xml_file_name = manifest_payload.get("xml_file_name")
     if not isinstance(xml_file_name, str) or not xml_file_name.strip():
         raise RuntimeError(
@@ -769,14 +885,11 @@ def _validate_loaded_xml_snapshot_payload(
             "Saved XML snapshot manifest consolidated_record_count must be an integer."
         )
 
-    validated_record_count = _validate_saved_consolidated_xml_snapshot(
+    validated_record_count = validate_consolidated_xml_file(
         xml_file_path=resolved_xml_file_path,
         expected_record_count=expected_record_count,
-    )
-    _validate_xml_record_uids(
-        xml_file_path=resolved_xml_file_path,
         expected_protein_uids=protein_uids,
-    )
+    ).record_count
 
     if (
         expected_uid_count is not None
@@ -1001,9 +1114,17 @@ def resolve_ncbi_protein_uid_snapshot(
     ssl_ca_directory: Optional[str] = None,
     deduplicate_uids: bool = True,
     sort_uids: bool = True,
-    page_size: int = 1000,
+    page_size: int = 10_000,
     max_retry_attempts: int = 5,
     request_delay_seconds: Optional[float] = None,
+    fetch_timeout_seconds: float = 30.0,
+    request_deadline_seconds: float = 300.0,
+    retry_backoff_initial_seconds: Optional[float] = None,
+    retry_backoff_multiplier: float = 2.0,
+    retry_backoff_max_seconds: float = 30.0,
+    rate_limit_backoff_seconds: float = 5.0,
+    reuse_http_connection: bool = False,
+    verbose_logging: bool = False,
     ncbi_email: Optional[str] = None,
     ncbi_api_key: Optional[str] = None,
     update_latest_directory: bool = True,
@@ -1091,6 +1212,14 @@ def resolve_ncbi_protein_uid_snapshot(
         page_size=page_size,
         max_retry_attempts=max_retry_attempts,
         request_delay_seconds=request_delay_seconds,
+        fetch_timeout_seconds=fetch_timeout_seconds,
+        request_deadline_seconds=request_deadline_seconds,
+        retry_backoff_initial_seconds=retry_backoff_initial_seconds,
+        retry_backoff_multiplier=retry_backoff_multiplier,
+        retry_backoff_max_seconds=retry_backoff_max_seconds,
+        rate_limit_backoff_seconds=rate_limit_backoff_seconds,
+        reuse_http_connection=reuse_http_connection,
+        verbose_logging=verbose_logging,
     )
 
     saved_snapshot_directory = save_ncbi_protein_uid_snapshot(
@@ -1111,7 +1240,7 @@ def resolve_ncbi_protein_xml_snapshot(
     source_uid_snapshot_root_directory: PathLike,
     ssl_ca_file: Optional[str] = None,
     ssl_ca_directory: Optional[str] = None,
-    xml_batch_size: int = 100,
+    xml_batch_size: int = 500,
     max_retry_attempts: int = 5,
     xml_request_delay_seconds: Optional[float] = None,
     fetch_timeout_seconds: float = 30.0,
@@ -1119,8 +1248,18 @@ def resolve_ncbi_protein_xml_snapshot(
     retry_backoff_initial_seconds: Optional[float] = None,
     retry_backoff_multiplier: float = 2.0,
     retry_backoff_max_seconds: float = 30.0,
+    rate_limit_backoff_seconds: float = 5.0,
     circuit_breaker_failure_threshold: int = 3,
     circuit_breaker_cooldown_seconds: float = 60.0,
+    xml_rettype: Optional[str] = NCBI_PROTEIN_GBSEQ_XML_RETTYPE,
+    max_concurrent_requests: int = 1,
+    max_request_starts_per_second: Optional[float] = None,
+    reuse_http_connection: bool = False,
+    batch_workspace_directory: Optional[PathLike] = None,
+    enable_batch_resume: bool = True,
+    purge_batch_workspace_on_success: bool = True,
+    validate_batch_protein_uids: bool = True,
+    verbose_batch_logging: bool = False,
     ncbi_email: Optional[str] = None,
     ncbi_api_key: Optional[str] = None,
     update_latest_directory: bool = True,
@@ -1135,6 +1274,11 @@ def resolve_ncbi_protein_xml_snapshot(
     Circuit-breaker state is retained by the NCBI API infrastructure across
     repeated snapshot workflow invocations for the same threshold and cooldown.
     Callers configure the policy here but do not need to own its mutable state.
+
+    Fetched batches are written to a workspace directory under the snapshot root.
+    A run that fails part way through therefore re-fetches only the batches it is
+    missing on the next attempt, and the workspace is removed once a snapshot has
+    been published successfully.
     """
     resolved_snapshot_mode = _coerce_snapshot_mode(snapshot_mode)
     resolved_snapshot_root_directory = _as_path(snapshot_root_directory)
@@ -1222,6 +1366,13 @@ def resolve_ncbi_protein_xml_snapshot(
         "manifest_file_path"
     ]
 
+    resolved_batch_workspace_directory = (
+        _as_path(batch_workspace_directory)
+        if batch_workspace_directory is not None
+        else resolved_snapshot_root_directory / BATCH_WORKSPACE_DIRECTORY_NAME
+    )
+    retrieval_telemetry = NCBIRetrievalTelemetry()
+
     fetch_result = fetch_ncbi_protein_xml_batches(
         ncbi_email=ncbi_email,
         ncbi_api_key=ncbi_api_key,
@@ -1236,23 +1387,48 @@ def resolve_ncbi_protein_xml_snapshot(
         retry_backoff_initial_seconds=retry_backoff_initial_seconds,
         retry_backoff_multiplier=retry_backoff_multiplier,
         retry_backoff_max_seconds=retry_backoff_max_seconds,
+        rate_limit_backoff_seconds=rate_limit_backoff_seconds,
         circuit_breaker_failure_threshold=circuit_breaker_failure_threshold,
         circuit_breaker_cooldown_seconds=circuit_breaker_cooldown_seconds,
         circuit_breaker=get_default_ncbi_xml_circuit_breaker(
             failure_threshold=circuit_breaker_failure_threshold,
             cooldown_seconds=circuit_breaker_cooldown_seconds,
         ),
+        rettype=xml_rettype,
+        max_concurrent_requests=max_concurrent_requests,
+        max_request_starts_per_second=max_request_starts_per_second,
+        reuse_http_connection=reuse_http_connection,
+        batch_workspace_directory=resolved_batch_workspace_directory,
+        enable_batch_resume=enable_batch_resume,
+        validate_batch_protein_uids=validate_batch_protein_uids,
+        verbose_batch_logging=verbose_batch_logging,
+        telemetry=retrieval_telemetry,
     )
 
-    saved_snapshot_directory = save_ncbi_protein_xml_snapshot(
+    saved_xml_snapshot = save_ncbi_protein_xml_snapshot(
         fetch_result=fetch_result,
         snapshot_root_directory=resolved_snapshot_root_directory,
         source_uid_snapshot_manifest=source_uid_snapshot_manifest,
         source_uid_snapshot_manifest_file_path=source_uid_snapshot_manifest_file_path,
         protein_uids=protein_uids,
         update_latest_directory=update_latest_directory,
+        telemetry=retrieval_telemetry,
     )
 
-    return load_xml_snapshot_by_directory(
-        snapshot_directory=saved_snapshot_directory,
+    if purge_batch_workspace_on_success:
+        purge_batch_workspace_directory(
+            workspace_directory=fetch_result.batch_workspace_directory,
+        )
+
+    # The snapshot was parsed, hashed, and UID-checked while it was written, so
+    # reloading it here would only repeat those passes over the published file.
+    resolved_snapshot_payload = saved_xml_snapshot.as_snapshot_payload()
+
+    # The manifest is written before the latest/ copy runs, so the manifest copy
+    # of the telemetry cannot describe publication itself. The payload carries
+    # the complete run, including the phases that follow the manifest write.
+    resolved_snapshot_payload["retrieval_telemetry"] = (
+        retrieval_telemetry.build_summary()
     )
+
+    return resolved_snapshot_payload

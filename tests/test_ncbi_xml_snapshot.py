@@ -44,8 +44,20 @@ from src.pago_pipeline.ncbi_api import (
     fetch_ncbi_protein_xml_batches,
     fetch_ncbi_protein_uid_snapshot,
     get_default_ncbi_xml_circuit_breaker,
+    read_ncbi_xml_batch_payload_bytes,
 )
 from src.pago_pipeline.storage import sha256_of_lines
+
+
+def build_gbset_payload(protein_uids: list[str]) -> bytes:
+    """
+    Build a minimal but valid GBSet payload carrying the given protein UIDs.
+    """
+    gbseq_records = b"".join(
+        f"<GBSeq><GBSeqid>gi|{protein_uid}</GBSeqid></GBSeq>".encode("utf-8")
+        for protein_uid in protein_uids
+    )
+    return b"<GBSet>" + gbseq_records + b"</GBSet>"
 
 
 class FakeFetchHandle:
@@ -446,9 +458,30 @@ class NCBIXmlFetchInfrastructureTests(unittest.TestCase):
         with ncbi_api._default_ncbi_xml_circuit_breakers_lock:
             ncbi_api._default_ncbi_xml_circuit_breakers.clear()
 
+        batch_spill_directory = tempfile.TemporaryDirectory()
+        self.addCleanup(batch_spill_directory.cleanup)
+        self.batch_spill_directory_name = batch_spill_directory.name
+
+        original_workspace_class = ncbi_api.NCBIXmlBatchWorkspace
+
+        def build_workspace_inside_test_directory(**workspace_parameters):
+            if workspace_parameters.get("ephemeral_parent_directory") is None:
+                workspace_parameters["ephemeral_parent_directory"] = (
+                    self.batch_spill_directory_name
+                )
+            return original_workspace_class(**workspace_parameters)
+
+        workspace_patcher = patch.object(
+            ncbi_api,
+            "NCBIXmlBatchWorkspace",
+            build_workspace_inside_test_directory,
+        )
+        workspace_patcher.start()
+        self.addCleanup(workspace_patcher.stop)
+
     def test_xml_fetch_retries_transient_failure_and_returns_batch(self) -> None:
         fetch_error = URLError("timed out")
-        successful_payload = b"<GBSet><GBSeq /><GBSeq /></GBSet>"
+        successful_payload = build_gbset_payload(["1001", "1002"])
         successful_handle = FakeFetchHandle(successful_payload)
 
         with patch(
@@ -475,7 +508,9 @@ class NCBIXmlFetchInfrastructureTests(unittest.TestCase):
         self.assertEqual(efetch_mock.call_count, 2)
         self.assertEqual(fetch_result.batch_count, 1)
         self.assertEqual(
-            fetch_result.xml_batches[0].xml_payload_bytes,
+            read_ncbi_xml_batch_payload_bytes(
+                xml_batch=fetch_result.xml_batches[0],
+            ),
             successful_payload,
         )
         sleep_mock.assert_any_call(0.25)
@@ -490,7 +525,7 @@ class NCBIXmlFetchInfrastructureTests(unittest.TestCase):
                 socket.timeout("response read timed out")
             ),
         )
-        successful_payload = b"<GBSet><GBSeq /></GBSet>"
+        successful_payload = build_gbset_payload(["1001"])
 
         with patch(
             "src.pago_pipeline.ncbi_api._open_ncbi_entrez_efetch_once",
@@ -519,7 +554,9 @@ class NCBIXmlFetchInfrastructureTests(unittest.TestCase):
         self.assertTrue(timed_out_handle.closed)
         self.assertEqual(efetch_mock.call_count, 2)
         self.assertEqual(
-            fetch_result.xml_batches[0].xml_payload_bytes,
+            read_ncbi_xml_batch_payload_bytes(
+                xml_batch=fetch_result.xml_batches[0],
+            ),
             successful_payload,
         )
         sleep_mock.assert_any_call(0.1)
@@ -527,7 +564,7 @@ class NCBIXmlFetchInfrastructureTests(unittest.TestCase):
     def test_xml_fetch_applies_exponential_backoff_with_configured_cap(
         self,
     ) -> None:
-        successful_payload = b"<GBSet><GBSeq /></GBSet>"
+        successful_payload = build_gbset_payload(["1001"])
 
         with patch(
             "src.pago_pipeline.ncbi_api._open_ncbi_entrez_efetch_once",
@@ -586,7 +623,7 @@ class NCBIXmlFetchInfrastructureTests(unittest.TestCase):
             side_effect=[
                 http_429,
                 http_503,
-                FakeFetchHandle(b"<GBSet><GBSeq /></GBSet>"),
+                FakeFetchHandle(build_gbset_payload(["1001"])),
             ],
         ) as efetch_mock:
             with patch(
@@ -640,7 +677,7 @@ class NCBIXmlFetchInfrastructureTests(unittest.TestCase):
 
         def fake_urlopen(*args, **kwargs):
             captured_urlopen_timeout["timeout"] = kwargs.get("timeout")
-            return FakeFetchHandle(b"<GBSet><GBSeq /></GBSet>")
+            return FakeFetchHandle(build_gbset_payload(["1001"]))
 
         with patch.object(ncbi_api.Entrez, "urlopen", fake_urlopen, create=True):
             with patch(
@@ -676,7 +713,7 @@ class NCBIXmlFetchInfrastructureTests(unittest.TestCase):
                 "sleep_between_tries",
                 None,
             )
-            return FakeFetchHandle(b"<GBSet><GBSeq /></GBSet>")
+            return FakeFetchHandle(build_gbset_payload(["1001"]))
 
         with patch.object(ncbi_api.Entrez, "max_tries", 3, create=True):
             with patch.object(
@@ -746,7 +783,7 @@ class NCBIXmlFetchInfrastructureTests(unittest.TestCase):
             release_blocked_read.wait(timeout=2.0)
 
         blocked_handle = FakeFetchHandle(
-            b"<GBSet><GBSeq /></GBSet>",
+            build_gbset_payload(["1001"]),
             read_callback=block_response_read,
         )
 
@@ -834,7 +871,7 @@ class NCBIXmlFetchInfrastructureTests(unittest.TestCase):
         self,
     ) -> None:
         clock = {"value": 0.0}
-        successful_payload = b"<GBSet><GBSeq /></GBSet>"
+        successful_payload = build_gbset_payload(["1001"])
 
         with patch(
             "src.pago_pipeline.ncbi_api.time.monotonic",
@@ -1293,6 +1330,13 @@ class ResolveNcbiSnapshotSslPropagationTests(unittest.TestCase):
                 "manifest": {},
                 "manifest_file_path": source_uid_snapshot_root_directory / "manifest.json",
             }
+            fetch_result_mock = Mock()
+            fetch_result_mock.batch_workspace_directory = None
+            saved_snapshot_mock = Mock()
+            saved_snapshot_mock.as_snapshot_payload.return_value = {
+                "manifest": {},
+                "protein_uids": ["1001", "1002"],
+            }
 
             with patch(
                 "src.pago_pipeline.ncbi_snapshot.resolve_ncbi_protein_uid_snapshot",
@@ -1300,43 +1344,39 @@ class ResolveNcbiSnapshotSslPropagationTests(unittest.TestCase):
             ):
                 with patch(
                     "src.pago_pipeline.ncbi_snapshot.fetch_ncbi_protein_xml_batches",
-                    return_value=Mock(),
+                    return_value=fetch_result_mock,
                 ) as fetch_mock:
                     with patch(
                         "src.pago_pipeline.ncbi_snapshot.save_ncbi_protein_xml_snapshot",
-                        return_value=snapshot_root_directory / "snapshots" / "snapshot-1",
+                        return_value=saved_snapshot_mock,
                     ):
-                        with patch(
-                            "src.pago_pipeline.ncbi_snapshot.load_xml_snapshot_by_directory",
-                            return_value={"manifest": {}, "protein_uids": ["1001", "1002"]},
-                        ):
-                            resolve_ncbi_protein_xml_snapshot(
-                                snapshot_mode="create_new",
-                                snapshot_root_directory=snapshot_root_directory,
-                                source_uid_snapshot_root_directory=(
-                                    source_uid_snapshot_root_directory
-                                ),
-                                ssl_ca_file="corporate-ca.pem",
-                                ssl_ca_directory="corporate-certs",
-                                fetch_timeout_seconds=12.0,
-                                batch_deadline_seconds=45.0,
-                                retry_backoff_initial_seconds=0.25,
-                                retry_backoff_multiplier=3.0,
-                                retry_backoff_max_seconds=4.0,
-                                circuit_breaker_failure_threshold=2,
-                                circuit_breaker_cooldown_seconds=30.0,
-                                ncbi_email="test@example.org",
-                            )
-                            resolve_ncbi_protein_xml_snapshot(
-                                snapshot_mode="create_new",
-                                snapshot_root_directory=snapshot_root_directory,
-                                source_uid_snapshot_root_directory=(
-                                    source_uid_snapshot_root_directory
-                                ),
-                                circuit_breaker_failure_threshold=2,
-                                circuit_breaker_cooldown_seconds=30.0,
-                                ncbi_email="test@example.org",
-                            )
+                        resolve_ncbi_protein_xml_snapshot(
+                            snapshot_mode="create_new",
+                            snapshot_root_directory=snapshot_root_directory,
+                            source_uid_snapshot_root_directory=(
+                                source_uid_snapshot_root_directory
+                            ),
+                            ssl_ca_file="corporate-ca.pem",
+                            ssl_ca_directory="corporate-certs",
+                            fetch_timeout_seconds=12.0,
+                            batch_deadline_seconds=45.0,
+                            retry_backoff_initial_seconds=0.25,
+                            retry_backoff_multiplier=3.0,
+                            retry_backoff_max_seconds=4.0,
+                            circuit_breaker_failure_threshold=2,
+                            circuit_breaker_cooldown_seconds=30.0,
+                            ncbi_email="test@example.org",
+                        )
+                        resolve_ncbi_protein_xml_snapshot(
+                            snapshot_mode="create_new",
+                            snapshot_root_directory=snapshot_root_directory,
+                            source_uid_snapshot_root_directory=(
+                                source_uid_snapshot_root_directory
+                            ),
+                            circuit_breaker_failure_threshold=2,
+                            circuit_breaker_cooldown_seconds=30.0,
+                            ncbi_email="test@example.org",
+                        )
 
         self.assertEqual(
             fetch_mock.call_args_list[0].kwargs["ssl_ca_file"],
