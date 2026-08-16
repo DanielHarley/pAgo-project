@@ -4,6 +4,7 @@
 .idea/
 *.iml
 .cursor/
+.codex/
 llm/
 
 # venv
