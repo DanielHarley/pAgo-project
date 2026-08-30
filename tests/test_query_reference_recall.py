@@ -1,0 +1,134 @@
+from __future__ import annotations
+
+import unittest
+from pathlib import Path
+
+import pandas as pd
+
+from src.pago_pipeline.query_reference_recall import compute_query_reference_recall
+
+_FIXTURE_CSV = (
+    Path(__file__).resolve().parent / "fixtures" / "query_recall_reference_set.csv"
+)
+
+
+def _reference_dataframe() -> pd.DataFrame:
+    return pd.DataFrame(
+        [
+            {
+                "accession": "WP_001.1",
+                "ago_family": "PAGO",
+                "clade": "LONG_A",
+                "reference_label_source": "src",
+                "reference_label_evidence": "EXPERIMENTAL",
+            },
+            {
+                "accession": "WP_002.2",
+                "ago_family": "PAGO",
+                "clade": "LONG_A",
+                "reference_label_source": "src",
+                "reference_label_evidence": "EXPERIMENTAL",
+            },
+            {
+                "accession": "WP_003.1",
+                "ago_family": "PAGO",
+                "clade": "LONG_B",
+                "reference_label_source": "src",
+                "reference_label_evidence": "EXPERIMENTAL",
+            },
+            {
+                "accession": "WP_004.1",
+                "ago_family": "PAGO",
+                "clade": "SHORT",
+                "reference_label_source": "src",
+                "reference_label_evidence": "EXPERIMENTAL",
+            },
+            {
+                "accession": "WP_005.1",
+                "ago_family": "PIWI_RE",
+                "clade": "PIWI_RE",
+                "reference_label_source": "src",
+                "reference_label_evidence": "LITERATURE_PHYLOGENETIC",
+            },
+        ]
+    )
+
+
+class QueryReferenceRecallLogicTests(unittest.TestCase):
+    def test_version_tolerant_matching_and_stratified_recall(self) -> None:
+        retrieved = pd.DataFrame(
+            {
+                "protein_uid": ["11", "12", "13"],
+                # WP_001.1 exact; WP_002.9 matches WP_002.2 via bare accession;
+                # WP_003 absent; WP_004 absent; WP_005 absent.
+                "gbseq__accession_version": ["WP_001.1", "WP_002.9", "WP_999.1"],
+            }
+        )
+        result = compute_query_reference_recall(
+            reference_dataframe=_reference_dataframe(),
+            retrieved_metadata_dataframe=retrieved,
+        )
+        self.assertEqual(result.reference_count, 5)
+        self.assertEqual(result.recovered_count, 2)
+        self.assertAlmostEqual(
+            result.stratum_recall["overall_reference_recall"], 2 / 5
+        )
+        self.assertAlmostEqual(
+            result.stratum_recall["long_a_reference_recall"], 2 / 2
+        )
+        self.assertAlmostEqual(
+            result.stratum_recall["long_b_reference_recall"], 0.0
+        )
+        self.assertAlmostEqual(result.stratum_recall["short_reference_recall"], 0.0)
+        self.assertAlmostEqual(
+            result.stratum_recall["piwi_re_reference_recall"], 0.0
+        )
+
+        detail_by_accession = dict(
+            zip(
+                result.detail_dataframe["accession"],
+                result.detail_dataframe["recovered"],
+            )
+        )
+        self.assertTrue(detail_by_accession["WP_001.1"])
+        self.assertTrue(detail_by_accession["WP_002.2"])
+        self.assertFalse(detail_by_accession["WP_003.1"])
+
+    def test_missing_reference_columns_raise(self) -> None:
+        with self.assertRaisesRegex(RuntimeError, "missing required columns"):
+            compute_query_reference_recall(
+                reference_dataframe=pd.DataFrame([{"accession": "x"}]),
+                retrieved_metadata_dataframe=pd.DataFrame(
+                    {"gbseq__accession_version": ["x"]}
+                ),
+            )
+
+    def test_committed_reference_set_is_well_formed(self) -> None:
+        reference_dataframe = pd.read_csv(_FIXTURE_CSV, dtype=str).fillna("")
+        for column_name in (
+            "accession",
+            "ago_family",
+            "clade",
+            "reference_label_source",
+            "reference_label_evidence",
+        ):
+            self.assertIn(column_name, reference_dataframe.columns)
+        self.assertGreater(len(reference_dataframe), 0)
+        self.assertTrue((reference_dataframe["accession"].str.len() > 0).all())
+        self.assertTrue(
+            set(reference_dataframe["clade"].str.upper())
+            <= {"LONG_A", "LONG_B", "SHORT", "PIWI_RE"}
+        )
+        self.assertTrue(
+            set(reference_dataframe["reference_label_evidence"].str.upper())
+            <= {
+                "EXPERIMENTAL",
+                "LITERATURE_PHYLOGENETIC",
+                "CURATED_COMPUTATIONAL",
+                "DATABASE_ANNOTATION",
+            }
+        )
+
+
+if __name__ == "__main__":
+    unittest.main()
