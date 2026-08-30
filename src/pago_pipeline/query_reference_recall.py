@@ -18,13 +18,16 @@ REQUIRED_REFERENCE_COLUMNS: tuple[str, ...] = (
 )
 
 # Recall is reported overall and per MID-PIWI clade. PIWI-RE is its own family,
-# not a clade, but a stratum is still useful for auditing text-query coverage.
-RECALL_STRATA: tuple[tuple[str, str], ...] = (
-    ("overall", "overall_reference_recall"),
-    ("LONG_A", "long_a_reference_recall"),
-    ("LONG_B", "long_b_reference_recall"),
-    ("SHORT", "short_reference_recall"),
-    ("PIWI_RE", "piwi_re_reference_recall"),
+# not a pAgo clade, so its stratum is selected on ago_family rather than clade
+# (a PIWI-RE reference row leaves clade empty / NA). Each stratum is
+# (display_name, metric_name, detail_column, detail_value); a None column means
+# "all rows".
+RECALL_STRATA: tuple[tuple[str, str, str | None, str | None], ...] = (
+    ("overall", "overall_reference_recall", None, None),
+    ("LONG_A", "long_a_reference_recall", "clade", "LONG_A"),
+    ("LONG_B", "long_b_reference_recall", "clade", "LONG_B"),
+    ("SHORT", "short_reference_recall", "clade", "SHORT"),
+    ("PIWI_RE", "piwi_re_reference_recall", "ago_family", "PIWI_RE"),
 )
 
 _VERSION_SUFFIX_PATTERN = re.compile(r"\.\d+$")
@@ -149,12 +152,12 @@ def compute_query_reference_recall(
     summary_rows: list[dict[str, object]] = []
     stratum_recall: dict[str, float | None] = {}
     stratum_recall_status: dict[str, str] = {}
-    for stratum_name, metric_name in RECALL_STRATA:
-        if stratum_name == "overall":
+    for stratum_name, metric_name, detail_column, detail_value in RECALL_STRATA:
+        if detail_column is None:
             stratum_frame = detail_dataframe
         else:
             stratum_frame = detail_dataframe[
-                detail_dataframe["clade"] == stratum_name
+                detail_dataframe[detail_column] == detail_value
             ]
         reference_count = int(len(stratum_frame))
         recovered_count = int(stratum_frame["recovered"].sum())

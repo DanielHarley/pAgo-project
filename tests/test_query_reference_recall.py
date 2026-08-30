@@ -157,15 +157,20 @@ class QueryReferenceRecallLogicTests(unittest.TestCase):
             "verification_status",
         ):
             self.assertIn(column_name, reference_dataframe.columns)
-        self.assertGreaterEqual(len(reference_dataframe), 14)
+        self.assertGreaterEqual(len(reference_dataframe), 15)
         self.assertTrue((reference_dataframe["accession"].str.len() > 0).all())
         self.assertTrue((reference_dataframe["accession"].str.contains(r"\.\d+$")).all())
         clades = set(reference_dataframe["clade"].str.upper())
-        self.assertTrue(clades <= {"LONG_A", "LONG_B", "SHORT", "PIWI_RE"})
-        # LONG_A / LONG_B / SHORT must each have at least one reference so their
-        # recall is evaluable. PIWI_RE may legitimately be empty (NOT_EVALUABLE).
+        self.assertTrue(
+            clades <= {"LONG_A", "LONG_B", "SHORT", "PIWI_RE", "NA", ""}
+        )
+        # LONG_A / LONG_B / SHORT must each have >= 1 reference (recall evaluable).
         for required_clade in ("LONG_A", "LONG_B", "SHORT"):
             self.assertIn(required_clade, clades)
+        # PIWI-RE is a family, not a pAgo clade: its stratum keys on ago_family.
+        self.assertIn(
+            "PIWI_RE", set(reference_dataframe["ago_family"].str.upper())
+        )
         self.assertTrue(
             set(reference_dataframe["reference_label_evidence"].str.upper())
             <= {

@@ -98,18 +98,19 @@ class QueryReferenceRecallSnapshotTests(unittest.TestCase):
             )
             self.assertIn("overall_reference_recall", manifest["stratum_recall"])
             self.assertIn("long_a_reference_recall", manifest["stratum_recall"])
-            # The committed reference set has LONG_A / LONG_B / SHORT but no
-            # PIWI_RE, so that stratum must be NOT_EVALUABLE (null), never 0.0.
-            self.assertIsNone(manifest["stratum_recall"]["piwi_re_reference_recall"])
+            # The committed reference set now has LONG_A / LONG_B / SHORT and one
+            # PIWI-RE (PsPIWI-RE), so every stratum is EVALUABLE. PsPIWI-RE is not
+            # among the retrieved accessions here, so its recall is a legitimate
+            # EVALUABLE 0.0 (not NOT_EVALUABLE).
             self.assertEqual(
-                manifest["stratum_recall_status"]["piwi_re_reference_recall"],
-                "NOT_EVALUABLE",
+                manifest["stratum_recall"]["piwi_re_reference_recall"], 0.0
             )
             for evaluable_metric in (
                 "overall_reference_recall",
                 "long_a_reference_recall",
                 "long_b_reference_recall",
                 "short_reference_recall",
+                "piwi_re_reference_recall",
             ):
                 self.assertEqual(
                     manifest["stratum_recall_status"][evaluable_metric],
