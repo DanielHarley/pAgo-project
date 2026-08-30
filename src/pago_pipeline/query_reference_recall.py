@@ -30,11 +30,17 @@ RECALL_STRATA: tuple[tuple[str, str], ...] = (
 _VERSION_SUFFIX_PATTERN = re.compile(r"\.\d+$")
 
 
+RECALL_STATUS_EVALUABLE = "EVALUABLE"
+RECALL_STATUS_NOT_EVALUABLE = "NOT_EVALUABLE"
+
+
 @dataclass(frozen=True)
 class QueryReferenceRecallResult:
     summary_dataframe: pd.DataFrame
     detail_dataframe: pd.DataFrame
-    stratum_recall: dict[str, float]
+    # None (not 0.0) for a stratum with zero reference sequences.
+    stratum_recall: dict[str, float | None]
+    stratum_recall_status: dict[str, str]
     reference_count: int
     recovered_count: int
 
@@ -141,7 +147,8 @@ def compute_query_reference_recall(
     detail_dataframe = pd.DataFrame(detail_rows)
 
     summary_rows: list[dict[str, object]] = []
-    stratum_recall: dict[str, float] = {}
+    stratum_recall: dict[str, float | None] = {}
+    stratum_recall_status: dict[str, str] = {}
     for stratum_name, metric_name in RECALL_STRATA:
         if stratum_name == "overall":
             stratum_frame = detail_dataframe
@@ -151,17 +158,24 @@ def compute_query_reference_recall(
             ]
         reference_count = int(len(stratum_frame))
         recovered_count = int(stratum_frame["recovered"].sum())
-        recall_value = (
-            float(recovered_count / reference_count) if reference_count else 0.0
-        )
+        if reference_count == 0:
+            recall_value: float | None = None
+            recall_status = RECALL_STATUS_NOT_EVALUABLE
+        else:
+            recall_value = float(recovered_count / reference_count)
+            recall_status = RECALL_STATUS_EVALUABLE
         stratum_recall[metric_name] = recall_value
+        stratum_recall_status[metric_name] = recall_status
         summary_rows.append(
             {
                 "stratum": stratum_name,
                 "metric_name": metric_name,
                 "reference_count": reference_count,
                 "recovered_count": recovered_count,
-                "recall": recall_value,
+                "recall": (
+                    float("nan") if recall_value is None else recall_value
+                ),
+                "recall_status": recall_status,
             }
         )
 
@@ -178,6 +192,7 @@ def compute_query_reference_recall(
         summary_dataframe=summary_dataframe,
         detail_dataframe=detail_dataframe,
         stratum_recall=stratum_recall,
+        stratum_recall_status=stratum_recall_status,
         reference_count=int(len(detail_dataframe)),
         recovered_count=int(detail_dataframe["recovered"].sum()),
     )

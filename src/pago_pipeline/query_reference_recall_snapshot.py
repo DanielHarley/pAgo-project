@@ -44,7 +44,7 @@ class QueryReferenceRecallSnapshotResult:
     detail_file_path: Path
     reference_count: int
     recovered_count: int
-    stratum_recall: dict[str, float]
+    stratum_recall: dict[str, float | None]
 
 
 def _as_path(path_like: PathLike) -> Path:
@@ -111,7 +111,8 @@ def _build_manifest_payload(
     output_file_path_by_key: Mapping[str, Path],
     reference_count: int,
     recovered_count: int,
-    stratum_recall: Mapping[str, float],
+    stratum_recall: Mapping[str, float | None],
+    stratum_recall_status: Mapping[str, str],
 ) -> dict[str, object]:
     output_files = {
         key: {
@@ -130,8 +131,13 @@ def _build_manifest_payload(
         "immutable_snapshot_relative_path": immutable_snapshot_relative_path,
         "reference_count": int(reference_count),
         "recovered_count": int(recovered_count),
+        # None (JSON null), not 0.0, for a stratum with zero reference sequences.
         "stratum_recall": {
-            str(key): float(value) for key, value in stratum_recall.items()
+            str(key): (None if value is None else float(value))
+            for key, value in stratum_recall.items()
+        },
+        "stratum_recall_status": {
+            str(key): str(value) for key, value in stratum_recall_status.items()
         },
         "query_recall_reference_set_csv_path": str(
             query_recall_reference_set_csv_file_path
@@ -251,6 +257,7 @@ def save_query_reference_recall_snapshot(
             reference_count=recall_result.reference_count,
             recovered_count=recall_result.recovered_count,
             stratum_recall=recall_result.stratum_recall,
+            stratum_recall_status=recall_result.stratum_recall_status,
         )
         write_json_atomic(
             payload=manifest_payload,

@@ -76,6 +76,8 @@ class QueryReferenceRecallLogicTests(unittest.TestCase):
         self.assertAlmostEqual(
             result.stratum_recall["long_a_reference_recall"], 2 / 2
         )
+        # Every clade has references in this fixture, so 0 recovered means an
+        # EVALUABLE recall of 0.0 (never confused with NOT_EVALUABLE).
         self.assertAlmostEqual(
             result.stratum_recall["long_b_reference_recall"], 0.0
         )
@@ -83,6 +85,16 @@ class QueryReferenceRecallLogicTests(unittest.TestCase):
         self.assertAlmostEqual(
             result.stratum_recall["piwi_re_reference_recall"], 0.0
         )
+        for metric_name in (
+            "overall_reference_recall",
+            "long_a_reference_recall",
+            "long_b_reference_recall",
+            "short_reference_recall",
+            "piwi_re_reference_recall",
+        ):
+            self.assertEqual(
+                result.stratum_recall_status[metric_name], "EVALUABLE"
+            )
 
         detail_by_accession = dict(
             zip(
@@ -93,6 +105,37 @@ class QueryReferenceRecallLogicTests(unittest.TestCase):
         self.assertTrue(detail_by_accession["WP_001.1"])
         self.assertTrue(detail_by_accession["WP_002.2"])
         self.assertFalse(detail_by_accession["WP_003.1"])
+
+    def test_empty_clade_is_not_evaluable_not_zero(self) -> None:
+        reference_dataframe = _reference_dataframe()
+        reference_dataframe = reference_dataframe[
+            reference_dataframe["clade"] != "SHORT"
+        ]
+        result = compute_query_reference_recall(
+            reference_dataframe=reference_dataframe,
+            retrieved_metadata_dataframe=pd.DataFrame(
+                {
+                    "protein_uid": ["1"],
+                    "gbseq__accession_version": ["WP_001.1"],
+                }
+            ),
+        )
+        self.assertIsNone(result.stratum_recall["short_reference_recall"])
+        self.assertEqual(
+            result.stratum_recall_status["short_reference_recall"],
+            "NOT_EVALUABLE",
+        )
+        short_row = result.summary_dataframe[
+            result.summary_dataframe["stratum"] == "SHORT"
+        ].iloc[0]
+        self.assertEqual(short_row["reference_count"], 0)
+        self.assertTrue(pd.isna(short_row["recall"]))
+        self.assertEqual(short_row["recall_status"], "NOT_EVALUABLE")
+        # A present-but-unrecovered clade is still EVALUABLE at 0.0.
+        self.assertEqual(
+            result.stratum_recall_status["long_b_reference_recall"], "EVALUABLE"
+        )
+        self.assertEqual(result.stratum_recall["long_b_reference_recall"], 0.0)
 
     def test_missing_reference_columns_raise(self) -> None:
         with self.assertRaisesRegex(RuntimeError, "missing required columns"):
@@ -111,14 +154,18 @@ class QueryReferenceRecallLogicTests(unittest.TestCase):
             "clade",
             "reference_label_source",
             "reference_label_evidence",
+            "verification_status",
         ):
             self.assertIn(column_name, reference_dataframe.columns)
-        self.assertGreater(len(reference_dataframe), 0)
+        self.assertGreaterEqual(len(reference_dataframe), 14)
         self.assertTrue((reference_dataframe["accession"].str.len() > 0).all())
-        self.assertTrue(
-            set(reference_dataframe["clade"].str.upper())
-            <= {"LONG_A", "LONG_B", "SHORT", "PIWI_RE"}
-        )
+        self.assertTrue((reference_dataframe["accession"].str.contains(r"\.\d+$")).all())
+        clades = set(reference_dataframe["clade"].str.upper())
+        self.assertTrue(clades <= {"LONG_A", "LONG_B", "SHORT", "PIWI_RE"})
+        # LONG_A / LONG_B / SHORT must each have at least one reference so their
+        # recall is evaluable. PIWI_RE may legitimately be empty (NOT_EVALUABLE).
+        for required_clade in ("LONG_A", "LONG_B", "SHORT"):
+            self.assertIn(required_clade, clades)
         self.assertTrue(
             set(reference_dataframe["reference_label_evidence"].str.upper())
             <= {
@@ -127,6 +174,10 @@ class QueryReferenceRecallLogicTests(unittest.TestCase):
                 "CURATED_COMPUTATIONAL",
                 "DATABASE_ANNOTATION",
             }
+        )
+        self.assertTrue(
+            set(reference_dataframe["verification_status"].str.lower())
+            <= {"verified", "provisional"}
         )
 
 

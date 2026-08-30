@@ -98,6 +98,23 @@ class QueryReferenceRecallSnapshotTests(unittest.TestCase):
             )
             self.assertIn("overall_reference_recall", manifest["stratum_recall"])
             self.assertIn("long_a_reference_recall", manifest["stratum_recall"])
+            # The committed reference set has LONG_A / LONG_B / SHORT but no
+            # PIWI_RE, so that stratum must be NOT_EVALUABLE (null), never 0.0.
+            self.assertIsNone(manifest["stratum_recall"]["piwi_re_reference_recall"])
+            self.assertEqual(
+                manifest["stratum_recall_status"]["piwi_re_reference_recall"],
+                "NOT_EVALUABLE",
+            )
+            for evaluable_metric in (
+                "overall_reference_recall",
+                "long_a_reference_recall",
+                "long_b_reference_recall",
+                "short_reference_recall",
+            ):
+                self.assertEqual(
+                    manifest["stratum_recall_status"][evaluable_metric],
+                    "EVALUABLE",
+                )
             self.assertEqual(
                 manifest["query_recall_reference_set_csv_sha256"],
                 sha256_of_file(input_file_path=_FIXTURE_CSV),
@@ -142,7 +159,7 @@ class QueryReferenceRecallSnapshotTests(unittest.TestCase):
 
             reference_copy.write_text(
                 reference_copy.read_text(encoding="utf-8")
-                + "WP_777.1,Zz,Zz sp,PAGO,SHORT,src,EXPERIMENTAL,provisional,x\n",
+                + "WP_777.1,Zz,Zz sp,PAGO,PIWI_RE,,src,LITERATURE_PHYLOGENETIC,provisional,x\n",
                 encoding="utf-8",
             )
             self.assertFalse(
