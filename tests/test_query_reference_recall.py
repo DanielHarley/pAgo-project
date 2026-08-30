@@ -161,13 +161,19 @@ class QueryReferenceRecallLogicTests(unittest.TestCase):
         self.assertTrue((reference_dataframe["accession"].str.len() > 0).all())
         self.assertTrue((reference_dataframe["accession"].str.contains(r"\.\d+$")).all())
         clades = set(reference_dataframe["clade"].str.upper())
+        # PIWI_RE is an ago_family, not a pAgo clade, so it is not an allowed
+        # value in the clade column.
         self.assertTrue(
-            clades <= {"LONG_A", "LONG_B", "SHORT", "PIWI_RE", "UNRESOLVED", "NA", ""}
+            clades <= {"LONG_A", "LONG_B", "SHORT", "UNRESOLVED", "NA", ""}
         )
         # PIWI-RE stratum keys on ago_family and must be non-empty (EVALUABLE).
-        self.assertGreaterEqual(
-            int((reference_dataframe["ago_family"].str.upper() == "PIWI_RE").sum()),
-            1,
+        piwi_re_rows = reference_dataframe[
+            reference_dataframe["ago_family"].str.upper() == "PIWI_RE"
+        ]
+        self.assertGreaterEqual(len(piwi_re_rows), 1)
+        # Every PIWI-RE row leaves the pAgo clade unresolved.
+        self.assertEqual(
+            set(piwi_re_rows["clade"].str.upper()), {"UNRESOLVED"}
         )
         # LONG_A / LONG_B / SHORT must each have >= 1 reference (recall evaluable).
         for required_clade in ("LONG_A", "LONG_B", "SHORT"):
