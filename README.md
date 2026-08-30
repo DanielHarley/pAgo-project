@@ -99,10 +99,39 @@ Run notebooks in numeric order:
 8. `notebooks/07_pca_3d_plot.ipynb`
 9. `notebooks/08_pago_qc_evidence_inventory.ipynb`
 10. `notebooks/09_pago_qc_filtered_datasets.ipynb`
+11. `notebooks/10_dataset_audit.ipynb`
 
 Notebooks are orchestration layers only. Reusable logic lives under
 `src/pago_pipeline/`, where each snapshot-producing stage owns its validation,
 manifest, and reuse behavior.
+
+## Annotation-enriched candidate set (from notebook 10)
+
+`notebooks/10_dataset_audit.ipynb` starts a second NCBI retrieval with a broader
+text query
+(`(PIWI[All Fields] OR Argonaute[All Fields]) AND (Bacteria[Organism] OR
+Archaea[Organism])`) and materializes the audit artifacts around it:
+
+- `ncbi_esearch_preflight` — one ESearch (with History) plus a small sample
+  fetch, recording `Count`, `QueryTranslation`, and a sample-record QC. The full
+  retrieval is blocked when `Count` exceeds `max_uid_count` until reviewed.
+- UID -> XML -> flattened metadata snapshots, reusing the existing NCBI modules
+  with `annotation_enriched_candidate_set`-suffixed snapshot roots.
+- `query_reference_recall` — how many curated reference pAgos
+  (`tests/fixtures/query_recall_reference_set.csv`) the text query recovered,
+  overall and per MID-PIWI clade (LONG_A / LONG_B / SHORT / PIWI_RE).
+- `pago_technical_prefilter` — excludes only technically unusable records
+  (missing/invalid sequence, missing `protein_uid`, technical duplicates). It
+  never removes a record by sequence length or by NCBI annotation text; length
+  outside a warning band sets `length_warning=True` and the record is kept.
+- `derived_protein_fasta` — the retained proteome as a FASTA snapshot with its
+  own `artifact_type` (`derived_protein_fasta_snapshot`), full transformation
+  provenance (`derived_from_*`, `record_selection_rule`, `source_record_ids_sha256`,
+  `record_order`) and load-time re-validation of the record multiset and order.
+
+The candidate set is *annotation-enriched*, not a full pAgo universe: a text
+query recovers proteins already annotated with the terminology. A
+sequence-based discovery route (HMM / PSI-BLAST over RefSeq) is future work.
 
 ## pAgo QC curation
 
