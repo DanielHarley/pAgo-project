@@ -27,6 +27,10 @@ from src.pago_pipeline.storage import read_json_file, sha256_of_file, write_json
 
 PathLike: TypeAlias = str | Path
 
+DEFAULT_FASTA_SNAPSHOT_ARTIFACT_TYPES: tuple[str, ...] = (
+    "ncbi_protein_fasta_snapshot",
+)
+
 
 @dataclass(frozen=True)
 class NCBIProteinFastaSnapshotResult:
@@ -228,14 +232,15 @@ def _validate_loaded_fasta_snapshot_payload(
     *,
     snapshot_directory: PathLike,
     manifest_payload: Mapping[str, object],
+    allowed_artifact_types: tuple[str, ...] = DEFAULT_FASTA_SNAPSHOT_ARTIFACT_TYPES,
 ) -> Path:
     resolved_snapshot_directory = _as_path(snapshot_directory)
 
     artifact_type = manifest_payload.get("artifact_type")
-    if artifact_type != "ncbi_protein_fasta_snapshot":
+    if artifact_type not in allowed_artifact_types:
         raise RuntimeError(
             "Saved FASTA snapshot manifest artifact_type mismatch. "
-            f"Expected 'ncbi_protein_fasta_snapshot', got {artifact_type!r}."
+            f"Expected one of {list(allowed_artifact_types)}, got {artifact_type!r}."
         )
 
     fasta_file_name = manifest_payload.get("fasta_file_name")
@@ -267,6 +272,7 @@ def _validate_loaded_fasta_snapshot_payload(
 def load_fasta_snapshot_by_directory(
     *,
     snapshot_directory: PathLike,
+    allowed_artifact_types: tuple[str, ...] = DEFAULT_FASTA_SNAPSHOT_ARTIFACT_TYPES,
 ) -> dict[str, object]:
     """
     Load and validate one saved FASTA snapshot directory.
@@ -283,6 +289,7 @@ def load_fasta_snapshot_by_directory(
     fasta_file_path = _validate_loaded_fasta_snapshot_payload(
         snapshot_directory=resolved_snapshot_directory,
         manifest_payload=manifest_payload,
+        allowed_artifact_types=allowed_artifact_types,
     )
 
     return {
@@ -296,6 +303,7 @@ def load_fasta_snapshot_by_directory(
 def load_latest_fasta_snapshot(
     *,
     snapshot_root_directory: PathLike,
+    allowed_artifact_types: tuple[str, ...] = DEFAULT_FASTA_SNAPSHOT_ARTIFACT_TYPES,
 ) -> dict[str, object]:
     """
     Load and validate the convenience latest FASTA snapshot copy.
@@ -303,7 +311,10 @@ def load_latest_fasta_snapshot(
 
     resolved_snapshot_root_directory = _as_path(snapshot_root_directory)
     latest_directory = resolved_snapshot_root_directory / "latest"
-    return load_fasta_snapshot_by_directory(snapshot_directory=latest_directory)
+    return load_fasta_snapshot_by_directory(
+        snapshot_directory=latest_directory,
+        allowed_artifact_types=allowed_artifact_types,
+    )
 
 
 def get_snapshot_fasta_file_path(
@@ -358,6 +369,7 @@ def latest_fasta_snapshot_is_available(
     *,
     snapshot_root_directory: PathLike,
     source_metadata_snapshot_root_directory: Optional[PathLike] = None,
+    allowed_artifact_types: tuple[str, ...] = DEFAULT_FASTA_SNAPSHOT_ARTIFACT_TYPES,
 ) -> bool:
     """
     Return True only if the convenience latest FASTA snapshot copy is complete.
@@ -379,6 +391,7 @@ def latest_fasta_snapshot_is_available(
         _validate_loaded_fasta_snapshot_payload(
             snapshot_directory=latest_directory,
             manifest_payload=manifest_payload,
+            allowed_artifact_types=allowed_artifact_types,
         )
         if source_metadata_snapshot_root_directory is not None:
             source_metadata_snapshot_payload = load_latest_metadata_snapshot(

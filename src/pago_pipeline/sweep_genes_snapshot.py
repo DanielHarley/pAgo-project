@@ -37,6 +37,14 @@ from src.pago_pipeline.storage import (
 
 PathLike: TypeAlias = str | Path
 
+# A SWeeP embedding can be built from the pipeline's own NCBI FASTA snapshot or
+# from a provenance-tracked derived-subset FASTA snapshot. Both expose the same
+# fasta manifest keys this module reads.
+SUPPORTED_SOURCE_FASTA_ARTIFACT_TYPES: tuple[str, ...] = (
+    "ncbi_protein_fasta_snapshot",
+    "derived_protein_fasta_snapshot",
+)
+
 DEFAULT_SWEEP_GENES_MASKS: tuple[tuple[int, ...], ...] = (
     (1, 1, 0, 0, 1),
     (1, 1, 1, 0, 0),
@@ -260,6 +268,10 @@ def _build_sweep_genes_snapshot_manifest(
         "source_fasta_manifest_sha256": sha256_of_file(
             input_file_path=Path(source_fasta_snapshot_payload["manifest_file_path"])
         ),
+        "source_fasta_artifact_type": source_fasta_manifest.get("artifact_type"),
+        "source_fasta_record_ids_sha256": source_fasta_manifest.get(
+            "source_record_ids_sha256"
+        ),
         "source_metadata_snapshot_relative_path": source_fasta_manifest.get(
             "source_metadata_snapshot_relative_path"
         ),
@@ -316,6 +328,7 @@ def save_sweep_genes_snapshot(
     random_seed: int = 42,
     chunk_size: int = 256,
     n_jobs: int = 1,
+    source_fasta_artifact_types: Sequence[str] = SUPPORTED_SOURCE_FASTA_ARTIFACT_TYPES,
     update_latest_directory: bool = True,
 ) -> SweepGenesSnapshotResult:
     if not projection:
@@ -327,11 +340,13 @@ def save_sweep_genes_snapshot(
     resolved_snapshot_root_directory = _as_path(snapshot_root_directory)
     resolved_source_fasta_snapshot_directory = _as_path(source_fasta_snapshot_directory)
     resolved_scripts_sweep_root_directory = _as_path(scripts_sweep_root_directory)
+    resolved_source_fasta_artifact_types = tuple(source_fasta_artifact_types)
     total_embedding_dimensions = len(normalized_masks) * projected_dimensions_per_mask
     embeddings_file_name = _build_embeddings_file_name(total_embedding_dimensions)
 
     source_fasta_snapshot_payload = load_fasta_snapshot_by_directory(
         snapshot_directory=resolved_source_fasta_snapshot_directory,
+        allowed_artifact_types=resolved_source_fasta_artifact_types,
     )
     fasta_file_path = Path(source_fasta_snapshot_payload["fasta_file_path"])
     source_fasta_manifest = source_fasta_snapshot_payload.get("manifest")
@@ -777,6 +792,7 @@ def latest_sweep_genes_snapshot_is_available(
     *,
     snapshot_root_directory: PathLike,
     source_fasta_snapshot_root_directory: Optional[PathLike] = None,
+    source_fasta_artifact_types: Sequence[str] = SUPPORTED_SOURCE_FASTA_ARTIFACT_TYPES,
 ) -> bool:
     resolved_snapshot_root_directory = _as_path(snapshot_root_directory)
     latest_directory = resolved_snapshot_root_directory / "latest"
@@ -796,6 +812,7 @@ def latest_sweep_genes_snapshot_is_available(
         if source_fasta_snapshot_root_directory is not None:
             source_fasta_snapshot_payload = load_latest_fasta_snapshot(
                 snapshot_root_directory=source_fasta_snapshot_root_directory,
+                allowed_artifact_types=tuple(source_fasta_artifact_types),
             )
             if not _source_fasta_snapshot_identity_matches(
                 manifest_payload=manifest_payload,
@@ -982,12 +999,28 @@ def _source_fasta_snapshot_identity_matches(
     if not isinstance(source_fasta_file_path, Path):
         return False
 
-    return (
+    if not (
         sha256_of_file(input_file_path=source_manifest_file_path)
         == expected_manifest_sha256
         and sha256_of_file(input_file_path=source_fasta_file_path)
         == expected_fasta_sha256
-    )
+    ):
+        return False
+
+    # When both sides carry the derived-FASTA record-id fingerprint, it must
+    # match too. Older NCBI FASTA snapshots do not have it; that is fine.
+    expected_record_ids_sha256 = manifest_payload.get("source_fasta_record_ids_sha256")
+    source_fasta_manifest = source_fasta_snapshot_payload.get("manifest")
+    if isinstance(expected_record_ids_sha256, str) and isinstance(
+        source_fasta_manifest, Mapping
+    ):
+        current_record_ids_sha256 = source_fasta_manifest.get(
+            "source_record_ids_sha256"
+        )
+        if current_record_ids_sha256 != expected_record_ids_sha256:
+            return False
+
+    return True
 
 
 def resolve_sweep_genes_snapshot(
@@ -1003,6 +1036,7 @@ def resolve_sweep_genes_snapshot(
     random_seed: int = 42,
     chunk_size: int = 256,
     n_jobs: int = 1,
+    source_fasta_artifact_types: Sequence[str] = SUPPORTED_SOURCE_FASTA_ARTIFACT_TYPES,
     update_latest_directory: bool = True,
 ) -> dict[str, object]:
     resolved_snapshot_mode = _coerce_snapshot_mode(snapshot_mode)
@@ -1010,6 +1044,7 @@ def resolve_sweep_genes_snapshot(
     resolved_source_fasta_snapshot_root_directory = _as_path(
         source_fasta_snapshot_root_directory
     )
+    resolved_source_fasta_artifact_types = tuple(source_fasta_artifact_types)
 
     if resolved_snapshot_mode == SnapshotMode.reuse_latest:
         latest_is_available = latest_sweep_genes_snapshot_is_available(
@@ -1017,6 +1052,7 @@ def resolve_sweep_genes_snapshot(
             source_fasta_snapshot_root_directory=(
                 resolved_source_fasta_snapshot_root_directory
             ),
+            source_fasta_artifact_types=resolved_source_fasta_artifact_types,
         )
         if not latest_is_available:
             raise FileNotFoundError(
@@ -1041,7 +1077,8 @@ def resolve_sweep_genes_snapshot(
 
     try:
         source_fasta_snapshot_payload = load_latest_fasta_snapshot(
-            snapshot_root_directory=resolved_source_fasta_snapshot_root_directory
+            snapshot_root_directory=resolved_source_fasta_snapshot_root_directory,
+            allowed_artifact_types=resolved_source_fasta_artifact_types,
         )
     except FileNotFoundError as exc:
         raise FileNotFoundError(
@@ -1120,6 +1157,7 @@ def resolve_sweep_genes_snapshot(
         composition=composition,
         projection=projection,
         random_seed=random_seed,
+        source_fasta_artifact_types=resolved_source_fasta_artifact_types,
         chunk_size=chunk_size,
         n_jobs=n_jobs,
         update_latest_directory=update_latest_directory,
