@@ -118,8 +118,12 @@ Archaea[Organism])`) and materializes the audit artifacts around it:
 - UID -> XML -> flattened metadata snapshots, reusing the existing NCBI modules
   with `annotation_enriched_candidate_set`-suffixed snapshot roots.
 - `query_reference_recall` — how many curated reference pAgos
-  (`tests/fixtures/query_recall_reference_set.csv`) the text query recovered,
-  overall and per MID-PIWI clade (LONG_A / LONG_B / SHORT / PIWI_RE).
+  (`tests/fixtures/query_recall_reference_set.csv`, see the sibling
+  `_curation_notes.md`) the text query recovered, overall, per MID-PIWI clade
+  (LONG_A / LONG_B / SHORT), and for the PIWI-RE family. A stratum with zero
+  references reports `NOT_EVALUABLE`, never `0.0`. Each reference row carries a
+  `reference_label_evidence` level (EXPERIMENTAL / LITERATURE_PHYLOGENETIC /
+  CURATED_COMPUTATIONAL / DATABASE_ANNOTATION).
 - `pago_technical_prefilter` — excludes only technically unusable records
   (missing/invalid sequence, missing `protein_uid`, technical duplicates). It
   never removes a record by sequence length or by NCBI annotation text; length
