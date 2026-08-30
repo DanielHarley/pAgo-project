@@ -241,7 +241,7 @@ def run_ncbi_esearch_preflight(
                         retmode="text",
                         retstart=0,
                         retmax=sample_requested_count,
-                        webenv=history_web_env,
+                        WebEnv=history_web_env,
                         query_key=history_query_key,
                     ),
                     max_retry_attempts=max_retry_attempts,
