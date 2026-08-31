@@ -31,6 +31,7 @@ prompt_toolkit==3.0.52
 psutil==7.2.2
 pure_eval==0.2.3
 Pygments==2.19.2
+pyhmmer==0.12.3
 python-dateutil==2.9.0.post0
 python-dotenv==1.2.1
 pyzmq==27.1.0

@@ -6,6 +6,8 @@
 .cursor/
 .codex/
 llm/
+.agents
+.claude
 
 # venv
 .venv/
