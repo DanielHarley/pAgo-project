@@ -18,6 +18,43 @@ Columns: `accession` (accession.version), `protein_short_name`, `organism`,
 `compute_query_reference_recall` selects the `PIWI_RE` stratum on
 `ago_family == "PIWI_RE"`.
 
+## Known limitation: exact-accession matching can undercount recall
+
+`compute_query_reference_recall` matches a reference to the retrieved set on
+`accession.version` (and its version-stripped form). If the *same protein
+sequence* is retrieved under a **different accession** than the one in this CSV,
+it is scored as a miss even though the retrieval biologically succeeded.
+
+### Investigated case: `ABP72561.1` / RsAgo (first real Phase A run, 52,473 records)
+
+`ABP72561.1` (GenBank, `hypothetical protein Rsph17025_3694 (plasmid)`,
+*Cereibacter sphaeroides* ATCC 17025, 777 aa; UniProt reviewed A4WYU7 "Protein
+argonaute", gene `Rsph17025_3694`) was reported as the single miss
+(`long_b_reference_recall = 0.5`, `overall = 0.952`).
+
+Mechanical investigation (not an accession swap):
+
+- NCBI Identical Protein Group for `ABP72561.1` contains `A4WYU7.1` (Swiss-Prot)
+  and `XLG71013.1` (patent) — no RefSeq `WP_` record exists for this sequence.
+- `A4WYU7.1` **is present** in the 52,473 retrieved records (protein_uid
+  `2500461169`) and its `gbseq__sequence` is **byte-identical** to `ABP72561.1`
+  (both 777 aa, `sha256 cbdb6bb64718c9e8ca78a34ac8445eff1556cb87b5ad687026373ed401c5fb36`).
+- RsAgo is also present as PDB chains `5AWH_A/B`, `6D8A`, `6D8F`, `6D8P`, `6D92`
+  (*C. sphaeroides* ATCC 17025).
+
+**Conclusion: A** — RsAgo was recovered by the query (via `A4WYU7.1`, same IPG,
+identical sequence). The reported miss is a benchmark artifact of exact-accession
+matching, not a query gap.
+
+**Consequence for the recall figures** from that run: the biologically correct
+recall on this panel is `overall = 21/21 = 1.000` and `LONG_B = 2/2 = 1.000`;
+the reported `0.952` / `0.500` reflect the matcher, not the retrieval.
+
+Recommended fix (pending approval, not applied): match a reference by protein
+sequence identity (e.g. a `sequence_sha256` column, or NCBI IPG resolution),
+falling back to accession. `ABP72561.1` should stay as-is in the CSV — it is a
+correct accession for RsAgo.
+
 ## PIWI-RE set (7 entries)
 
 - 1 EXPERIMENTAL: `WP_014597637.1` PsPIWI-RE (*Pseudomonas stutzeri* DSM 4166),

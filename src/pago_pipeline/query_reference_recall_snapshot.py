@@ -373,7 +373,16 @@ def load_query_reference_recall_snapshot_by_directory(
         "summary_file_path": resolved["summary_file"],
         "detail_file_path": resolved["detail_file"],
         "summary": pd.read_csv(resolved["summary_file"]),
-        "detail": pd.read_csv(resolved["detail_file"]),
+        # accession / protein_uid columns are identifiers, not numbers: keep them
+        # as strings so pandas does not render them in scientific notation.
+        "detail": pd.read_csv(
+            resolved["detail_file"],
+            dtype={
+                "accession": "string",
+                "matched_accession": "string",
+                "matched_protein_uid": "string",
+            },
+        ),
     }
 
 
