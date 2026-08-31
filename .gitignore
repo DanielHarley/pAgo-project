@@ -58,5 +58,8 @@ htmlcov/
 !src/pago_pipeline/resources/
 !src/pago_pipeline/resources/**
 
-# SWeeP original (intellectual property — must not be committed)
+# SWeeP original (intellectual property must not be committed)
 scripts/sweep-2.1.3.0/
+
+# Temporary files
+tmp

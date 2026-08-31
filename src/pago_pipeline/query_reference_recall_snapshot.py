@@ -20,6 +20,11 @@ from src.pago_pipeline.ncbi_snapshot import (
     list_saved_snapshot_directories,
 )
 from src.pago_pipeline.query_reference_recall import (
+    DEFAULT_RETRIEVED_ACCESSION_COLUMN,
+    DEFAULT_RETRIEVED_PROTEIN_UID_COLUMN,
+    DEFAULT_RETRIEVED_SEQUENCE_COLUMN,
+    build_matching_strategy_payload,
+    build_matching_strategy_sha256,
     compute_query_reference_recall,
 )
 from src.pago_pipeline.storage import read_json_file, sha256_of_file, write_json_atomic
@@ -27,7 +32,9 @@ from src.pago_pipeline.storage import read_json_file, sha256_of_file, write_json
 PathLike: TypeAlias = str | Path
 
 ARTIFACT_TYPE = "query_reference_recall"
-SNAPSHOT_FORMAT_VERSION = "1.0"
+# 1.1 adds the identifier/sequence match hierarchy and the two recall readings.
+# A 1.0 snapshot is methodologically incompatible and is not reused.
+SNAPSHOT_FORMAT_VERSION = "1.1"
 DEFAULT_MANIFEST_FILE_NAME = "manifest.json"
 DEFAULT_SUMMARY_FILE_NAME = "reference_recall_summary.csv"
 DEFAULT_DETAIL_FILE_NAME = "reference_recall_detail.csv"
@@ -43,8 +50,10 @@ class QueryReferenceRecallSnapshotResult:
     summary_file_path: Path
     detail_file_path: Path
     reference_count: int
-    recovered_count: int
-    stratum_recall: dict[str, float | None]
+    exact_recovered_count: int
+    equivalent_recovered_count: int
+    stratum_exact_recall: dict[str, float | None]
+    stratum_equivalent_recall: dict[str, float | None]
 
 
 def _as_path(path_like: PathLike) -> Path:
@@ -110,8 +119,10 @@ def _build_manifest_payload(
     query_recall_reference_set_csv_file_path: Path,
     output_file_path_by_key: Mapping[str, Path],
     reference_count: int,
-    recovered_count: int,
-    stratum_recall: Mapping[str, float | None],
+    exact_recovered_count: int,
+    equivalent_recovered_count: int,
+    stratum_exact_recall: Mapping[str, float | None],
+    stratum_equivalent_recall: Mapping[str, float | None],
     stratum_recall_status: Mapping[str, str],
 ) -> dict[str, object]:
     output_files = {
@@ -122,6 +133,13 @@ def _build_manifest_payload(
         }
         for key, file_path in output_file_path_by_key.items()
     }
+
+    def _nullable_float_map(source: Mapping[str, float | None]) -> dict[str, object]:
+        return {
+            str(key): (None if value is None else float(value))
+            for key, value in source.items()
+        }
+
     return {
         "artifact_type": ARTIFACT_TYPE,
         "snapshot_format_version": SNAPSHOT_FORMAT_VERSION,
@@ -129,13 +147,16 @@ def _build_manifest_payload(
         "manifest_file_name": DEFAULT_MANIFEST_FILE_NAME,
         "immutable_snapshot_directory_name": immutable_snapshot_directory_name,
         "immutable_snapshot_relative_path": immutable_snapshot_relative_path,
+        "matching_strategy": build_matching_strategy_payload(),
+        "matching_strategy_sha256": build_matching_strategy_sha256(),
         "reference_count": int(reference_count),
-        "recovered_count": int(recovered_count),
+        "exact_recovered_count": int(exact_recovered_count),
+        "equivalent_recovered_count": int(equivalent_recovered_count),
+        # Strict-identifier reading (EXACT + SAME_BASE accession only).
+        "stratum_exact_recall": _nullable_float_map(stratum_exact_recall),
+        # Retrieval-equivalent reading (also SEQUENCE_SHA256).
+        "stratum_equivalent_recall": _nullable_float_map(stratum_equivalent_recall),
         # None (JSON null), not 0.0, for a stratum with zero reference sequences.
-        "stratum_recall": {
-            str(key): (None if value is None else float(value))
-            for key, value in stratum_recall.items()
-        },
         "stratum_recall_status": {
             str(key): str(value) for key, value in stratum_recall_status.items()
         },
@@ -221,7 +242,11 @@ def save_query_reference_recall_snapshot(
             source_metadata_csv_file_path,
             low_memory=False,
             usecols=lambda column_name: column_name
-            in {"protein_uid", "gbseq__accession_version"},
+            in {
+                DEFAULT_RETRIEVED_PROTEIN_UID_COLUMN,
+                DEFAULT_RETRIEVED_ACCESSION_COLUMN,
+                DEFAULT_RETRIEVED_SEQUENCE_COLUMN,
+            },
             dtype=str,
         )
         recall_result = compute_query_reference_recall(
@@ -255,8 +280,10 @@ def save_query_reference_recall_snapshot(
             query_recall_reference_set_csv_file_path=resolved_reference_set_csv_path,
             output_file_path_by_key=output_file_path_by_key,
             reference_count=recall_result.reference_count,
-            recovered_count=recall_result.recovered_count,
-            stratum_recall=recall_result.stratum_recall,
+            exact_recovered_count=recall_result.exact_recovered_count,
+            equivalent_recovered_count=recall_result.equivalent_recovered_count,
+            stratum_exact_recall=recall_result.stratum_exact_recall,
+            stratum_equivalent_recall=recall_result.stratum_equivalent_recall,
             stratum_recall_status=recall_result.stratum_recall_status,
         )
         write_json_atomic(
@@ -295,8 +322,10 @@ def save_query_reference_recall_snapshot(
         summary_file_path=output_file_path_by_key["summary_file"],
         detail_file_path=output_file_path_by_key["detail_file"],
         reference_count=recall_result.reference_count,
-        recovered_count=recall_result.recovered_count,
-        stratum_recall=dict(recall_result.stratum_recall),
+        exact_recovered_count=recall_result.exact_recovered_count,
+        equivalent_recovered_count=recall_result.equivalent_recovered_count,
+        stratum_exact_recall=dict(recall_result.stratum_exact_recall),
+        stratum_equivalent_recall=dict(recall_result.stratum_equivalent_recall),
     )
 
 
@@ -316,7 +345,14 @@ def _validate_loaded_query_reference_recall_payload(
         raise RuntimeError(
             "Saved query reference recall snapshot snapshot_format_version "
             f"mismatch. Expected {SNAPSHOT_FORMAT_VERSION!r}, got "
-            f"{snapshot_format_version!r}."
+            f"{snapshot_format_version!r}. A snapshot written by an earlier "
+            "matching methodology is not reused."
+        )
+    matching_strategy_sha256 = manifest_payload.get("matching_strategy_sha256")
+    if matching_strategy_sha256 != build_matching_strategy_sha256():
+        raise RuntimeError(
+            "Saved query reference recall snapshot matching_strategy_sha256 "
+            "mismatch; the recall matching methodology changed."
         )
     output_files = manifest_payload.get("output_files")
     if not isinstance(output_files, Mapping):
@@ -379,6 +415,8 @@ def load_query_reference_recall_snapshot_by_directory(
             resolved["detail_file"],
             dtype={
                 "accession": "string",
+                "sequence_sha256": "string",
+                "match_method": "string",
                 "matched_accession": "string",
                 "matched_protein_uid": "string",
             },

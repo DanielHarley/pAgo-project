@@ -9,21 +9,60 @@ claim — hence `reference_label_evidence` per row.
 
 Columns: `accession` (accession.version), `protein_short_name`, `organism`,
 `ago_family` (`PAGO` / `PIWI_RE`), `clade` (`LONG_A` / `LONG_B` / `SHORT` /
-`UNRESOLVED`), `uniprot_accession`, `reference_label_source`,
-`reference_label_evidence` (`EXPERIMENTAL` / `LITERATURE_PHYLOGENETIC` /
-`CURATED_COMPUTATIONAL` / `DATABASE_ANNOTATION`), `verification_status`
-(`verified` / `provisional`), `notes`.
+`UNRESOLVED`), `sequence_sha256`, `sequence_length`, `uniprot_accession`,
+`reference_label_source`, `reference_label_evidence` (`EXPERIMENTAL` /
+`LITERATURE_PHYLOGENETIC` / `CURATED_COMPUTATIONAL` / `DATABASE_ANNOTATION`),
+`verification_status` (`verified` / `provisional`), `notes`.
+
+## `sequence_sha256` — protein-sequence identity column
+
+`sequence_sha256` is `sha256(normalize(protein_sequence))` where `normalize` =
+**strip every whitespace character, then uppercase** (`SEQUENCE_NORMALIZATION =
+"strip_all_whitespace_then_uppercase"` in `query_reference_recall.py`). The same
+normalization is applied to the retrieved `gbseq__sequence` before hashing, so a
+reference is recognised when its exact protein sequence appears in the retrieved
+set under *any* accession. `sequence_length` is the residue count after
+normalization (informational; not used for matching).
+
+### How the 21 hashes were derived (offline, deterministic, reproducible)
+
+Every hash was computed from the **local metadata CSV of the first real Phase A
+run** —
+`data/02-intermediate/protein_metadata_csv__annotation_enriched_candidate_set/latest/protein_metadata.csv`
+— by looking up each reference accession's `gbseq__sequence` and hashing it with
+the normalization above. No online NCBI / IPG call is made, during curation or
+during normal pipeline execution. For `ABP72561.1` (RsAgo, GenBank, no `WP_`
+RefSeq record and not itself in the retrieved set) the byte-identical Swiss-Prot
+alias `A4WYU7.1` — same NCBI Identical Protein Group, independently confirmed
+byte-identical, 777 aa — was used as the offline sequence source. The resulting
+RsAgo hash is
+`cbdb6bb64718c9e8ca78a34ac8445eff1556cb87b5ad687026373ed401c5fb36`.
+
+`compute_query_reference_recall` matches each reference in this order:
+`EXACT_ACCESSION_VERSION` -> `SAME_BASE_ACCESSION` -> `SEQUENCE_SHA256` ->
+`NONE`, and reports **two** recall readings per stratum: `exact_accession_recall`
+(strict-accession methods only) and `retrieval_equivalent_recall` (also counts a
+`SEQUENCE_SHA256` hit). When several retrieved records share one sequence hash,
+the lexicographically smallest accession is recorded as the representative and
+`sequence_match_count` holds the number of colliding records. The matching
+methodology is pinned by `matching_strategy_sha256`; changing it invalidates the
+`query_reference_recall` snapshot (and nothing else — no downstream artifact
+consumes recall).
 
 `PIWI_RE` rows leave `clade = UNRESOLVED`: PIWI-RE is a family, not a pAgo clade.
 `compute_query_reference_recall` selects the `PIWI_RE` stratum on
 `ago_family == "PIWI_RE"`.
 
-## Known limitation: exact-accession matching can undercount recall
+## Resolved: sequence-identity matching (was: exact-accession undercount)
 
-`compute_query_reference_recall` matches a reference to the retrieved set on
-`accession.version` (and its version-stripped form). If the *same protein
-sequence* is retrieved under a **different accession** than the one in this CSV,
-it is scored as a miss even though the retrieval biologically succeeded.
+Earlier versions of `compute_query_reference_recall` matched only on
+`accession.version` (and its version-stripped form), so the *same protein
+sequence* retrieved under a **different accession** scored as a miss even though
+the retrieval biologically succeeded. This is now fixed: `SEQUENCE_SHA256` is the
+third matching tier (see the `sequence_sha256` section above), and the
+`retrieval_equivalent_recall` reading counts such recoveries. The strict
+`exact_accession_recall` reading is retained alongside it. The RsAgo case below
+is what motivated the change; it is now recovered via `A4WYU7.1`.
 
 ### Investigated case: `ABP72561.1` / RsAgo (first real Phase A run, 52,473 records)
 
@@ -43,17 +82,15 @@ Mechanical investigation (not an accession swap):
   (*C. sphaeroides* ATCC 17025).
 
 **Conclusion: A** — RsAgo was recovered by the query (via `A4WYU7.1`, same IPG,
-identical sequence). The reported miss is a benchmark artifact of exact-accession
+identical sequence). The reported miss was a benchmark artifact of exact-accession
 matching, not a query gap.
 
-**Consequence for the recall figures** from that run: the biologically correct
-recall on this panel is `overall = 21/21 = 1.000` and `LONG_B = 2/2 = 1.000`;
-the reported `0.952` / `0.500` reflect the matcher, not the retrieval.
-
-Recommended fix (pending approval, not applied): match a reference by protein
-sequence identity (e.g. a `sequence_sha256` column, or NCBI IPG resolution),
-falling back to accession. `ABP72561.1` should stay as-is in the CSV — it is a
-correct accession for RsAgo.
+**Recall figures** for this panel with the sequence-identity matcher:
+`retrieval_equivalent_recall` `overall = 21/21 = 1.000`, `LONG_B = 2/2 = 1.000`;
+the strict `exact_accession_recall` stays `overall = 20/21 = 0.952`,
+`LONG_B = 1/2 = 0.500` — RsAgo's `ABP72561.1` is genuinely absent from the
+retrieved accessions, and that reading is reported honestly rather than hidden.
+`ABP72561.1` stays as-is in the CSV — it is a correct accession for RsAgo.
 
 ## PIWI-RE set (7 entries)
 

@@ -120,10 +120,15 @@ Archaea[Organism])`) and materializes the audit artifacts around it:
 - `query_reference_recall` — how many curated reference pAgos
   (`tests/fixtures/query_recall_reference_set.csv`, see the sibling
   `_curation_notes.md`) the text query recovered, overall, per MID-PIWI clade
-  (LONG_A / LONG_B / SHORT), and for the PIWI-RE family. A stratum with zero
-  references reports `NOT_EVALUABLE`, never `0.0`. Each reference row carries a
-  `reference_label_evidence` level (EXPERIMENTAL / LITERATURE_PHYLOGENETIC /
-  CURATED_COMPUTATIONAL / DATABASE_ANNOTATION).
+  (LONG_A / LONG_B / SHORT), and for the PIWI-RE family. A reference is matched
+  by accession.version, then by base accession, then by identical protein
+  sequence (`sequence_sha256`, whitespace-stripped + uppercased) — so a protein
+  retrieved under a different accession still counts. Two readings are reported:
+  `exact_accession_recall` (strict) and `retrieval_equivalent_recall` (also
+  sequence identity). A stratum with zero references reports `NOT_EVALUABLE`,
+  never `0.0`. The matching methodology is pinned by `matching_strategy_sha256`.
+  Each reference row carries a `reference_label_evidence` level (EXPERIMENTAL /
+  LITERATURE_PHYLOGENETIC / CURATED_COMPUTATIONAL / DATABASE_ANNOTATION).
 - `pago_technical_prefilter` — excludes only technically unusable records
   (missing/invalid sequence, missing `protein_uid`, technical duplicates). It
   never removes a record by sequence length or by NCBI annotation text; length
