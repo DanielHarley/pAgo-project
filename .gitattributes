@@ -1,1 +1,6 @@
 data/01-raw/protein_xml_snapshots/**/*.xml filter=lfs diff=lfs merge=lfs -text
+
+# SHA-256-pinned Phase B reference resources: never apply end-of-line
+# conversion, or a Windows checkout would mutate the bytes and break the
+# committed lock hashes.
+src/pago_pipeline/resources/** -text

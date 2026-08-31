@@ -23,6 +23,7 @@ jobs:
       - name: Install locked dependencies
         run: |
           python -m pip install -r requirements.lock.txt
+          python -m pip check
 
       - name: Print environment
         run: |
@@ -31,6 +32,10 @@ jobs:
       - name: Verify raw data hashes
         run: |
           python scripts/verify_raw_data.py
+
+      - name: Verify Pfam HMM reference bundle
+        run: |
+          python scripts/verify_reference_data.py --scope pfam
 
       - name: Run tests
         run: |
@@ -54,7 +59,12 @@ jobs:
       - name: Install locked dependencies
         run: |
           python -m pip install -r requirements.lock.txt
+          python -m pip check
 
-      - name: Run Windows snapshot reuse tests
+      - name: Verify Pfam HMM resources with PyHMMER on Windows
         run: |
-          python -m unittest tests.test_sweep_genes_snapshot tests.test_pca_kmeans_snapshot
+          python scripts/verify_reference_data.py --scope pfam
+
+      - name: Run Windows snapshot reuse and PyHMMER tests
+        run: |
+          python -m unittest tests.test_sweep_genes_snapshot tests.test_pca_kmeans_snapshot tests.test_pfam_hmm_bundle tests.test_pfam_hmm_bundle_snapshot
