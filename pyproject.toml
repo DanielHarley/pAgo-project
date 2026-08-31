@@ -19,3 +19,14 @@ dependencies = [
     "scipy",
     "tqdm",
 ]
+
+[project.optional-dependencies]
+# Curation / development only: needed solely to reconstruct the APAZ Phase B
+# reference resources with scripts/regenerate_apaz_reference.py. Not imported by
+# the pipeline at runtime and deliberately kept out of requirements.lock.txt.
+# scripts/derive_apaz_split_groups.py additionally needs an external MMseqs2
+# (bioconda, pinned in src/pago_pipeline/resources/apaz_seed/seeds_lock.json),
+# which has no pip wheel contract.
+curation = [
+    "pyfamsa==0.7.0",
+]

@@ -110,27 +110,49 @@ def verify_pfam_reference_data() -> VerificationSummary:
 
 
 def verify_apaz_reference_data() -> VerificationSummary:
-    from src.pago_pipeline.apaz_hmm_build import validate_apaz_hmm_build_inputs
+    # B2 verification depends only on the canonical split-group library and the
+    # committed apaz_seed resources; it must not import any B3 module.
+    import csv as _csv
+    from collections import Counter as _Counter
 
-    result = validate_apaz_hmm_build_inputs()
-    locked_file_count = verify_every_declared_lock_file(
-        lock_file_path=result.seed_lock_file_path
+    from src.pago_pipeline.apaz_split_groups import (
+        validate_apaz_partition_invariants,
+        validate_apaz_seed_consistency,
     )
-    partition_counts = Counter(result.partition_by_accession.values())
+
+    apaz_seed_directory = (
+        PROJECT_ROOT / "src" / "pago_pipeline" / "resources" / "apaz_seed"
+    )
+    partitions_csv_path = apaz_seed_directory / "apaz_partitions.csv"
+    locked_file_count = verify_every_declared_lock_file(
+        lock_file_path=apaz_seed_directory / "seeds_lock.json"
+    )
+    partition_invariants = validate_apaz_partition_invariants(
+        partitions_csv_path=partitions_csv_path,
+        split_groups_directory=apaz_seed_directory / "split_groups",
+    )
+    seed_checks = validate_apaz_seed_consistency(resource_directory=apaz_seed_directory)
+
+    with partitions_csv_path.open("r", encoding="utf-8", newline="") as handle:
+        rows = list(_csv.DictReader(handle))
+    partition_counts = _Counter(row["partition"] for row in rows)
     formatted_partitions = ",".join(
         f"{partition}={partition_counts[partition]}"
         for partition in sorted(partition_counts)
     )
+    lock_sha256 = sha256_of_file(input_file_path=apaz_seed_directory / "seeds_lock.json")
+    partitions_sha256 = sha256_of_file(input_file_path=partitions_csv_path)
     return VerificationSummary(
         reference_layer="apaz_seed",
         details=(
-            f"seed_alignments={len(result.seed_artifacts)}",
             f"locked_files={locked_file_count}",
-            f"partition_rows={len(result.partition_by_accession)}",
-            f"homology_clusters={len(set(result.homology_cluster_by_accession.values()))}",
+            f"partition_rows={len(rows)}",
+            f"split_groups={len({row['split_group_id'] for row in rows})}",
             f"partitions={formatted_partitions}",
-            f"seed_lock_sha256={result.seed_lock_sha256}",
-            f"partitions_sha256={result.partitions_sha256}",
+            f"partition_invariants_passed={len(partition_invariants)}",
+            f"seed_consistency_checks_passed={len(seed_checks)}",
+            f"seed_lock_sha256={lock_sha256}",
+            f"partitions_sha256={partitions_sha256}",
         ),
     )
 
