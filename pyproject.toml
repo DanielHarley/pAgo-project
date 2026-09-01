@@ -29,4 +29,7 @@ dependencies = [
 # which has no pip wheel contract.
 curation = [
     "pyfamsa==0.7.0",
+    # scripts/build_clade_reference_catalog.py: reads the Ryazansky 2018
+    # Table S1 .xls workbook (B4). Not imported by the pipeline at runtime.
+    "xlrd==2.0.2",
 ]
