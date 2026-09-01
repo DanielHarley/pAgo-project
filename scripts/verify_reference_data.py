@@ -158,27 +158,37 @@ def verify_apaz_reference_data() -> VerificationSummary:
 
 
 def verify_clade_reference_data() -> VerificationSummary:
-    from src.pago_pipeline.clade_hmm_build import validate_clade_hmm_build_inputs
+    # Validates the B4.2 Ryazansky catalog and the B4.3 MID-PIWI split groups.
+    # B5 (clade_hmm_build) will extend this once its seeds are curated; this
+    # verifier must not import any B5/B6 module.
+    from src.pago_pipeline.clade_midpiwi_split_groups import (
+        validate_clade_reference_data,
+    )
 
-    result = validate_clade_hmm_build_inputs()
-    locked_file_count = verify_every_declared_lock_file(
-        lock_file_path=result.seed_lock_file_path
+    clade_seed_directory = (
+        PROJECT_ROOT / "src" / "pago_pipeline" / "resources" / "clade_seed"
     )
-    partition_counts = Counter(result.partition_by_accession.values())
-    formatted_partitions = ",".join(
-        f"{partition}={partition_counts[partition]}"
-        for partition in sorted(partition_counts)
+    result = validate_clade_reference_data(
+        clade_seed_directory=clade_seed_directory
     )
+    counts = result["clade_group_counts"]
     return VerificationSummary(
         reference_layer="clade_seed",
         details=(
-            f"seed_alignments={len(result.seed_artifacts)}",
-            f"locked_files={locked_file_count}",
-            f"partition_rows={len(result.partition_by_accession)}",
-            f"homology_clusters={len(set(result.homology_cluster_by_accession.values()))}",
-            f"partitions={formatted_partitions}",
-            f"seed_lock_sha256={result.seed_lock_sha256}",
-            f"partitions_sha256={result.partitions_sha256}",
+            f"catalog_rows={result['catalog_rows']}",
+            f"midpiwi_regions={result['midpiwi_regions']}",
+            f"split_groups={result['split_groups']}",
+            f"partition_eligible_groups={result['partition_eligible_groups']}",
+            "clade_group_counts="
+            + ",".join(f"{k}={counts[k]}" for k in sorted(counts)),
+            f"label_conflict_groups={result['label_conflict_groups']}",
+            f"groups_containing_unresolved={result['groups_containing_unresolved']}",
+            f"quarantine_groups={result['quarantine_groups']}",
+            "all_vs_all_combinatorial_coverage="
+            f"{result['all_vs_all_combinatorial_coverage']}",
+            f"checks_passed={len(result['checks'])}",
+            f"catalog_sha256={result['catalog_sha256']}",
+            f"split_groups_csv_sha256={result['split_groups_csv_sha256']}",
         ),
     )
 
