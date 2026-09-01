@@ -1,0 +1,298 @@
+{
+  "by_architecture_status": {
+    "LONG_ARCHITECTURE": 393,
+    "SHORT_ARCHITECTURE": 579,
+    "TRUNCATED": 38
+  },
+  "by_curated_pago_clade": {
+    "LONG_A": 225,
+    "LONG_B": 198,
+    "SHORT": 583,
+    "UNRESOLVED": 4
+  },
+  "by_curation_status": {
+    "OK": 1008,
+    "QUARANTINE": 2
+  },
+  "by_midpiwi_extraction_status": {
+    "MISSING_MID": 8,
+    "OK": 1002
+  },
+  "by_source_ago_type": {
+    "longA": 207,
+    "longA_trun": 19,
+    "longB": 186,
+    "longB_trun": 13,
+    "short": 577,
+    "short_trun": 6,
+    "unkn": 2
+  },
+  "by_source_phylogenetic_clade": {
+    "LONG_A": 226,
+    "LONG_B": 199,
+    "SHORT": 583,
+    "UNRESOLVED": 2
+  },
+  "canonical_vs_truncated": {
+    "canonical": 972,
+    "truncated": 38
+  },
+  "coordinate_convention": {
+    "convention": "one_based_inclusive_contiguous_mid_then_piwi",
+    "mid_end_eq_piwi_start": 0,
+    "mid_end_plus_one_eq_piwi_start": 1002,
+    "mid_piwi_gap_or_overlap": 0,
+    "paz_end_lt_mid_start": 393,
+    "paz_pairs": 393,
+    "piwi_end_eq_length": 5,
+    "piwi_end_gt_length": 0
+  },
+  "duplicate_full_sequence_pairs": [
+    [
+      "NP_213999.1",
+      "WP_010880937.1"
+    ],
+    [
+      "NP_443795.1",
+      "WP_010875054.1"
+    ],
+    [
+      "NP_630911.1",
+      "WP_011031225.1"
+    ],
+    [
+      "NP_681738.1",
+      "WP_011056792.1"
+    ],
+    [
+      "NP_952414.1",
+      "WP_010942012.1"
+    ],
+    [
+      "WP_011971022.1",
+      "YP_001314988.1"
+    ]
+  ],
+  "duplicate_midpiwi_region_groups": [
+    [
+      "NP_213999.1",
+      "WP_010880937.1"
+    ],
+    [
+      "NP_443795.1",
+      "WP_010875054.1"
+    ],
+    [
+      "NP_630911.1",
+      "WP_011031225.1"
+    ],
+    [
+      "NP_681738.1",
+      "WP_011056792.1"
+    ],
+    [
+      "NP_952414.1",
+      "WP_010942012.1"
+    ],
+    [
+      "WP_002566035.1",
+      "WP_048931269.1"
+    ],
+    [
+      "WP_009518867.1",
+      "WP_035619941.1"
+    ],
+    [
+      "WP_011971022.1",
+      "YP_001314988.1"
+    ],
+    [
+      "WP_014295921.1",
+      "WP_075780265.1"
+    ],
+    [
+      "WP_031431803.1",
+      "WP_005372460.1"
+    ],
+    [
+      "WP_047361658.1",
+      "WP_060422788.1"
+    ],
+    [
+      "WP_054724085.1",
+      "WP_092468852.1"
+    ],
+    [
+      "WP_054851363.1",
+      "WP_088696231.1"
+    ],
+    [
+      "WP_055133795.1",
+      "WP_059333817.1"
+    ],
+    [
+      "WP_058870690.1",
+      "WP_087527547.1"
+    ],
+    [
+      "WP_072885920.1",
+      "WP_088264063.1"
+    ],
+    [
+      "WP_038030409.1",
+      "WP_039457454.1"
+    ],
+    [
+      "WP_079392071.1",
+      "WP_079759401.1"
+    ]
+  ],
+  "experimental_anchors_in_table_s1": [
+    "AaAgo",
+    "AfAgo",
+    "GsAgo",
+    "MhAgo",
+    "MjAgo",
+    "MpAgo",
+    "NgAgo",
+    "PfAgo",
+    "RsAgo",
+    "SeAgo",
+    "SiAgo"
+  ],
+  "n_midpiwi_extracted": 1002,
+  "n_sequences_not_recovered": 0,
+  "n_sequences_recovered": 1010,
+  "n_total": 1010,
+  "n_unique_full_sequence_sha256": 1004,
+  "n_unique_midpiwi_region_sha256": 984,
+  "ncbi_record_status": {
+    "DEAD_REPLACED": 7,
+    "LIVE": 731,
+    "SUPPRESSED": 272
+  },
+  "potential_exclusion_reasons": {
+    "curated_clade_unresolved": 4,
+    "dead_replaced": 7,
+    "midpiwi_extraction_failed": 8,
+    "missing_mid_coordinate": 8,
+    "obsolete_accession_double_listed": 6,
+    "quarantine": 2,
+    "suppressed": 272,
+    "suppressed_and_truncated": 16
+  },
+  "quality_checks": {
+    "coord_out_of_range": [],
+    "duplicate_accession": [],
+    "length_current_ne_source": [],
+    "mid_start_gt_mid_end": [],
+    "mid_then_piwi_gap_or_overlap": [],
+    "missing_mid": [
+      "WP_051382728.1",
+      "WP_051558641.1",
+      "WP_074592521.1",
+      "WP_084480083.1",
+      "WP_018015751.1",
+      "WP_073948441.1",
+      "WP_083786902.1",
+      "WP_089761446.1"
+    ],
+    "piwi_end_gt_current_length": [],
+    "replacement_not_equivalent": [],
+    "trun_with_complete_midpiwi": [
+      "WP_009610106.1",
+      "WP_010044791.1",
+      "WP_037994439.1",
+      "WP_041932423.1",
+      "WP_044937782.1",
+      "WP_052368014.1",
+      "WP_052846682.1",
+      "WP_061096135.1",
+      "WP_061307001.1",
+      "WP_068616618.1",
+      "WP_069674097.1",
+      "WP_072261297.1",
+      "WP_074671526.1",
+      "WP_075666638.1",
+      "WP_075800933.1",
+      "WP_081892706.1",
+      "WP_082735923.1",
+      "WP_083461754.1",
+      "WP_084326285.1",
+      "WP_091823002.1",
+      "WP_101294153.1",
+      "WP_010878815.1",
+      "WP_012735993.1",
+      "WP_012952863.1",
+      "WP_019493534.1",
+      "WP_026329128.1",
+      "WP_036253794.1",
+      "WP_051044347.1",
+      "WP_062422190.1",
+      "WP_092037576.1"
+    ],
+    "trun_with_incomplete_midpiwi": [
+      "WP_051382728.1",
+      "WP_051558641.1",
+      "WP_074592521.1",
+      "WP_084480083.1",
+      "WP_018015751.1",
+      "WP_073948441.1",
+      "WP_083786902.1",
+      "WP_089761446.1"
+    ]
+  },
+  "quarantine": [
+    {
+      "anchor": "AfAgo",
+      "quarantine_reason": "literature/architecture clade SHORT vs Ryazansky phylogenetic longB_trun; pending specific audit against the primary sources",
+      "source_accession": "WP_010878815.1",
+      "source_ago_type": "longB_trun"
+    },
+    {
+      "anchor": "SiAgo",
+      "quarantine_reason": "literature/architecture clade SHORT vs Ryazansky phylogenetic longA_trun; pending specific audit against the primary sources",
+      "source_accession": "WP_012735993.1",
+      "source_ago_type": "longA_trun"
+    }
+  ],
+  "replacements": [
+    {
+      "equivalent": true,
+      "replacement": "WP_010880937.1",
+      "source": "NP_213999.1"
+    },
+    {
+      "equivalent": true,
+      "replacement": "WP_010875054.1",
+      "source": "NP_443795.1"
+    },
+    {
+      "equivalent": true,
+      "replacement": "WP_011031225.1",
+      "source": "NP_630911.1"
+    },
+    {
+      "equivalent": true,
+      "replacement": "WP_011056792.1",
+      "source": "NP_681738.1"
+    },
+    {
+      "equivalent": true,
+      "replacement": "WP_010942012.1",
+      "source": "NP_952414.1"
+    },
+    {
+      "equivalent": true,
+      "replacement": "WP_011971022.1",
+      "source": "YP_001314988.1"
+    },
+    {
+      "equivalent": true,
+      "replacement": "WP_011229221.1",
+      "source": "YP_145307.1"
+    }
+  ],
+  "review": [],
+  "ryazansky_s1_catalog_sha256": "dde09c035919ad6ebd23199200e13d78c73afa5ef842193d9c39114cff95d631"
+}

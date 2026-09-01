@@ -1,0 +1,66 @@
+{
+  "artifact_type": "clade_reference_source_manifest",
+  "doi": "10.1128/mBio.01935-18",
+  "license_code": "CC BY",
+  "materialized_files": [
+    {
+      "bytes": 2206,
+      "description": "Official PMC Open Access metadata record for the article.",
+      "file_name": "PMC6299218.1.metadata.json",
+      "md5": "8af783d937b1a23970e635b923316fd6",
+      "role": "pmc_oa_metadata",
+      "sha256": "89aa43f27ebb729d388abfe6e6098f8e02d7dc9095cb63b4f6e5e3bc3f8385cb",
+      "url": "https://pmc-oa-opendata.s3.amazonaws.com/metadata/PMC6299218.1.json"
+    },
+    {
+      "bytes": 309760,
+      "description": "The list of 1010 identified pAgo proteins: accession, species, taxon, length, Ago_type clade label, and PAZ/MID/PIWI domain coordinates.",
+      "file_name": "mbo006184236st1.xls",
+      "md5": "36c9e5b00dfd327b856bdc69de9d70f0",
+      "role": "table_s1",
+      "sha256": "db6918a2067dab67d7680d921cb46f66e371361b3639bb969da4f15896f795df",
+      "url": "https://pmc-oa-opendata.s3.amazonaws.com/PMC6299218.1/mbo006184236st1.xls"
+    },
+    {
+      "bytes": 17848,
+      "description": "Alignment of the MID* 5'-end-binding-motif fragment for 75 long pAgos with a non-canonical MID motif (diagnostic; not the tree alignment).",
+      "file_name": "mbo006184236sd1.txt",
+      "md5": "4a151e924f85810a34f2ad5cbcc3278f",
+      "role": "data_set_s1",
+      "sha256": "5590331a3cfe399562df34d2de3005e603c776e8927cda2cde0b17bfe22ee701",
+      "url": "https://pmc-oa-opendata.s3.amazonaws.com/PMC6299218.1/mbo006184236sd1.txt"
+    },
+    {
+      "bytes": 143035,
+      "description": "Alignment of PAZ and PAZ* domains of long pAgos (diagnostic; not the tree alignment).",
+      "file_name": "mbo006184236sd2.txt",
+      "md5": "3a160c67945eff04ad161662ae781a77",
+      "role": "data_set_s2",
+      "sha256": "1abbf176413bdb52732b2c219c8418624987b3229fb71d3a70c5b0a0fd4a68ba",
+      "url": "https://pmc-oa-opendata.s3.amazonaws.com/PMC6299218.1/mbo006184236sd2.txt"
+    }
+  ],
+  "non_materialized_supplements": [
+    {
+      "bytes": 312739,
+      "file_name": "mbo006184236st2.xlsx",
+      "md5": "ffc634d19468f4ab872fc71cb35ed649",
+      "note": "genomic-context data (operon neighbour orthogroups); not a clade or sequence resource; recorded for provenance only.",
+      "sha256": "f8731f8012ad316a106b17aaab4b607876750d03223a0fe83fc2d4d8f48aa59d",
+      "url": "https://pmc-oa-opendata.s3.amazonaws.com/PMC6299218.1/mbo006184236st2.xlsx"
+    },
+    {
+      "bytes": 30720,
+      "file_name": "mbo006184236st3.xls",
+      "md5": "fd61523055f660ebcd75bc9cedefb9ed",
+      "note": "genomic-context data (operon neighbour orthogroups); not a clade or sequence resource; recorded for provenance only.",
+      "sha256": "c0976419a6917068c7fe6fa10538d47df91de4fc1fd1bdddcb8febba8d0776cb",
+      "url": "https://pmc-oa-opendata.s3.amazonaws.com/PMC6299218.1/mbo006184236st3.xls"
+    }
+  ],
+  "pmc_id": "PMC6299218.1",
+  "pmc_oa_base_url": "https://pmc-oa-opendata.s3.amazonaws.com/PMC6299218.1/",
+  "pmc_oa_metadata_url": "https://pmc-oa-opendata.s3.amazonaws.com/metadata/PMC6299218.1.json",
+  "pmid": 30563906,
+  "source_article_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6299218/"
+}

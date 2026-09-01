@@ -1,0 +1,5052 @@
+{
+ "NP_213999.1": {
+  "replacedby": "WP_010880937.1",
+  "slen": 706,
+  "status": "dead"
+ },
+ "NP_443795.1": {
+  "replacedby": "WP_010875054.1",
+  "slen": 517,
+  "status": "dead"
+ },
+ "NP_630911.1": {
+  "replacedby": "WP_011031225.1",
+  "slen": 681,
+  "status": "dead"
+ },
+ "NP_681738.1": {
+  "replacedby": "WP_011056792.1",
+  "slen": 756,
+  "status": "dead"
+ },
+ "NP_952414.1": {
+  "replacedby": "WP_010942012.1",
+  "slen": 473,
+  "status": "dead"
+ },
+ "WP_000151321.1": {
+  "replacedby": "",
+  "slen": 728,
+  "status": "live"
+ },
+ "WP_002566035.1": {
+  "replacedby": "",
+  "slen": 1046,
+  "status": "live"
+ },
+ "WP_002645493.1": {
+  "replacedby": "",
+  "slen": 513,
+  "status": "live"
+ },
+ "WP_002801241.1": {
+  "replacedby": "",
+  "slen": 747,
+  "status": "live"
+ },
+ "WP_002993156.1": {
+  "replacedby": "",
+  "slen": 482,
+  "status": "live"
+ },
+ "WP_004290502.1": {
+  "replacedby": "",
+  "slen": 1038,
+  "status": "live"
+ },
+ "WP_004308218.1": {
+  "replacedby": "",
+  "slen": 1054,
+  "status": "live"
+ },
+ "WP_004318406.1": {
+  "replacedby": "",
+  "slen": 1054,
+  "status": "live"
+ },
+ "WP_004328663.1": {
+  "replacedby": "",
+  "slen": 610,
+  "status": "live"
+ },
+ "WP_004492459.1": {
+  "replacedby": "",
+  "slen": 637,
+  "status": "live"
+ },
+ "WP_004594459.1": {
+  "replacedby": "",
+  "slen": 347,
+  "status": "suppressed"
+ },
+ "WP_004624807.1": {
+  "replacedby": "",
+  "slen": 1052,
+  "status": "live"
+ },
+ "WP_004672358.1": {
+  "replacedby": "",
+  "slen": 518,
+  "status": "suppressed"
+ },
+ "WP_004710421.1": {
+  "replacedby": "",
+  "slen": 728,
+  "status": "live"
+ },
+ "WP_004748891.1": {
+  "replacedby": "",
+  "slen": 480,
+  "status": "live"
+ },
+ "WP_004968197.1": {
+  "replacedby": "",
+  "slen": 749,
+  "status": "suppressed"
+ },
+ "WP_004992799.1": {
+  "replacedby": "",
+  "slen": 1045,
+  "status": "live"
+ },
+ "WP_005032630.1": {
+  "replacedby": "",
+  "slen": 1045,
+  "status": "live"
+ },
+ "WP_005277191.1": {
+  "replacedby": "",
+  "slen": 1045,
+  "status": "live"
+ },
+ "WP_005372460.1": {
+  "replacedby": "",
+  "slen": 514,
+  "status": "suppressed"
+ },
+ "WP_005580376.1": {
+  "replacedby": "",
+  "slen": 887,
+  "status": "live"
+ },
+ "WP_005783349.1": {
+  "replacedby": "",
+  "slen": 481,
+  "status": "live"
+ },
+ "WP_005801097.1": {
+  "replacedby": "",
+  "slen": 1046,
+  "status": "live"
+ },
+ "WP_005864495.1": {
+  "replacedby": "",
+  "slen": 469,
+  "status": "live"
+ },
+ "WP_005988487.1": {
+  "replacedby": "",
+  "slen": 485,
+  "status": "live"
+ },
+ "WP_006019180.1": {
+  "replacedby": "",
+  "slen": 484,
+  "status": "live"
+ },
+ "WP_006054116.1": {
+  "replacedby": "",
+  "slen": 895,
+  "status": "live"
+ },
+ "WP_006090832.1": {
+  "replacedby": "",
+  "slen": 889,
+  "status": "live"
+ },
+ "WP_006111085.1": {
+  "replacedby": "",
+  "slen": 839,
+  "status": "suppressed"
+ },
+ "WP_006169674.1": {
+  "replacedby": "",
+  "slen": 347,
+  "status": "suppressed"
+ },
+ "WP_006183335.1": {
+  "replacedby": "",
+  "slen": 847,
+  "status": "suppressed"
+ },
+ "WP_006270761.1": {
+  "replacedby": "",
+  "slen": 485,
+  "status": "live"
+ },
+ "WP_006328963.1": {
+  "replacedby": "",
+  "slen": 518,
+  "status": "live"
+ },
+ "WP_006512592.1": {
+  "replacedby": "",
+  "slen": 500,
+  "status": "suppressed"
+ },
+ "WP_006580534.1": {
+  "replacedby": "",
+  "slen": 714,
+  "status": "suppressed"
+ },
+ "WP_006630693.1": {
+  "replacedby": "",
+  "slen": 470,
+  "status": "live"
+ },
+ "WP_006630972.1": {
+  "replacedby": "",
+  "slen": 764,
+  "status": "suppressed"
+ },
+ "WP_006746222.1": {
+  "replacedby": "",
+  "slen": 1064,
+  "status": "live"
+ },
+ "WP_007011916.1": {
+  "replacedby": "",
+  "slen": 472,
+  "status": "live"
+ },
+ "WP_007013852.1": {
+  "replacedby": "",
+  "slen": 485,
+  "status": "live"
+ },
+ "WP_007015521.1": {
+  "replacedby": "",
+  "slen": 469,
+  "status": "live"
+ },
+ "WP_007044032.1": {
+  "replacedby": "",
+  "slen": 875,
+  "status": "suppressed"
+ },
+ "WP_007412615.1": {
+  "replacedby": "",
+  "slen": 481,
+  "status": "live"
+ },
+ "WP_008137931.1": {
+  "replacedby": "",
+  "slen": 483,
+  "status": "live"
+ },
+ "WP_008205290.1": {
+  "replacedby": "",
+  "slen": 747,
+  "status": "live"
+ },
+ "WP_008387991.1": {
+  "replacedby": "",
+  "slen": 475,
+  "status": "live"
+ },
+ "WP_008390487.1": {
+  "replacedby": "",
+  "slen": 482,
+  "status": "live"
+ },
+ "WP_008391586.1": {
+  "replacedby": "",
+  "slen": 514,
+  "status": "live"
+ },
+ "WP_008458795.1": {
+  "replacedby": "",
+  "slen": 347,
+  "status": "live"
+ },
+ "WP_008504757.1": {
+  "replacedby": "",
+  "slen": 795,
+  "status": "live"
+ },
+ "WP_008580551.1": {
+  "replacedby": "",
+  "slen": 472,
+  "status": "live"
+ },
+ "WP_008606028.1": {
+  "replacedby": "",
+  "slen": 728,
+  "status": "suppressed"
+ },
+ "WP_008615787.1": {
+  "replacedby": "",
+  "slen": 1052,
+  "status": "live"
+ },
+ "WP_008631444.1": {
+  "replacedby": "",
+  "slen": 685,
+  "status": "live"
+ },
+ "WP_008657175.1": {
+  "replacedby": "",
+  "slen": 1043,
+  "status": "live"
+ },
+ "WP_008691735.1": {
+  "replacedby": "",
+  "slen": 758,
+  "status": "live"
+ },
+ "WP_008706031.1": {
+  "replacedby": "",
+  "slen": 500,
+  "status": "live"
+ },
+ "WP_008781126.1": {
+  "replacedby": "",
+  "slen": 469,
+  "status": "live"
+ },
+ "WP_008838212.1": {
+  "replacedby": "",
+  "slen": 789,
+  "status": "live"
+ },
+ "WP_008877327.1": {
+  "replacedby": "",
+  "slen": 518,
+  "status": "live"
+ },
+ "WP_008983419.1": {
+  "replacedby": "",
+  "slen": 472,
+  "status": "live"
+ },
+ "WP_009126228.1": {
+  "replacedby": "",
+  "slen": 1038,
+  "status": "live"
+ },
+ "WP_009128903.1": {
+  "replacedby": "",
+  "slen": 634,
+  "status": "live"
+ },
+ "WP_009184284.1": {
+  "replacedby": "",
+  "slen": 763,
+  "status": "live"
+ },
+ "WP_009361466.1": {
+  "replacedby": "",
+  "slen": 639,
+  "status": "live"
+ },
+ "WP_009456812.1": {
+  "replacedby": "",
+  "slen": 737,
+  "status": "live"
+ },
+ "WP_009486613.1": {
+  "replacedby": "",
+  "slen": 759,
+  "status": "suppressed"
+ },
+ "WP_009507643.1": {
+  "replacedby": "",
+  "slen": 486,
+  "status": "suppressed"
+ },
+ "WP_009518867.1": {
+  "replacedby": "",
+  "slen": 730,
+  "status": "live"
+ },
+ "WP_009610106.1": {
+  "replacedby": "",
+  "slen": 432,
+  "status": "live"
+ },
+ "WP_009787621.1": {
+  "replacedby": "",
+  "slen": 764,
+  "status": "live"
+ },
+ "WP_009826338.1": {
+  "replacedby": "",
+  "slen": 480,
+  "status": "live"
+ },
+ "WP_009860218.1": {
+  "replacedby": "",
+  "slen": 1055,
+  "status": "live"
+ },
+ "WP_010044791.1": {
+  "replacedby": "",
+  "slen": 518,
+  "status": "suppressed"
+ },
+ "WP_010123963.1": {
+  "replacedby": "",
+  "slen": 485,
+  "status": "live"
+ },
+ "WP_010165149.1": {
+  "replacedby": "",
+  "slen": 518,
+  "status": "live"
+ },
+ "WP_010289662.1": {
+  "replacedby": "",
+  "slen": 737,
+  "status": "live"
+ },
+ "WP_010424306.1": {
+  "replacedby": "",
+  "slen": 474,
+  "status": "live"
+ },
+ "WP_010682499.1": {
+  "replacedby": "",
+  "slen": 767,
+  "status": "live"
+ },
+ "WP_010683363.1": {
+  "replacedby": "",
+  "slen": 468,
+  "status": "live"
+ },
+ "WP_010870838.1": {
+  "replacedby": "",
+  "slen": 713,
+  "status": "live"
+ },
+ "WP_010875054.1": {
+  "replacedby": "",
+  "slen": 517,
+  "status": "live"
+ },
+ "WP_010878815.1": {
+  "replacedby": "",
+  "slen": 427,
+  "status": "live"
+ },
+ "WP_010880937.1": {
+  "replacedby": "",
+  "slen": 706,
+  "status": "live"
+ },
+ "WP_010942012.1": {
+  "replacedby": "",
+  "slen": 473,
+  "status": "live"
+ },
+ "WP_011011654.1": {
+  "replacedby": "",
+  "slen": 770,
+  "status": "live"
+ },
+ "WP_011021016.1": {
+  "replacedby": "",
+  "slen": 466,
+  "status": "live"
+ },
+ "WP_011031225.1": {
+  "replacedby": "",
+  "slen": 681,
+  "status": "live"
+ },
+ "WP_011056792.1": {
+  "replacedby": "",
+  "slen": 756,
+  "status": "suppressed"
+ },
+ "WP_011238781.1": {
+  "replacedby": "",
+  "slen": 727,
+  "status": "suppressed"
+ },
+ "WP_011244830.1": {
+  "replacedby": "",
+  "slen": 735,
+  "status": "live"
+ },
+ "WP_011308723.1": {
+  "replacedby": "",
+  "slen": 794,
+  "status": "live"
+ },
+ "WP_011378069.1": {
+  "replacedby": "",
+  "slen": 735,
+  "status": "live"
+ },
+ "WP_011434286.1": {
+  "replacedby": "",
+  "slen": 746,
+  "status": "suppressed"
+ },
+ "WP_011488074.1": {
+  "replacedby": "",
+  "slen": 1063,
+  "status": "suppressed"
+ },
+ "WP_011504020.1": {
+  "replacedby": "",
+  "slen": 507,
+  "status": "suppressed"
+ },
+ "WP_011516870.1": {
+  "replacedby": "",
+  "slen": 483,
+  "status": "live"
+ },
+ "WP_011718590.1": {
+  "replacedby": "",
+  "slen": 480,
+  "status": "live"
+ },
+ "WP_011767947.1": {
+  "replacedby": "",
+  "slen": 477,
+  "status": "suppressed"
+ },
+ "WP_011831498.1": {
+  "replacedby": "",
+  "slen": 473,
+  "status": "live"
+ },
+ "WP_011910606.1": {
+  "replacedby": "",
+  "slen": 777,
+  "status": "suppressed"
+ },
+ "WP_011914275.1": {
+  "replacedby": "",
+  "slen": 485,
+  "status": "live"
+ },
+ "WP_011923976.1": {
+  "replacedby": "",
+  "slen": 472,
+  "status": "live"
+ },
+ "WP_011940821.1": {
+  "replacedby": "",
+  "slen": 473,
+  "status": "live"
+ },
+ "WP_011951052.1": {
+  "replacedby": "",
+  "slen": 518,
+  "status": "suppressed"
+ },
+ "WP_011971022.1": {
+  "replacedby": "",
+  "slen": 517,
+  "status": "live"
+ },
+ "WP_011996092.1": {
+  "replacedby": "",
+  "slen": 482,
+  "status": "suppressed"
+ },
+ "WP_012222259.1": {
+  "replacedby": "",
+  "slen": 518,
+  "status": "live"
+ },
+ "WP_012473796.1": {
+  "replacedby": "",
+  "slen": 474,
+  "status": "suppressed"
+ },
+ "WP_012486311.1": {
+  "replacedby": "",
+  "slen": 418,
+  "status": "live"
+ },
+ "WP_012572468.1": {
+  "replacedby": "",
+  "slen": 766,
+  "status": "live"
+ },
+ "WP_012575214.1": {
+  "replacedby": "",
+  "slen": 707,
+  "status": "live"
+ },
+ "WP_012597165.1": {
+  "replacedby": "",
+  "slen": 764,
+  "status": "live"
+ },
+ "WP_012659190.1": {
+  "replacedby": "",
+  "slen": 718,
+  "status": "live"
+ },
+ "WP_012660077.1": {
+  "replacedby": "",
+  "slen": 474,
+  "status": "live"
+ },
+ "WP_012735993.1": {
+  "replacedby": "",
+  "slen": 459,
+  "status": "live"
+ },
+ "WP_012912354.1": {
+  "replacedby": "",
+  "slen": 660,
+  "status": "suppressed"
+ },
+ "WP_012952863.1": {
+  "replacedby": "",
+  "slen": 460,
+  "status": "live"
+ },
+ "WP_012966655.1": {
+  "replacedby": "",
+  "slen": 782,
+  "status": "live"
+ },
+ "WP_012979970.1": {
+  "replacedby": "",
+  "slen": 839,
+  "status": "suppressed"
+ },
+ "WP_013078837.1": {
+  "replacedby": "",
+  "slen": 482,
+  "status": "live"
+ },
+ "WP_013109335.1": {
+  "replacedby": "",
+  "slen": 473,
+  "status": "suppressed"
+ },
+ "WP_013299754.1": {
+  "replacedby": "",
+  "slen": 476,
+  "status": "live"
+ },
+ "WP_013300197.1": {
+  "replacedby": "",
+  "slen": 766,
+  "status": "live"
+ },
+ "WP_013300248.1": {
+  "replacedby": "",
+  "slen": 472,
+  "status": "live"
+ },
+ "WP_013324485.1": {
+  "replacedby": "",
+  "slen": 721,
+  "status": "live"
+ },
+ "WP_013451524.1": {
+  "replacedby": "",
+  "slen": 669,
+  "status": "live"
+ },
+ "WP_013500616.1": {
+  "replacedby": "",
+  "slen": 761,
+  "status": "suppressed"
+ },
+ "WP_013561109.1": {
+  "replacedby": "",
+  "slen": 617,
+  "status": "live"
+ },
+ "WP_013581438.1": {
+  "replacedby": "",
+  "slen": 499,
+  "status": "live"
+ },
+ "WP_013596008.1": {
+  "replacedby": "",
+  "slen": 484,
+  "status": "live"
+ },
+ "WP_013604390.1": {
+  "replacedby": "",
+  "slen": 611,
+  "status": "live"
+ },
+ "WP_013632721.1": {
+  "replacedby": "",
+  "slen": 502,
+  "status": "live"
+ },
+ "WP_013637055.1": {
+  "replacedby": "",
+  "slen": 501,
+  "status": "live"
+ },
+ "WP_013654324.1": {
+  "replacedby": "",
+  "slen": 470,
+  "status": "live"
+ },
+ "WP_013685229.1": {
+  "replacedby": "",
+  "slen": 1052,
+  "status": "live"
+ },
+ "WP_013833357.1": {
+  "replacedby": "",
+  "slen": 499,
+  "status": "live"
+ },
+ "WP_013847450.1": {
+  "replacedby": "",
+  "slen": 822,
+  "status": "suppressed"
+ },
+ "WP_013878483.1": {
+  "replacedby": "",
+  "slen": 757,
+  "status": "live"
+ },
+ "WP_013921749.1": {
+  "replacedby": "",
+  "slen": 801,
+  "status": "live"
+ },
+ "WP_014020247.1": {
+  "replacedby": "",
+  "slen": 521,
+  "status": "live"
+ },
+ "WP_014022287.1": {
+  "replacedby": "",
+  "slen": 699,
+  "status": "live"
+ },
+ "WP_014132756.1": {
+  "replacedby": "",
+  "slen": 509,
+  "status": "live"
+ },
+ "WP_014195559.1": {
+  "replacedby": "",
+  "slen": 710,
+  "status": "live"
+ },
+ "WP_014200912.1": {
+  "replacedby": "",
+  "slen": 520,
+  "status": "suppressed"
+ },
+ "WP_014295921.1": {
+  "replacedby": "",
+  "slen": 639,
+  "status": "live"
+ },
+ "WP_014387264.1": {
+  "replacedby": "",
+  "slen": 514,
+  "status": "live"
+ },
+ "WP_014511275.1": {
+  "replacedby": "",
+  "slen": 685,
+  "status": "live"
+ },
+ "WP_014514637.1": {
+  "replacedby": "",
+  "slen": 692,
+  "status": "suppressed"
+ },
+ "WP_014678514.1": {
+  "replacedby": "",
+  "slen": 748,
+  "status": "live"
+ },
+ "WP_014746186.1": {
+  "replacedby": "",
+  "slen": 520,
+  "status": "suppressed"
+ },
+ "WP_014773309.1": {
+  "replacedby": "",
+  "slen": 695,
+  "status": "live"
+ },
+ "WP_014956171.1": {
+  "replacedby": "",
+  "slen": 1041,
+  "status": "live"
+ },
+ "WP_015056743.1": {
+  "replacedby": "",
+  "slen": 484,
+  "status": "live"
+ },
+ "WP_015118671.1": {
+  "replacedby": "",
+  "slen": 749,
+  "status": "live"
+ },
+ "WP_015150617.1": {
+  "replacedby": "",
+  "slen": 676,
+  "status": "live"
+ },
+ "WP_015157107.1": {
+  "replacedby": "",
+  "slen": 744,
+  "status": "live"
+ },
+ "WP_015159126.1": {
+  "replacedby": "",
+  "slen": 743,
+  "status": "live"
+ },
+ "WP_015195532.1": {
+  "replacedby": "",
+  "slen": 713,
+  "status": "live"
+ },
+ "WP_015201773.1": {
+  "replacedby": "",
+  "slen": 738,
+  "status": "live"
+ },
+ "WP_015213401.1": {
+  "replacedby": "",
+  "slen": 740,
+  "status": "live"
+ },
+ "WP_015329024.1": {
+  "replacedby": "",
+  "slen": 739,
+  "status": "live"
+ },
+ "WP_015449155.1": {
+  "replacedby": "",
+  "slen": 519,
+  "status": "suppressed"
+ },
+ "WP_015596990.1": {
+  "replacedby": "",
+  "slen": 511,
+  "status": "live"
+ },
+ "WP_015664540.1": {
+  "replacedby": "",
+  "slen": 472,
+  "status": "live"
+ },
+ "WP_015717132.1": {
+  "replacedby": "",
+  "slen": 696,
+  "status": "suppressed"
+ },
+ "WP_015784319.1": {
+  "replacedby": "",
+  "slen": 1123,
+  "status": "suppressed"
+ },
+ "WP_015791216.1": {
+  "replacedby": "",
+  "slen": 706,
+  "status": "live"
+ },
+ "WP_015807620.1": {
+  "replacedby": "",
+  "slen": 626,
+  "status": "suppressed"
+ },
+ "WP_015895835.1": {
+  "replacedby": "",
+  "slen": 517,
+  "status": "live"
+ },
+ "WP_015898277.1": {
+  "replacedby": "",
+  "slen": 756,
+  "status": "live"
+ },
+ "WP_015912957.1": {
+  "replacedby": "",
+  "slen": 751,
+  "status": "live"
+ },
+ "WP_016205751.1": {
+  "replacedby": "",
+  "slen": 705,
+  "status": "live"
+ },
+ "WP_016263567.1": {
+  "replacedby": "",
+  "slen": 471,
+  "status": "live"
+ },
+ "WP_016268111.1": {
+  "replacedby": "",
+  "slen": 469,
+  "status": "live"
+ },
+ "WP_016278428.1": {
+  "replacedby": "",
+  "slen": 1049,
+  "status": "live"
+ },
+ "WP_016393046.1": {
+  "replacedby": "",
+  "slen": 471,
+  "status": "live"
+ },
+ "WP_016523204.1": {
+  "replacedby": "",
+  "slen": 621,
+  "status": "live"
+ },
+ "WP_016733898.1": {
+  "replacedby": "",
+  "slen": 500,
+  "status": "live"
+ },
+ "WP_016736428.1": {
+  "replacedby": "",
+  "slen": 468,
+  "status": "suppressed"
+ },
+ "WP_016804074.1": {
+  "replacedby": "",
+  "slen": 565,
+  "status": "suppressed"
+ },
+ "WP_016846609.1": {
+  "replacedby": "",
+  "slen": 499,
+  "status": "live"
+ },
+ "WP_016876098.1": {
+  "replacedby": "",
+  "slen": 737,
+  "status": "live"
+ },
+ "WP_017309810.1": {
+  "replacedby": "",
+  "slen": 737,
+  "status": "suppressed"
+ },
+ "WP_017346485.1": {
+  "replacedby": "",
+  "slen": 485,
+  "status": "live"
+ },
+ "WP_017454948.1": {
+  "replacedby": "",
+  "slen": 480,
+  "status": "live"
+ },
+ "WP_017496420.1": {
+  "replacedby": "",
+  "slen": 763,
+  "status": "live"
+ },
+ "WP_017747476.1": {
+  "replacedby": "",
+  "slen": 1124,
+  "status": "live"
+ },
+ "WP_017748677.1": {
+  "replacedby": "",
+  "slen": 746,
+  "status": "live"
+ },
+ "WP_017841076.1": {
+  "replacedby": "",
+  "slen": 739,
+  "status": "live"
+ },
+ "WP_018005263.1": {
+  "replacedby": "",
+  "slen": 483,
+  "status": "live"
+ },
+ "WP_018015751.1": {
+  "replacedby": "",
+  "slen": 198,
+  "status": "live"
+ },
+ "WP_018016395.1": {
+  "replacedby": "",
+  "slen": 293,
+  "status": "live"
+ },
+ "WP_018045489.1": {
+  "replacedby": "",
+  "slen": 484,
+  "status": "live"
+ },
+ "WP_018594123.1": {
+  "replacedby": "",
+  "slen": 315,
+  "status": "live"
+ },
+ "WP_019493534.1": {
+  "replacedby": "",
+  "slen": 546,
+  "status": "suppressed"
+ },
+ "WP_019494780.1": {
+  "replacedby": "",
+  "slen": 746,
+  "status": "suppressed"
+ },
+ "WP_019497030.1": {
+  "replacedby": "",
+  "slen": 808,
+  "status": "suppressed"
+ },
+ "WP_019960614.1": {
+  "replacedby": "",
+  "slen": 478,
+  "status": "live"
+ },
+ "WP_019977020.1": {
+  "replacedby": "",
+  "slen": 1062,
+  "status": "live"
+ },
+ "WP_020208903.1": {
+  "replacedby": "",
+  "slen": 480,
+  "status": "live"
+ },
+ "WP_020279644.1": {
+  "replacedby": "",
+  "slen": 710,
+  "status": "live"
+ },
+ "WP_021700080.1": {
+  "replacedby": "",
+  "slen": 471,
+  "status": "live"
+ },
+ "WP_022545095.1": {
+  "replacedby": "",
+  "slen": 474,
+  "status": "suppressed"
+ },
+ "WP_022673743.1": {
+  "replacedby": "",
+  "slen": 485,
+  "status": "live"
+ },
+ "WP_022727543.1": {
+  "replacedby": "",
+  "slen": 485,
+  "status": "live"
+ },
+ "WP_022787370.1": {
+  "replacedby": "",
+  "slen": 1014,
+  "status": "suppressed"
+ },
+ "WP_022842740.1": {
+  "replacedby": "",
+  "slen": 490,
+  "status": "suppressed"
+ },
+ "WP_022949975.1": {
+  "replacedby": "",
+  "slen": 473,
+  "status": "live"
+ },
+ "WP_023692462.1": {
+  "replacedby": "",
+  "slen": 483,
+  "status": "live"
+ },
+ "WP_023699067.1": {
+  "replacedby": "",
+  "slen": 518,
+  "status": "live"
+ },
+ "WP_023727137.1": {
+  "replacedby": "",
+  "slen": 484,
+  "status": "live"
+ },
+ "WP_023749875.1": {
+  "replacedby": "",
+  "slen": 473,
+  "status": "live"
+ },
+ "WP_023755374.1": {
+  "replacedby": "",
+  "slen": 483,
+  "status": "live"
+ },
+ "WP_023817613.1": {
+  "replacedby": "",
+  "slen": 710,
+  "status": "live"
+ },
+ "WP_023828907.1": {
+  "replacedby": "",
+  "slen": 473,
+  "status": "live"
+ },
+ "WP_023920034.1": {
+  "replacedby": "",
+  "slen": 777,
+  "status": "live"
+ },
+ "WP_023924954.1": {
+  "replacedby": "",
+  "slen": 502,
+  "status": "live"
+ },
+ "WP_024021728.1": {
+  "replacedby": "",
+  "slen": 469,
+  "status": "live"
+ },
+ "WP_024125870.1": {
+  "replacedby": "",
+  "slen": 760,
+  "status": "suppressed"
+ },
+ "WP_024146569.1": {
+  "replacedby": "",
+  "slen": 731,
+  "status": "live"
+ },
+ "WP_024740054.1": {
+  "replacedby": "",
+  "slen": 1043,
+  "status": "live"
+ },
+ "WP_024810210.1": {
+  "replacedby": "",
+  "slen": 472,
+  "status": "suppressed"
+ },
+ "WP_024873364.1": {
+  "replacedby": "",
+  "slen": 745,
+  "status": "live"
+ },
+ "WP_024889333.1": {
+  "replacedby": "",
+  "slen": 730,
+  "status": "live"
+ },
+ "WP_024981710.1": {
+  "replacedby": "",
+  "slen": 763,
+  "status": "live"
+ },
+ "WP_025091661.1": {
+  "replacedby": "",
+  "slen": 482,
+  "status": "live"
+ },
+ "WP_025200270.1": {
+  "replacedby": "",
+  "slen": 484,
+  "status": "live"
+ },
+ "WP_025465492.1": {
+  "replacedby": "",
+  "slen": 565,
+  "status": "suppressed"
+ },
+ "WP_025493197.1": {
+  "replacedby": "",
+  "slen": 923,
+  "status": "suppressed"
+ },
+ "WP_025660140.1": {
+  "replacedby": "",
+  "slen": 756,
+  "status": "live"
+ },
+ "WP_025665356.1": {
+  "replacedby": "",
+  "slen": 1052,
+  "status": "live"
+ },
+ "WP_026011736.1": {
+  "replacedby": "",
+  "slen": 705,
+  "status": "suppressed"
+ },
+ "WP_026108493.1": {
+  "replacedby": "",
+  "slen": 473,
+  "status": "suppressed"
+ },
+ "WP_026190901.1": {
+  "replacedby": "",
+  "slen": 485,
+  "status": "suppressed"
+ },
+ "WP_026299638.1": {
+  "replacedby": "",
+  "slen": 505,
+  "status": "live"
+ },
+ "WP_026329128.1": {
+  "replacedby": "",
+  "slen": 434,
+  "status": "live"
+ },
+ "WP_026423302.1": {
+  "replacedby": "",
+  "slen": 477,
+  "status": "live"
+ },
+ "WP_026448204.1": {
+  "replacedby": "",
+  "slen": 470,
+  "status": "suppressed"
+ },
+ "WP_026461319.1": {
+  "replacedby": "",
+  "slen": 625,
+  "status": "live"
+ },
+ "WP_026609465.1": {
+  "replacedby": "",
+  "slen": 473,
+  "status": "live"
+ },
+ "WP_026705043.1": {
+  "replacedby": "",
+  "slen": 664,
+  "status": "live"
+ },
+ "WP_026751107.1": {
+  "replacedby": "",
+  "slen": 684,
+  "status": "live"
+ },
+ "WP_026764177.1": {
+  "replacedby": "",
+  "slen": 692,
+  "status": "live"
+ },
+ "WP_026782277.1": {
+  "replacedby": "",
+  "slen": 485,
+  "status": "live"
+ },
+ "WP_026824436.1": {
+  "replacedby": "",
+  "slen": 701,
+  "status": "live"
+ },
+ "WP_026927916.1": {
+  "replacedby": "",
+  "slen": 472,
+  "status": "live"
+ },
+ "WP_026932798.1": {
+  "replacedby": "",
+  "slen": 504,
+  "status": "suppressed"
+ },
+ "WP_027025738.1": {
+  "replacedby": "",
+  "slen": 468,
+  "status": "suppressed"
+ },
+ "WP_027160976.1": {
+  "replacedby": "",
+  "slen": 518,
+  "status": "live"
+ },
+ "WP_027308646.1": {
+  "replacedby": "",
+  "slen": 757,
+  "status": "live"
+ },
+ "WP_027412346.1": {
+  "replacedby": "",
+  "slen": 1040,
+  "status": "live"
+ },
+ "WP_027443719.1": {
+  "replacedby": "",
+  "slen": 471,
+  "status": "live"
+ },
+ "WP_027844945.1": {
+  "replacedby": "",
+  "slen": 764,
+  "status": "live"
+ },
+ "WP_027853031.1": {
+  "replacedby": "",
+  "slen": 483,
+  "status": "live"
+ },
+ "WP_027879788.1": {
+  "replacedby": "",
+  "slen": 703,
+  "status": "live"
+ },
+ "WP_028031285.1": {
+  "replacedby": "",
+  "slen": 485,
+  "status": "suppressed"
+ },
+ "WP_028057924.1": {
+  "replacedby": "",
+  "slen": 504,
+  "status": "live"
+ },
+ "WP_028095444.1": {
+  "replacedby": "",
+  "slen": 468,
+  "status": "live"
+ },
+ "WP_028223139.1": {
+  "replacedby": "",
+  "slen": 920,
+  "status": "suppressed"
+ },
+ "WP_028306819.1": {
+  "replacedby": "",
+  "slen": 758,
+  "status": "live"
+ },
+ "WP_028343463.1": {
+  "replacedby": "",
+  "slen": 473,
+  "status": "live"
+ },
+ "WP_028359221.1": {
+  "replacedby": "",
+  "slen": 481,
+  "status": "live"
+ },
+ "WP_028363061.1": {
+  "replacedby": "",
+  "slen": 523,
+  "status": "suppressed"
+ },
+ "WP_028663822.1": {
+  "replacedby": "",
+  "slen": 1111,
+  "status": "live"
+ },
+ "WP_028849835.1": {
+  "replacedby": "",
+  "slen": 476,
+  "status": "live"
+ },
+ "WP_028894342.1": {
+  "replacedby": "",
+  "slen": 473,
+  "status": "suppressed"
+ },
+ "WP_028947682.1": {
+  "replacedby": "",
+  "slen": 731,
+  "status": "live"
+ },
+ "WP_029005632.1": {
+  "replacedby": "",
+  "slen": 436,
+  "status": "suppressed"
+ },
+ "WP_029134084.1": {
+  "replacedby": "",
+  "slen": 507,
+  "status": "live"
+ },
+ "WP_029193119.1": {
+  "replacedby": "",
+  "slen": 1051,
+  "status": "live"
+ },
+ "WP_029585865.1": {
+  "replacedby": "",
+  "slen": 498,
+  "status": "live"
+ },
+ "WP_029630398.1": {
+  "replacedby": "",
+  "slen": 797,
+  "status": "suppressed"
+ },
+ "WP_030007227.1": {
+  "replacedby": "",
+  "slen": 660,
+  "status": "live"
+ },
+ "WP_030101561.1": {
+  "replacedby": "",
+  "slen": 758,
+  "status": "suppressed"
+ },
+ "WP_030102812.1": {
+  "replacedby": "",
+  "slen": 481,
+  "status": "live"
+ },
+ "WP_030421331.1": {
+  "replacedby": "",
+  "slen": 481,
+  "status": "live"
+ },
+ "WP_030443103.1": {
+  "replacedby": "",
+  "slen": 764,
+  "status": "live"
+ },
+ "WP_030539671.1": {
+  "replacedby": "",
+  "slen": 485,
+  "status": "suppressed"
+ },
+ "WP_031194042.1": {
+  "replacedby": "",
+  "slen": 763,
+  "status": "live"
+ },
+ "WP_031233806.1": {
+  "replacedby": "",
+  "slen": 483,
+  "status": "live"
+ },
+ "WP_031431803.1": {
+  "replacedby": "",
+  "slen": 500,
+  "status": "live"
+ },
+ "WP_031431988.1": {
+  "replacedby": "",
+  "slen": 730,
+  "status": "live"
+ },
+ "WP_031452536.1": {
+  "replacedby": "",
+  "slen": 1041,
+  "status": "suppressed"
+ },
+ "WP_031556059.1": {
+  "replacedby": "",
+  "slen": 476,
+  "status": "live"
+ },
+ "WP_031656931.1": {
+  "replacedby": "",
+  "slen": 730,
+  "status": "live"
+ },
+ "WP_032135203.1": {
+  "replacedby": "",
+  "slen": 503,
+  "status": "live"
+ },
+ "WP_032541218.1": {
+  "replacedby": "",
+  "slen": 469,
+  "status": "live"
+ },
+ "WP_032939873.1": {
+  "replacedby": "",
+  "slen": 467,
+  "status": "suppressed"
+ },
+ "WP_033435353.1": {
+  "replacedby": "",
+  "slen": 758,
+  "status": "suppressed"
+ },
+ "WP_033463414.1": {
+  "replacedby": "",
+  "slen": 474,
+  "status": "live"
+ },
+ "WP_033572516.1": {
+  "replacedby": "",
+  "slen": 469,
+  "status": "live"
+ },
+ "WP_033851601.1": {
+  "replacedby": "",
+  "slen": 731,
+  "status": "suppressed"
+ },
+ "WP_034345674.1": {
+  "replacedby": "",
+  "slen": 518,
+  "status": "suppressed"
+ },
+ "WP_034385873.1": {
+  "replacedby": "",
+  "slen": 674,
+  "status": "live"
+ },
+ "WP_034404411.1": {
+  "replacedby": "",
+  "slen": 674,
+  "status": "live"
+ },
+ "WP_034679766.1": {
+  "replacedby": "",
+  "slen": 503,
+  "status": "live"
+ },
+ "WP_034728376.1": {
+  "replacedby": "",
+  "slen": 1052,
+  "status": "live"
+ },
+ "WP_034768861.1": {
+  "replacedby": "",
+  "slen": 411,
+  "status": "suppressed"
+ },
+ "WP_034806158.1": {
+  "replacedby": "",
+  "slen": 702,
+  "status": "live"
+ },
+ "WP_034824194.1": {
+  "replacedby": "",
+  "slen": 787,
+  "status": "live"
+ },
+ "WP_034826052.1": {
+  "replacedby": "",
+  "slen": 766,
+  "status": "live"
+ },
+ "WP_034870033.1": {
+  "replacedby": "",
+  "slen": 503,
+  "status": "live"
+ },
+ "WP_035063661.1": {
+  "replacedby": "",
+  "slen": 707,
+  "status": "live"
+ },
+ "WP_035065747.1": {
+  "replacedby": "",
+  "slen": 707,
+  "status": "live"
+ },
+ "WP_035133775.1": {
+  "replacedby": "",
+  "slen": 763,
+  "status": "live"
+ },
+ "WP_035210974.1": {
+  "replacedby": "",
+  "slen": 478,
+  "status": "live"
+ },
+ "WP_035549539.1": {
+  "replacedby": "",
+  "slen": 517,
+  "status": "live"
+ },
+ "WP_035619941.1": {
+  "replacedby": "",
+  "slen": 727,
+  "status": "live"
+ },
+ "WP_035658611.1": {
+  "replacedby": "",
+  "slen": 735,
+  "status": "live"
+ },
+ "WP_036211522.1": {
+  "replacedby": "",
+  "slen": 480,
+  "status": "suppressed"
+ },
+ "WP_036243660.1": {
+  "replacedby": "",
+  "slen": 693,
+  "status": "suppressed"
+ },
+ "WP_036250713.1": {
+  "replacedby": "",
+  "slen": 739,
+  "status": "live"
+ },
+ "WP_036253794.1": {
+  "replacedby": "",
+  "slen": 744,
+  "status": "suppressed"
+ },
+ "WP_036284033.1": {
+  "replacedby": "",
+  "slen": 482,
+  "status": "live"
+ },
+ "WP_036294986.1": {
+  "replacedby": "",
+  "slen": 739,
+  "status": "suppressed"
+ },
+ "WP_036488545.1": {
+  "replacedby": "",
+  "slen": 749,
+  "status": "suppressed"
+ },
+ "WP_036632783.1": {
+  "replacedby": "",
+  "slen": 503,
+  "status": "live"
+ },
+ "WP_036798916.1": {
+  "replacedby": "",
+  "slen": 778,
+  "status": "live"
+ },
+ "WP_036828494.1": {
+  "replacedby": "",
+  "slen": 695,
+  "status": "suppressed"
+ },
+ "WP_036855842.1": {
+  "replacedby": "",
+  "slen": 502,
+  "status": "live"
+ },
+ "WP_036856560.1": {
+  "replacedby": "",
+  "slen": 1042,
+  "status": "live"
+ },
+ "WP_036883142.1": {
+  "replacedby": "",
+  "slen": 1046,
+  "status": "live"
+ },
+ "WP_036958753.1": {
+  "replacedby": "",
+  "slen": 472,
+  "status": "live"
+ },
+ "WP_037057030.1": {
+  "replacedby": "",
+  "slen": 483,
+  "status": "live"
+ },
+ "WP_037165530.1": {
+  "replacedby": "",
+  "slen": 484,
+  "status": "suppressed"
+ },
+ "WP_037187053.1": {
+  "replacedby": "",
+  "slen": 483,
+  "status": "suppressed"
+ },
+ "WP_037474223.1": {
+  "replacedby": "",
+  "slen": 485,
+  "status": "live"
+ },
+ "WP_037510712.1": {
+  "replacedby": "",
+  "slen": 485,
+  "status": "live"
+ },
+ "WP_037716572.1": {
+  "replacedby": "",
+  "slen": 382,
+  "status": "suppressed"
+ },
+ "WP_037994439.1": {
+  "replacedby": "",
+  "slen": 454,
+  "status": "live"
+ },
+ "WP_038030409.1": {
+  "replacedby": "",
+  "slen": 685,
+  "status": "live"
+ },
+ "WP_038030576.1": {
+  "replacedby": "",
+  "slen": 646,
+  "status": "live"
+ },
+ "WP_038044516.1": {
+  "replacedby": "",
+  "slen": 705,
+  "status": "live"
+ },
+ "WP_038066338.1": {
+  "replacedby": "",
+  "slen": 695,
+  "status": "live"
+ },
+ "WP_038205792.1": {
+  "replacedby": "",
+  "slen": 484,
+  "status": "live"
+ },
+ "WP_038507007.1": {
+  "replacedby": "",
+  "slen": 703,
+  "status": "live"
+ },
+ "WP_038562081.1": {
+  "replacedby": "",
+  "slen": 704,
+  "status": "live"
+ },
+ "WP_038936587.1": {
+  "replacedby": "",
+  "slen": 466,
+  "status": "live"
+ },
+ "WP_038943876.1": {
+  "replacedby": "",
+  "slen": 483,
+  "status": "live"
+ },
+ "WP_039394112.1": {
+  "replacedby": "",
+  "slen": 485,
+  "status": "live"
+ },
+ "WP_039442424.1": {
+  "replacedby": "",
+  "slen": 482,
+  "status": "live"
+ },
+ "WP_039457454.1": {
+  "replacedby": "",
+  "slen": 685,
+  "status": "live"
+ },
+ "WP_039925744.1": {
+  "replacedby": "",
+  "slen": 1046,
+  "status": "live"
+ },
+ "WP_040282634.1": {
+  "replacedby": "",
+  "slen": 683,
+  "status": "live"
+ },
+ "WP_040311121.1": {
+  "replacedby": "",
+  "slen": 497,
+  "status": "suppressed"
+ },
+ "WP_040843044.1": {
+  "replacedby": "",
+  "slen": 468,
+  "status": "live"
+ },
+ "WP_041081268.1": {
+  "replacedby": "",
+  "slen": 637,
+  "status": "live"
+ },
+ "WP_041339469.1": {
+  "replacedby": "",
+  "slen": 1123,
+  "status": "suppressed"
+ },
+ "WP_041438497.1": {
+  "replacedby": "",
+  "slen": 729,
+  "status": "live"
+ },
+ "WP_041440484.1": {
+  "replacedby": "",
+  "slen": 657,
+  "status": "suppressed"
+ },
+ "WP_041514531.1": {
+  "replacedby": "",
+  "slen": 517,
+  "status": "live"
+ },
+ "WP_041864519.1": {
+  "replacedby": "",
+  "slen": 426,
+  "status": "suppressed"
+ },
+ "WP_041932423.1": {
+  "replacedby": "",
+  "slen": 678,
+  "status": "suppressed"
+ },
+ "WP_041946582.1": {
+  "replacedby": "",
+  "slen": 1031,
+  "status": "suppressed"
+ },
+ "WP_042061209.1": {
+  "replacedby": "",
+  "slen": 485,
+  "status": "live"
+ },
+ "WP_042087937.1": {
+  "replacedby": "",
+  "slen": 470,
+  "status": "live"
+ },
+ "WP_042211195.1": {
+  "replacedby": "",
+  "slen": 705,
+  "status": "live"
+ },
+ "WP_042291992.1": {
+  "replacedby": "",
+  "slen": 675,
+  "status": "suppressed"
+ },
+ "WP_042343949.1": {
+  "replacedby": "",
+  "slen": 764,
+  "status": "live"
+ },
+ "WP_042383163.1": {
+  "replacedby": "",
+  "slen": 710,
+  "status": "live"
+ },
+ "WP_042399050.1": {
+  "replacedby": "",
+  "slen": 745,
+  "status": "live"
+ },
+ "WP_042419824.1": {
+  "replacedby": "",
+  "slen": 476,
+  "status": "live"
+ },
+ "WP_042565353.1": {
+  "replacedby": "",
+  "slen": 1041,
+  "status": "live"
+ },
+ "WP_042571951.1": {
+  "replacedby": "",
+  "slen": 471,
+  "status": "live"
+ },
+ "WP_042608003.1": {
+  "replacedby": "",
+  "slen": 482,
+  "status": "suppressed"
+ },
+ "WP_042619123.1": {
+  "replacedby": "",
+  "slen": 516,
+  "status": "suppressed"
+ },
+ "WP_042896060.1": {
+  "replacedby": "",
+  "slen": 707,
+  "status": "suppressed"
+ },
+ "WP_043061314.1": {
+  "replacedby": "",
+  "slen": 472,
+  "status": "live"
+ },
+ "WP_043087749.1": {
+  "replacedby": "",
+  "slen": 482,
+  "status": "live"
+ },
+ "WP_043351599.1": {
+  "replacedby": "",
+  "slen": 484,
+  "status": "live"
+ },
+ "WP_044015994.1": {
+  "replacedby": "",
+  "slen": 1046,
+  "status": "suppressed"
+ },
+ "WP_044171549.1": {
+  "replacedby": "",
+  "slen": 637,
+  "status": "suppressed"
+ },
+ "WP_044264717.1": {
+  "replacedby": "",
+  "slen": 642,
+  "status": "suppressed"
+ },
+ "WP_044272246.1": {
+  "replacedby": "",
+  "slen": 469,
+  "status": "live"
+ },
+ "WP_044394679.1": {
+  "replacedby": "",
+  "slen": 525,
+  "status": "live"
+ },
+ "WP_044394879.1": {
+  "replacedby": "",
+  "slen": 487,
+  "status": "live"
+ },
+ "WP_044400168.1": {
+  "replacedby": "",
+  "slen": 665,
+  "status": "live"
+ },
+ "WP_044449525.1": {
+  "replacedby": "",
+  "slen": 472,
+  "status": "live"
+ },
+ "WP_044451674.1": {
+  "replacedby": "",
+  "slen": 737,
+  "status": "suppressed"
+ },
+ "WP_044518241.1": {
+  "replacedby": "",
+  "slen": 632,
+  "status": "live"
+ },
+ "WP_044549173.1": {
+  "replacedby": "",
+  "slen": 484,
+  "status": "live"
+ },
+ "WP_044937782.1": {
+  "replacedby": "",
+  "slen": 300,
+  "status": "live"
+ },
+ "WP_045054463.1": {
+  "replacedby": "",
+  "slen": 745,
+  "status": "live"
+ },
+ "WP_045057111.1": {
+  "replacedby": "",
+  "slen": 485,
+  "status": "live"
+ },
+ "WP_045124563.1": {
+  "replacedby": "",
+  "slen": 730,
+  "status": "live"
+ },
+ "WP_045126888.1": {
+  "replacedby": "",
+  "slen": 476,
+  "status": "live"
+ },
+ "WP_045143632.1": {
+  "replacedby": "",
+  "slen": 748,
+  "status": "live"
+ },
+ "WP_045167303.1": {
+  "replacedby": "",
+  "slen": 1042,
+  "status": "live"
+ },
+ "WP_045765666.1": {
+  "replacedby": "",
+  "slen": 730,
+  "status": "live"
+ },
+ "WP_045834967.1": {
+  "replacedby": "",
+  "slen": 761,
+  "status": "live"
+ },
+ "WP_045964484.1": {
+  "replacedby": "",
+  "slen": 732,
+  "status": "live"
+ },
+ "WP_046101283.1": {
+  "replacedby": "",
+  "slen": 731,
+  "status": "suppressed"
+ },
+ "WP_046237973.1": {
+  "replacedby": "",
+  "slen": 473,
+  "status": "live"
+ },
+ "WP_046408758.1": {
+  "replacedby": "",
+  "slen": 511,
+  "status": "live"
+ },
+ "WP_046756490.1": {
+  "replacedby": "",
+  "slen": 485,
+  "status": "live"
+ },
+ "WP_046846063.1": {
+  "replacedby": "",
+  "slen": 484,
+  "status": "live"
+ },
+ "WP_047265940.1": {
+  "replacedby": "",
+  "slen": 640,
+  "status": "live"
+ },
+ "WP_047361658.1": {
+  "replacedby": "",
+  "slen": 731,
+  "status": "suppressed"
+ },
+ "WP_047388363.1": {
+  "replacedby": "",
+  "slen": 765,
+  "status": "live"
+ },
+ "WP_047451873.1": {
+  "replacedby": "",
+  "slen": 678,
+  "status": "live"
+ },
+ "WP_047468664.1": {
+  "replacedby": "",
+  "slen": 394,
+  "status": "suppressed"
+ },
+ "WP_047479138.1": {
+  "replacedby": "",
+  "slen": 1042,
+  "status": "suppressed"
+ },
+ "WP_047547418.1": {
+  "replacedby": "",
+  "slen": 1052,
+  "status": "live"
+ },
+ "WP_047564308.1": {
+  "replacedby": "",
+  "slen": 518,
+  "status": "suppressed"
+ },
+ "WP_047589627.1": {
+  "replacedby": "",
+  "slen": 749,
+  "status": "suppressed"
+ },
+ "WP_047618200.1": {
+  "replacedby": "",
+  "slen": 518,
+  "status": "suppressed"
+ },
+ "WP_048090858.1": {
+  "replacedby": "",
+  "slen": 515,
+  "status": "live"
+ },
+ "WP_048095815.1": {
+  "replacedby": "",
+  "slen": 892,
+  "status": "suppressed"
+ },
+ "WP_048159825.1": {
+  "replacedby": "",
+  "slen": 834,
+  "status": "live"
+ },
+ "WP_048201370.1": {
+  "replacedby": "",
+  "slen": 796,
+  "status": "live"
+ },
+ "WP_048500688.1": {
+  "replacedby": "",
+  "slen": 480,
+  "status": "live"
+ },
+ "WP_048755579.1": {
+  "replacedby": "",
+  "slen": 500,
+  "status": "live"
+ },
+ "WP_048925809.1": {
+  "replacedby": "",
+  "slen": 736,
+  "status": "live"
+ },
+ "WP_048931269.1": {
+  "replacedby": "",
+  "slen": 1046,
+  "status": "live"
+ },
+ "WP_049284969.1": {
+  "replacedby": "",
+  "slen": 473,
+  "status": "live"
+ },
+ "WP_049625402.1": {
+  "replacedby": "",
+  "slen": 710,
+  "status": "live"
+ },
+ "WP_049720106.1": {
+  "replacedby": "",
+  "slen": 709,
+  "status": "live"
+ },
+ "WP_049724747.1": {
+  "replacedby": "",
+  "slen": 730,
+  "status": "live"
+ },
+ "WP_049759955.1": {
+  "replacedby": "",
+  "slen": 592,
+  "status": "suppressed"
+ },
+ "WP_049772080.1": {
+  "replacedby": "",
+  "slen": 514,
+  "status": "suppressed"
+ },
+ "WP_049801371.1": {
+  "replacedby": "",
+  "slen": 437,
+  "status": "suppressed"
+ },
+ "WP_049858649.1": {
+  "replacedby": "",
+  "slen": 483,
+  "status": "suppressed"
+ },
+ "WP_049907365.1": {
+  "replacedby": "",
+  "slen": 749,
+  "status": "suppressed"
+ },
+ "WP_049912037.1": {
+  "replacedby": "",
+  "slen": 745,
+  "status": "live"
+ },
+ "WP_049917000.1": {
+  "replacedby": "",
+  "slen": 839,
+  "status": "live"
+ },
+ "WP_049923881.1": {
+  "replacedby": "",
+  "slen": 869,
+  "status": "live"
+ },
+ "WP_049934199.1": {
+  "replacedby": "",
+  "slen": 847,
+  "status": "live"
+ },
+ "WP_049938490.1": {
+  "replacedby": "",
+  "slen": 347,
+  "status": "live"
+ },
+ "WP_049943687.1": {
+  "replacedby": "",
+  "slen": 347,
+  "status": "suppressed"
+ },
+ "WP_049969002.1": {
+  "replacedby": "",
+  "slen": 839,
+  "status": "live"
+ },
+ "WP_049982463.1": {
+  "replacedby": "",
+  "slen": 883,
+  "status": "live"
+ },
+ "WP_050002102.1": {
+  "replacedby": "",
+  "slen": 754,
+  "status": "live"
+ },
+ "WP_050117363.1": {
+  "replacedby": "",
+  "slen": 731,
+  "status": "live"
+ },
+ "WP_050399988.1": {
+  "replacedby": "",
+  "slen": 466,
+  "status": "live"
+ },
+ "WP_050403924.1": {
+  "replacedby": "",
+  "slen": 461,
+  "status": "suppressed"
+ },
+ "WP_050475206.1": {
+  "replacedby": "",
+  "slen": 518,
+  "status": "live"
+ },
+ "WP_050617980.1": {
+  "replacedby": "",
+  "slen": 1050,
+  "status": "suppressed"
+ },
+ "WP_050783877.1": {
+  "replacedby": "",
+  "slen": 1048,
+  "status": "suppressed"
+ },
+ "WP_051044347.1": {
+  "replacedby": "",
+  "slen": 434,
+  "status": "live"
+ },
+ "WP_051050569.1": {
+  "replacedby": "",
+  "slen": 390,
+  "status": "live"
+ },
+ "WP_051144000.1": {
+  "replacedby": "",
+  "slen": 479,
+  "status": "suppressed"
+ },
+ "WP_051168181.1": {
+  "replacedby": "",
+  "slen": 750,
+  "status": "live"
+ },
+ "WP_051227128.1": {
+  "replacedby": "",
+  "slen": 1048,
+  "status": "live"
+ },
+ "WP_051382728.1": {
+  "replacedby": "",
+  "slen": 172,
+  "status": "suppressed"
+ },
+ "WP_051444181.1": {
+  "replacedby": "",
+  "slen": 402,
+  "status": "suppressed"
+ },
+ "WP_051458318.1": {
+  "replacedby": "",
+  "slen": 479,
+  "status": "suppressed"
+ },
+ "WP_051558641.1": {
+  "replacedby": "",
+  "slen": 242,
+  "status": "suppressed"
+ },
+ "WP_051559024.1": {
+  "replacedby": "",
+  "slen": 756,
+  "status": "suppressed"
+ },
+ "WP_051642935.1": {
+  "replacedby": "",
+  "slen": 1046,
+  "status": "live"
+ },
+ "WP_051645823.1": {
+  "replacedby": "",
+  "slen": 491,
+  "status": "suppressed"
+ },
+ "WP_051660779.1": {
+  "replacedby": "",
+  "slen": 511,
+  "status": "suppressed"
+ },
+ "WP_051761427.1": {
+  "replacedby": "",
+  "slen": 478,
+  "status": "suppressed"
+ },
+ "WP_051880056.1": {
+  "replacedby": "",
+  "slen": 1052,
+  "status": "suppressed"
+ },
+ "WP_052067485.1": {
+  "replacedby": "",
+  "slen": 336,
+  "status": "suppressed"
+ },
+ "WP_052142878.1": {
+  "replacedby": "",
+  "slen": 466,
+  "status": "suppressed"
+ },
+ "WP_052192192.1": {
+  "replacedby": "",
+  "slen": 696,
+  "status": "live"
+ },
+ "WP_052287949.1": {
+  "replacedby": "",
+  "slen": 740,
+  "status": "suppressed"
+ },
+ "WP_052303232.1": {
+  "replacedby": "",
+  "slen": 1063,
+  "status": "suppressed"
+ },
+ "WP_052334926.1": {
+  "replacedby": "",
+  "slen": 475,
+  "status": "live"
+ },
+ "WP_052368014.1": {
+  "replacedby": "",
+  "slen": 318,
+  "status": "live"
+ },
+ "WP_052564896.1": {
+  "replacedby": "",
+  "slen": 1043,
+  "status": "live"
+ },
+ "WP_052696789.1": {
+  "replacedby": "",
+  "slen": 298,
+  "status": "suppressed"
+ },
+ "WP_052698403.1": {
+  "replacedby": "",
+  "slen": 739,
+  "status": "live"
+ },
+ "WP_052744931.1": {
+  "replacedby": "",
+  "slen": 484,
+  "status": "live"
+ },
+ "WP_052755409.1": {
+  "replacedby": "",
+  "slen": 500,
+  "status": "suppressed"
+ },
+ "WP_052846682.1": {
+  "replacedby": "",
+  "slen": 449,
+  "status": "suppressed"
+ },
+ "WP_052886194.1": {
+  "replacedby": "",
+  "slen": 504,
+  "status": "suppressed"
+ },
+ "WP_053058140.1": {
+  "replacedby": "",
+  "slen": 915,
+  "status": "suppressed"
+ },
+ "WP_053224305.1": {
+  "replacedby": "",
+  "slen": 699,
+  "status": "live"
+ },
+ "WP_053244068.1": {
+  "replacedby": "",
+  "slen": 473,
+  "status": "live"
+ },
+ "WP_053299209.1": {
+  "replacedby": "",
+  "slen": 473,
+  "status": "live"
+ },
+ "WP_053326747.1": {
+  "replacedby": "",
+  "slen": 491,
+  "status": "live"
+ },
+ "WP_053381024.1": {
+  "replacedby": "",
+  "slen": 421,
+  "status": "suppressed"
+ },
+ "WP_053471386.1": {
+  "replacedby": "",
+  "slen": 1058,
+  "status": "live"
+ },
+ "WP_053571899.1": {
+  "replacedby": "",
+  "slen": 474,
+  "status": "live"
+ },
+ "WP_053772880.1": {
+  "replacedby": "",
+  "slen": 475,
+  "status": "live"
+ },
+ "WP_054163257.1": {
+  "replacedby": "",
+  "slen": 768,
+  "status": "live"
+ },
+ "WP_054211399.1": {
+  "replacedby": "",
+  "slen": 483,
+  "status": "live"
+ },
+ "WP_054407042.1": {
+  "replacedby": "",
+  "slen": 482,
+  "status": "live"
+ },
+ "WP_054435361.1": {
+  "replacedby": "",
+  "slen": 485,
+  "status": "live"
+ },
+ "WP_054724085.1": {
+  "replacedby": "",
+  "slen": 703,
+  "status": "live"
+ },
+ "WP_054725864.1": {
+  "replacedby": "",
+  "slen": 471,
+  "status": "live"
+ },
+ "WP_054851363.1": {
+  "replacedby": "",
+  "slen": 703,
+  "status": "live"
+ },
+ "WP_055075777.1": {
+  "replacedby": "",
+  "slen": 749,
+  "status": "live"
+ },
+ "WP_055087491.1": {
+  "replacedby": "",
+  "slen": 736,
+  "status": "live"
+ },
+ "WP_055111997.1": {
+  "replacedby": "",
+  "slen": 507,
+  "status": "live"
+ },
+ "WP_055133795.1": {
+  "replacedby": "",
+  "slen": 761,
+  "status": "live"
+ },
+ "WP_055143320.1": {
+  "replacedby": "",
+  "slen": 508,
+  "status": "suppressed"
+ },
+ "WP_055152023.1": {
+  "replacedby": "",
+  "slen": 698,
+  "status": "live"
+ },
+ "WP_055195547.1": {
+  "replacedby": "",
+  "slen": 745,
+  "status": "live"
+ },
+ "WP_055268308.1": {
+  "replacedby": "",
+  "slen": 744,
+  "status": "live"
+ },
+ "WP_055276084.1": {
+  "replacedby": "",
+  "slen": 745,
+  "status": "live"
+ },
+ "WP_055429304.1": {
+  "replacedby": "",
+  "slen": 750,
+  "status": "live"
+ },
+ "WP_055441081.1": {
+  "replacedby": "",
+  "slen": 707,
+  "status": "live"
+ },
+ "WP_055808193.1": {
+  "replacedby": "",
+  "slen": 402,
+  "status": "suppressed"
+ },
+ "WP_056025367.1": {
+  "replacedby": "",
+  "slen": 483,
+  "status": "live"
+ },
+ "WP_056034460.1": {
+  "replacedby": "",
+  "slen": 1037,
+  "status": "live"
+ },
+ "WP_056152151.1": {
+  "replacedby": "",
+  "slen": 483,
+  "status": "live"
+ },
+ "WP_056160044.1": {
+  "replacedby": "",
+  "slen": 483,
+  "status": "live"
+ },
+ "WP_056176878.1": {
+  "replacedby": "",
+  "slen": 483,
+  "status": "live"
+ },
+ "WP_056186123.1": {
+  "replacedby": "",
+  "slen": 484,
+  "status": "live"
+ },
+ "WP_056209640.1": {
+  "replacedby": "",
+  "slen": 1058,
+  "status": "live"
+ },
+ "WP_056240734.1": {
+  "replacedby": "",
+  "slen": 515,
+  "status": "suppressed"
+ },
+ "WP_056452252.1": {
+  "replacedby": "",
+  "slen": 499,
+  "status": "live"
+ },
+ "WP_056466663.1": {
+  "replacedby": "",
+  "slen": 758,
+  "status": "suppressed"
+ },
+ "WP_056495446.1": {
+  "replacedby": "",
+  "slen": 516,
+  "status": "live"
+ },
+ "WP_056695929.1": {
+  "replacedby": "",
+  "slen": 487,
+  "status": "live"
+ },
+ "WP_056888902.1": {
+  "replacedby": "",
+  "slen": 476,
+  "status": "live"
+ },
+ "WP_056934506.1": {
+  "replacedby": "",
+  "slen": 841,
+  "status": "live"
+ },
+ "WP_057026386.1": {
+  "replacedby": "",
+  "slen": 500,
+  "status": "live"
+ },
+ "WP_057221538.1": {
+  "replacedby": "",
+  "slen": 483,
+  "status": "live"
+ },
+ "WP_057280934.1": {
+  "replacedby": "",
+  "slen": 1046,
+  "status": "live"
+ },
+ "WP_057482736.1": {
+  "replacedby": "",
+  "slen": 468,
+  "status": "live"
+ },
+ "WP_057498726.1": {
+  "replacedby": "",
+  "slen": 482,
+  "status": "suppressed"
+ },
+ "WP_057502543.1": {
+  "replacedby": "",
+  "slen": 482,
+  "status": "suppressed"
+ },
+ "WP_057834161.1": {
+  "replacedby": "",
+  "slen": 469,
+  "status": "live"
+ },
+ "WP_058195190.1": {
+  "replacedby": "",
+  "slen": 468,
+  "status": "live"
+ },
+ "WP_058282028.1": {
+  "replacedby": "",
+  "slen": 472,
+  "status": "live"
+ },
+ "WP_058316939.1": {
+  "replacedby": "",
+  "slen": 769,
+  "status": "live"
+ },
+ "WP_058453976.1": {
+  "replacedby": "",
+  "slen": 485,
+  "status": "live"
+ },
+ "WP_058568616.1": {
+  "replacedby": "",
+  "slen": 472,
+  "status": "live"
+ },
+ "WP_058572808.1": {
+  "replacedby": "",
+  "slen": 895,
+  "status": "live"
+ },
+ "WP_058745239.1": {
+  "replacedby": "",
+  "slen": 483,
+  "status": "live"
+ },
+ "WP_058751935.1": {
+  "replacedby": "",
+  "slen": 363,
+  "status": "live"
+ },
+ "WP_058870690.1": {
+  "replacedby": "",
+  "slen": 730,
+  "status": "live"
+ },
+ "WP_058963777.1": {
+  "replacedby": "",
+  "slen": 1050,
+  "status": "suppressed"
+ },
+ "WP_058998822.1": {
+  "replacedby": "",
+  "slen": 734,
+  "status": "live"
+ },
+ "WP_059000177.1": {
+  "replacedby": "",
+  "slen": 494,
+  "status": "live"
+ },
+ "WP_059333817.1": {
+  "replacedby": "",
+  "slen": 761,
+  "status": "live"
+ },
+ "WP_059401470.1": {
+  "replacedby": "",
+  "slen": 525,
+  "status": "suppressed"
+ },
+ "WP_059598007.1": {
+  "replacedby": "",
+  "slen": 481,
+  "status": "live"
+ },
+ "WP_059622980.1": {
+  "replacedby": "",
+  "slen": 466,
+  "status": "suppressed"
+ },
+ "WP_059848415.1": {
+  "replacedby": "",
+  "slen": 334,
+  "status": "suppressed"
+ },
+ "WP_059875185.1": {
+  "replacedby": "",
+  "slen": 481,
+  "status": "live"
+ },
+ "WP_059945304.1": {
+  "replacedby": "",
+  "slen": 1048,
+  "status": "live"
+ },
+ "WP_059982501.1": {
+  "replacedby": "",
+  "slen": 1048,
+  "status": "live"
+ },
+ "WP_060074291.1": {
+  "replacedby": "",
+  "slen": 481,
+  "status": "live"
+ },
+ "WP_060274988.1": {
+  "replacedby": "",
+  "slen": 334,
+  "status": "suppressed"
+ },
+ "WP_060408162.1": {
+  "replacedby": "",
+  "slen": 1050,
+  "status": "live"
+ },
+ "WP_060422788.1": {
+  "replacedby": "",
+  "slen": 731,
+  "status": "suppressed"
+ },
+ "WP_060527926.1": {
+  "replacedby": "",
+  "slen": 731,
+  "status": "suppressed"
+ },
+ "WP_060847087.1": {
+  "replacedby": "",
+  "slen": 484,
+  "status": "live"
+ },
+ "WP_061048385.1": {
+  "replacedby": "",
+  "slen": 479,
+  "status": "live"
+ },
+ "WP_061096135.1": {
+  "replacedby": "",
+  "slen": 540,
+  "status": "live"
+ },
+ "WP_061247661.1": {
+  "replacedby": "",
+  "slen": 639,
+  "status": "live"
+ },
+ "WP_061254329.1": {
+  "replacedby": "",
+  "slen": 639,
+  "status": "live"
+ },
+ "WP_061307001.1": {
+  "replacedby": "",
+  "slen": 467,
+  "status": "live"
+ },
+ "WP_061437684.1": {
+  "replacedby": "",
+  "slen": 1040,
+  "status": "suppressed"
+ },
+ "WP_061516783.1": {
+  "replacedby": "",
+  "slen": 1045,
+  "status": "live"
+ },
+ "WP_061532998.1": {
+  "replacedby": "",
+  "slen": 482,
+  "status": "live"
+ },
+ "WP_061880232.1": {
+  "replacedby": "",
+  "slen": 517,
+  "status": "suppressed"
+ },
+ "WP_061934618.1": {
+  "replacedby": "",
+  "slen": 482,
+  "status": "live"
+ },
+ "WP_061958300.1": {
+  "replacedby": "",
+  "slen": 483,
+  "status": "live"
+ },
+ "WP_062081643.1": {
+  "replacedby": "",
+  "slen": 636,
+  "status": "suppressed"
+ },
+ "WP_062128845.1": {
+  "replacedby": "",
+  "slen": 1042,
+  "status": "live"
+ },
+ "WP_062171242.1": {
+  "replacedby": "",
+  "slen": 482,
+  "status": "suppressed"
+ },
+ "WP_062303332.1": {
+  "replacedby": "",
+  "slen": 809,
+  "status": "live"
+ },
+ "WP_062341845.1": {
+  "replacedby": "",
+  "slen": 483,
+  "status": "live"
+ },
+ "WP_062365450.1": {
+  "replacedby": "",
+  "slen": 485,
+  "status": "live"
+ },
+ "WP_062422190.1": {
+  "replacedby": "",
+  "slen": 848,
+  "status": "live"
+ },
+ "WP_062436241.1": {
+  "replacedby": "",
+  "slen": 727,
+  "status": "live"
+ },
+ "WP_062480250.1": {
+  "replacedby": "",
+  "slen": 730,
+  "status": "live"
+ },
+ "WP_062486948.1": {
+  "replacedby": "",
+  "slen": 508,
+  "status": "live"
+ },
+ "WP_062547851.1": {
+  "replacedby": "",
+  "slen": 466,
+  "status": "live"
+ },
+ "WP_062548533.1": {
+  "replacedby": "",
+  "slen": 759,
+  "status": "live"
+ },
+ "WP_062618762.1": {
+  "replacedby": "",
+  "slen": 703,
+  "status": "live"
+ },
+ "WP_062649003.1": {
+  "replacedby": "",
+  "slen": 481,
+  "status": "live"
+ },
+ "WP_062680197.1": {
+  "replacedby": "",
+  "slen": 483,
+  "status": "suppressed"
+ },
+ "WP_062755455.1": {
+  "replacedby": "",
+  "slen": 710,
+  "status": "live"
+ },
+ "WP_062769735.1": {
+  "replacedby": "",
+  "slen": 518,
+  "status": "live"
+ },
+ "WP_062785620.1": {
+  "replacedby": "",
+  "slen": 482,
+  "status": "live"
+ },
+ "WP_063002580.1": {
+  "replacedby": "",
+  "slen": 483,
+  "status": "live"
+ },
+ "WP_063059159.1": {
+  "replacedby": "",
+  "slen": 715,
+  "status": "suppressed"
+ },
+ "WP_063415881.1": {
+  "replacedby": "",
+  "slen": 731,
+  "status": "live"
+ },
+ "WP_063460619.1": {
+  "replacedby": "",
+  "slen": 484,
+  "status": "live"
+ },
+ "WP_064030493.1": {
+  "replacedby": "",
+  "slen": 739,
+  "status": "suppressed"
+ },
+ "WP_064102502.1": {
+  "replacedby": "",
+  "slen": 475,
+  "status": "live"
+ },
+ "WP_064221217.1": {
+  "replacedby": "",
+  "slen": 710,
+  "status": "live"
+ },
+ "WP_064665417.1": {
+  "replacedby": "",
+  "slen": 472,
+  "status": "live"
+ },
+ "WP_064683282.1": {
+  "replacedby": "",
+  "slen": 483,
+  "status": "live"
+ },
+ "WP_064790850.1": {
+  "replacedby": "",
+  "slen": 505,
+  "status": "live"
+ },
+ "WP_064801520.1": {
+  "replacedby": "",
+  "slen": 473,
+  "status": "live"
+ },
+ "WP_064835081.1": {
+  "replacedby": "",
+  "slen": 484,
+  "status": "live"
+ },
+ "WP_065006788.1": {
+  "replacedby": "",
+  "slen": 485,
+  "status": "live"
+ },
+ "WP_065010824.1": {
+  "replacedby": "",
+  "slen": 500,
+  "status": "live"
+ },
+ "WP_065061705.1": {
+  "replacedby": "",
+  "slen": 767,
+  "status": "live"
+ },
+ "WP_065383217.1": {
+  "replacedby": "",
+  "slen": 766,
+  "status": "live"
+ },
+ "WP_065578026.1": {
+  "replacedby": "",
+  "slen": 472,
+  "status": "live"
+ },
+ "WP_065656394.1": {
+  "replacedby": "",
+  "slen": 484,
+  "status": "live"
+ },
+ "WP_065664089.1": {
+  "replacedby": "",
+  "slen": 483,
+  "status": "live"
+ },
+ "WP_065715042.1": {
+  "replacedby": "",
+  "slen": 725,
+  "status": "live"
+ },
+ "WP_065720110.1": {
+  "replacedby": "",
+  "slen": 636,
+  "status": "live"
+ },
+ "WP_065818629.1": {
+  "replacedby": "",
+  "slen": 491,
+  "status": "suppressed"
+ },
+ "WP_065998850.1": {
+  "replacedby": "",
+  "slen": 480,
+  "status": "live"
+ },
+ "WP_066219549.1": {
+  "replacedby": "",
+  "slen": 699,
+  "status": "live"
+ },
+ "WP_066419254.1": {
+  "replacedby": "",
+  "slen": 472,
+  "status": "live"
+ },
+ "WP_066514271.1": {
+  "replacedby": "",
+  "slen": 471,
+  "status": "live"
+ },
+ "WP_066548972.1": {
+  "replacedby": "",
+  "slen": 505,
+  "status": "live"
+ },
+ "WP_066624034.1": {
+  "replacedby": "",
+  "slen": 506,
+  "status": "suppressed"
+ },
+ "WP_066664216.1": {
+  "replacedby": "",
+  "slen": 517,
+  "status": "suppressed"
+ },
+ "WP_066752989.1": {
+  "replacedby": "",
+  "slen": 1053,
+  "status": "live"
+ },
+ "WP_066798582.1": {
+  "replacedby": "",
+  "slen": 482,
+  "status": "live"
+ },
+ "WP_066978564.1": {
+  "replacedby": "",
+  "slen": 480,
+  "status": "live"
+ },
+ "WP_067182979.1": {
+  "replacedby": "",
+  "slen": 482,
+  "status": "live"
+ },
+ "WP_067325603.1": {
+  "replacedby": "",
+  "slen": 518,
+  "status": "live"
+ },
+ "WP_067527441.1": {
+  "replacedby": "",
+  "slen": 475,
+  "status": "live"
+ },
+ "WP_067673144.1": {
+  "replacedby": "",
+  "slen": 485,
+  "status": "suppressed"
+ },
+ "WP_067714880.1": {
+  "replacedby": "",
+  "slen": 641,
+  "status": "live"
+ },
+ "WP_067969883.1": {
+  "replacedby": "",
+  "slen": 484,
+  "status": "live"
+ },
+ "WP_067970430.1": {
+  "replacedby": "",
+  "slen": 506,
+  "status": "suppressed"
+ },
+ "WP_068094634.1": {
+  "replacedby": "",
+  "slen": 469,
+  "status": "live"
+ },
+ "WP_068133589.1": {
+  "replacedby": "",
+  "slen": 454,
+  "status": "live"
+ },
+ "WP_068185907.1": {
+  "replacedby": "",
+  "slen": 1043,
+  "status": "suppressed"
+ },
+ "WP_068222130.1": {
+  "replacedby": "",
+  "slen": 489,
+  "status": "live"
+ },
+ "WP_068240872.1": {
+  "replacedby": "",
+  "slen": 255,
+  "status": "suppressed"
+ },
+ "WP_068394128.1": {
+  "replacedby": "",
+  "slen": 643,
+  "status": "suppressed"
+ },
+ "WP_068463428.1": {
+  "replacedby": "",
+  "slen": 516,
+  "status": "suppressed"
+ },
+ "WP_068488195.1": {
+  "replacedby": "",
+  "slen": 676,
+  "status": "live"
+ },
+ "WP_068616618.1": {
+  "replacedby": "",
+  "slen": 419,
+  "status": "suppressed"
+ },
+ "WP_068768973.1": {
+  "replacedby": "",
+  "slen": 471,
+  "status": "live"
+ },
+ "WP_068818384.1": {
+  "replacedby": "",
+  "slen": 478,
+  "status": "live"
+ },
+ "WP_068847674.1": {
+  "replacedby": "",
+  "slen": 503,
+  "status": "live"
+ },
+ "WP_069020258.1": {
+  "replacedby": "",
+  "slen": 473,
+  "status": "live"
+ },
+ "WP_069133529.1": {
+  "replacedby": "",
+  "slen": 702,
+  "status": "suppressed"
+ },
+ "WP_069211835.1": {
+  "replacedby": "",
+  "slen": 474,
+  "status": "suppressed"
+ },
+ "WP_069293923.1": {
+  "replacedby": "",
+  "slen": 640,
+  "status": "live"
+ },
+ "WP_069438049.1": {
+  "replacedby": "",
+  "slen": 499,
+  "status": "suppressed"
+ },
+ "WP_069674097.1": {
+  "replacedby": "",
+  "slen": 454,
+  "status": "live"
+ },
+ "WP_069709177.1": {
+  "replacedby": "",
+  "slen": 471,
+  "status": "live"
+ },
+ "WP_070097871.1": {
+  "replacedby": "",
+  "slen": 782,
+  "status": "live"
+ },
+ "WP_070235713.1": {
+  "replacedby": "",
+  "slen": 687,
+  "status": "live"
+ },
+ "WP_070666724.1": {
+  "replacedby": "",
+  "slen": 502,
+  "status": "live"
+ },
+ "WP_071036708.1": {
+  "replacedby": "",
+  "slen": 760,
+  "status": "live"
+ },
+ "WP_071068901.1": {
+  "replacedby": "",
+  "slen": 481,
+  "status": "live"
+ },
+ "WP_071069330.1": {
+  "replacedby": "",
+  "slen": 760,
+  "status": "live"
+ },
+ "WP_071145652.1": {
+  "replacedby": "",
+  "slen": 1036,
+  "status": "live"
+ },
+ "WP_071240728.1": {
+  "replacedby": "",
+  "slen": 478,
+  "status": "live"
+ },
+ "WP_071455425.1": {
+  "replacedby": "",
+  "slen": 745,
+  "status": "live"
+ },
+ "WP_071507487.1": {
+  "replacedby": "",
+  "slen": 483,
+  "status": "live"
+ },
+ "WP_071516134.1": {
+  "replacedby": "",
+  "slen": 726,
+  "status": "live"
+ },
+ "WP_071678161.1": {
+  "replacedby": "",
+  "slen": 689,
+  "status": "live"
+ },
+ "WP_071970086.1": {
+  "replacedby": "",
+  "slen": 518,
+  "status": "live"
+ },
+ "WP_071980016.1": {
+  "replacedby": "",
+  "slen": 472,
+  "status": "live"
+ },
+ "WP_072017558.1": {
+  "replacedby": "",
+  "slen": 483,
+  "status": "live"
+ },
+ "WP_072261297.1": {
+  "replacedby": "",
+  "slen": 425,
+  "status": "suppressed"
+ },
+ "WP_072319133.1": {
+  "replacedby": "",
+  "slen": 763,
+  "status": "live"
+ },
+ "WP_072349419.1": {
+  "replacedby": "",
+  "slen": 703,
+  "status": "suppressed"
+ },
+ "WP_072554966.1": {
+  "replacedby": "",
+  "slen": 683,
+  "status": "live"
+ },
+ "WP_072559536.1": {
+  "replacedby": "",
+  "slen": 485,
+  "status": "live"
+ },
+ "WP_072598063.1": {
+  "replacedby": "",
+  "slen": 471,
+  "status": "live"
+ },
+ "WP_072761037.1": {
+  "replacedby": "",
+  "slen": 638,
+  "status": "live"
+ },
+ "WP_072766083.1": {
+  "replacedby": "",
+  "slen": 1040,
+  "status": "live"
+ },
+ "WP_072865986.1": {
+  "replacedby": "",
+  "slen": 640,
+  "status": "live"
+ },
+ "WP_072885920.1": {
+  "replacedby": "",
+  "slen": 763,
+  "status": "live"
+ },
+ "WP_072985233.1": {
+  "replacedby": "",
+  "slen": 663,
+  "status": "live"
+ },
+ "WP_073035635.1": {
+  "replacedby": "",
+  "slen": 485,
+  "status": "suppressed"
+ },
+ "WP_073067334.1": {
+  "replacedby": "",
+  "slen": 513,
+  "status": "live"
+ },
+ "WP_073099829.1": {
+  "replacedby": "",
+  "slen": 763,
+  "status": "live"
+ },
+ "WP_073132933.1": {
+  "replacedby": "",
+  "slen": 1053,
+  "status": "live"
+ },
+ "WP_073217643.1": {
+  "replacedby": "",
+  "slen": 703,
+  "status": "live"
+ },
+ "WP_073243758.1": {
+  "replacedby": "",
+  "slen": 1057,
+  "status": "live"
+ },
+ "WP_073288094.1": {
+  "replacedby": "",
+  "slen": 748,
+  "status": "live"
+ },
+ "WP_073409929.1": {
+  "replacedby": "",
+  "slen": 1041,
+  "status": "live"
+ },
+ "WP_073555659.1": {
+  "replacedby": "",
+  "slen": 737,
+  "status": "live"
+ },
+ "WP_073904485.1": {
+  "replacedby": "",
+  "slen": 469,
+  "status": "suppressed"
+ },
+ "WP_073948441.1": {
+  "replacedby": "",
+  "slen": 234,
+  "status": "suppressed"
+ },
+ "WP_074100515.1": {
+  "replacedby": "",
+  "slen": 705,
+  "status": "live"
+ },
+ "WP_074121856.1": {
+  "replacedby": "",
+  "slen": 484,
+  "status": "live"
+ },
+ "WP_074129928.1": {
+  "replacedby": "",
+  "slen": 478,
+  "status": "live"
+ },
+ "WP_074270847.1": {
+  "replacedby": "",
+  "slen": 518,
+  "status": "suppressed"
+ },
+ "WP_074290364.1": {
+  "replacedby": "",
+  "slen": 751,
+  "status": "suppressed"
+ },
+ "WP_074343050.1": {
+  "replacedby": "",
+  "slen": 472,
+  "status": "suppressed"
+ },
+ "WP_074487304.1": {
+  "replacedby": "",
+  "slen": 795,
+  "status": "live"
+ },
+ "WP_074487308.1": {
+  "replacedby": "",
+  "slen": 505,
+  "status": "live"
+ },
+ "WP_074592521.1": {
+  "replacedby": "",
+  "slen": 181,
+  "status": "live"
+ },
+ "WP_074637371.1": {
+  "replacedby": "",
+  "slen": 491,
+  "status": "live"
+ },
+ "WP_074671526.1": {
+  "replacedby": "",
+  "slen": 665,
+  "status": "live"
+ },
+ "WP_074724477.1": {
+  "replacedby": "",
+  "slen": 1052,
+  "status": "live"
+ },
+ "WP_074796062.1": {
+  "replacedby": "",
+  "slen": 895,
+  "status": "live"
+ },
+ "WP_074856960.1": {
+  "replacedby": "",
+  "slen": 634,
+  "status": "live"
+ },
+ "WP_075054206.1": {
+  "replacedby": "",
+  "slen": 772,
+  "status": "live"
+ },
+ "WP_075061402.1": {
+  "replacedby": "",
+  "slen": 504,
+  "status": "live"
+ },
+ "WP_075225804.1": {
+  "replacedby": "",
+  "slen": 483,
+  "status": "live"
+ },
+ "WP_075256236.1": {
+  "replacedby": "",
+  "slen": 480,
+  "status": "live"
+ },
+ "WP_075598738.1": {
+  "replacedby": "",
+  "slen": 1122,
+  "status": "live"
+ },
+ "WP_075600998.1": {
+  "replacedby": "",
+  "slen": 480,
+  "status": "live"
+ },
+ "WP_075628771.1": {
+  "replacedby": "",
+  "slen": 469,
+  "status": "live"
+ },
+ "WP_075634049.1": {
+  "replacedby": "",
+  "slen": 517,
+  "status": "live"
+ },
+ "WP_075666638.1": {
+  "replacedby": "",
+  "slen": 342,
+  "status": "live"
+ },
+ "WP_075780265.1": {
+  "replacedby": "",
+  "slen": 639,
+  "status": "live"
+ },
+ "WP_075793711.1": {
+  "replacedby": "",
+  "slen": 1051,
+  "status": "live"
+ },
+ "WP_075800933.1": {
+  "replacedby": "",
+  "slen": 395,
+  "status": "live"
+ },
+ "WP_075892274.1": {
+  "replacedby": "",
+  "slen": 724,
+  "status": "live"
+ },
+ "WP_076305724.1": {
+  "replacedby": "",
+  "slen": 705,
+  "status": "live"
+ },
+ "WP_076523956.1": {
+  "replacedby": "",
+  "slen": 712,
+  "status": "live"
+ },
+ "WP_076626087.1": {
+  "replacedby": "",
+  "slen": 792,
+  "status": "live"
+ },
+ "WP_076628695.1": {
+  "replacedby": "",
+  "slen": 518,
+  "status": "live"
+ },
+ "WP_076701676.1": {
+  "replacedby": "",
+  "slen": 700,
+  "status": "live"
+ },
+ "WP_076783222.1": {
+  "replacedby": "",
+  "slen": 636,
+  "status": "live"
+ },
+ "WP_076815490.1": {
+  "replacedby": "",
+  "slen": 485,
+  "status": "live"
+ },
+ "WP_077026978.1": {
+  "replacedby": "",
+  "slen": 645,
+  "status": "suppressed"
+ },
+ "WP_077067832.1": {
+  "replacedby": "",
+  "slen": 742,
+  "status": "suppressed"
+ },
+ "WP_077117441.1": {
+  "replacedby": "",
+  "slen": 761,
+  "status": "suppressed"
+ },
+ "WP_077198807.1": {
+  "replacedby": "",
+  "slen": 650,
+  "status": "live"
+ },
+ "WP_077208232.1": {
+  "replacedby": "",
+  "slen": 728,
+  "status": "live"
+ },
+ "WP_077292070.1": {
+  "replacedby": "",
+  "slen": 483,
+  "status": "live"
+ },
+ "WP_077292091.1": {
+  "replacedby": "",
+  "slen": 486,
+  "status": "live"
+ },
+ "WP_077684788.1": {
+  "replacedby": "",
+  "slen": 422,
+  "status": "suppressed"
+ },
+ "WP_078350477.1": {
+  "replacedby": "",
+  "slen": 670,
+  "status": "live"
+ },
+ "WP_078365264.1": {
+  "replacedby": "",
+  "slen": 518,
+  "status": "live"
+ },
+ "WP_078690884.1": {
+  "replacedby": "",
+  "slen": 763,
+  "status": "live"
+ },
+ "WP_078792595.1": {
+  "replacedby": "",
+  "slen": 1040,
+  "status": "live"
+ },
+ "WP_078813595.1": {
+  "replacedby": "",
+  "slen": 480,
+  "status": "live"
+ },
+ "WP_078814669.1": {
+  "replacedby": "",
+  "slen": 1043,
+  "status": "live"
+ },
+ "WP_078924280.1": {
+  "replacedby": "",
+  "slen": 659,
+  "status": "live"
+ },
+ "WP_079083882.1": {
+  "replacedby": "",
+  "slen": 760,
+  "status": "live"
+ },
+ "WP_079235170.1": {
+  "replacedby": "",
+  "slen": 740,
+  "status": "suppressed"
+ },
+ "WP_079365507.1": {
+  "replacedby": "",
+  "slen": 768,
+  "status": "live"
+ },
+ "WP_079392071.1": {
+  "replacedby": "",
+  "slen": 483,
+  "status": "live"
+ },
+ "WP_079605749.1": {
+  "replacedby": "",
+  "slen": 470,
+  "status": "live"
+ },
+ "WP_079685318.1": {
+  "replacedby": "",
+  "slen": 526,
+  "status": "live"
+ },
+ "WP_079731543.1": {
+  "replacedby": "",
+  "slen": 506,
+  "status": "live"
+ },
+ "WP_079759401.1": {
+  "replacedby": "",
+  "slen": 483,
+  "status": "live"
+ },
+ "WP_079791393.1": {
+  "replacedby": "",
+  "slen": 485,
+  "status": "live"
+ },
+ "WP_079980881.1": {
+  "replacedby": "",
+  "slen": 470,
+  "status": "suppressed"
+ },
+ "WP_080458312.1": {
+  "replacedby": "",
+  "slen": 491,
+  "status": "live"
+ },
+ "WP_080466871.1": {
+  "replacedby": "",
+  "slen": 256,
+  "status": "live"
+ },
+ "WP_080498849.1": {
+  "replacedby": "",
+  "slen": 466,
+  "status": "suppressed"
+ },
+ "WP_080509724.1": {
+  "replacedby": "",
+  "slen": 347,
+  "status": "suppressed"
+ },
+ "WP_080523304.1": {
+  "replacedby": "",
+  "slen": 409,
+  "status": "suppressed"
+ },
+ "WP_080564575.1": {
+  "replacedby": "",
+  "slen": 751,
+  "status": "suppressed"
+ },
+ "WP_080700177.1": {
+  "replacedby": "",
+  "slen": 474,
+  "status": "live"
+ },
+ "WP_080807610.1": {
+  "replacedby": "",
+  "slen": 1126,
+  "status": "live"
+ },
+ "WP_080810445.1": {
+  "replacedby": "",
+  "slen": 500,
+  "status": "live"
+ },
+ "WP_080811274.1": {
+  "replacedby": "",
+  "slen": 487,
+  "status": "live"
+ },
+ "WP_080826257.1": {
+  "replacedby": "",
+  "slen": 484,
+  "status": "live"
+ },
+ "WP_080840602.1": {
+  "replacedby": "",
+  "slen": 706,
+  "status": "live"
+ },
+ "WP_080977504.1": {
+  "replacedby": "",
+  "slen": 750,
+  "status": "live"
+ },
+ "WP_081057482.1": {
+  "replacedby": "",
+  "slen": 768,
+  "status": "suppressed"
+ },
+ "WP_081144923.1": {
+  "replacedby": "",
+  "slen": 1117,
+  "status": "live"
+ },
+ "WP_081147617.1": {
+  "replacedby": "",
+  "slen": 516,
+  "status": "live"
+ },
+ "WP_081295151.1": {
+  "replacedby": "",
+  "slen": 1098,
+  "status": "suppressed"
+ },
+ "WP_081295619.1": {
+  "replacedby": "",
+  "slen": 1136,
+  "status": "live"
+ },
+ "WP_081441952.1": {
+  "replacedby": "",
+  "slen": 1005,
+  "status": "suppressed"
+ },
+ "WP_081444939.1": {
+  "replacedby": "",
+  "slen": 1024,
+  "status": "suppressed"
+ },
+ "WP_081599527.1": {
+  "replacedby": "",
+  "slen": 742,
+  "status": "live"
+ },
+ "WP_081699304.1": {
+  "replacedby": "",
+  "slen": 788,
+  "status": "suppressed"
+ },
+ "WP_081743200.1": {
+  "replacedby": "",
+  "slen": 1039,
+  "status": "suppressed"
+ },
+ "WP_081892299.1": {
+  "replacedby": "",
+  "slen": 778,
+  "status": "suppressed"
+ },
+ "WP_081892706.1": {
+  "replacedby": "",
+  "slen": 360,
+  "status": "live"
+ },
+ "WP_082240375.1": {
+  "replacedby": "",
+  "slen": 502,
+  "status": "live"
+ },
+ "WP_082340613.1": {
+  "replacedby": "",
+  "slen": 482,
+  "status": "suppressed"
+ },
+ "WP_082382784.1": {
+  "replacedby": "",
+  "slen": 461,
+  "status": "suppressed"
+ },
+ "WP_082735923.1": {
+  "replacedby": "",
+  "slen": 653,
+  "status": "suppressed"
+ },
+ "WP_082755986.1": {
+  "replacedby": "",
+  "slen": 937,
+  "status": "suppressed"
+ },
+ "WP_082773600.1": {
+  "replacedby": "",
+  "slen": 743,
+  "status": "live"
+ },
+ "WP_082819762.1": {
+  "replacedby": "",
+  "slen": 485,
+  "status": "live"
+ },
+ "WP_082839051.1": {
+  "replacedby": "",
+  "slen": 794,
+  "status": "live"
+ },
+ "WP_082905585.1": {
+  "replacedby": "",
+  "slen": 763,
+  "status": "live"
+ },
+ "WP_082934345.1": {
+  "replacedby": "",
+  "slen": 500,
+  "status": "live"
+ },
+ "WP_083396642.1": {
+  "replacedby": "",
+  "slen": 466,
+  "status": "suppressed"
+ },
+ "WP_083461754.1": {
+  "replacedby": "",
+  "slen": 452,
+  "status": "suppressed"
+ },
+ "WP_083592923.1": {
+  "replacedby": "",
+  "slen": 481,
+  "status": "live"
+ },
+ "WP_083600058.1": {
+  "replacedby": "",
+  "slen": 709,
+  "status": "suppressed"
+ },
+ "WP_083716754.1": {
+  "replacedby": "",
+  "slen": 514,
+  "status": "suppressed"
+ },
+ "WP_083764430.1": {
+  "replacedby": "",
+  "slen": 685,
+  "status": "suppressed"
+ },
+ "WP_083783314.1": {
+  "replacedby": "",
+  "slen": 500,
+  "status": "live"
+ },
+ "WP_083786902.1": {
+  "replacedby": "",
+  "slen": 245,
+  "status": "live"
+ },
+ "WP_083829967.1": {
+  "replacedby": "",
+  "slen": 813,
+  "status": "suppressed"
+ },
+ "WP_083842423.1": {
+  "replacedby": "",
+  "slen": 483,
+  "status": "live"
+ },
+ "WP_083862946.1": {
+  "replacedby": "",
+  "slen": 725,
+  "status": "suppressed"
+ },
+ "WP_083871010.1": {
+  "replacedby": "",
+  "slen": 1044,
+  "status": "suppressed"
+ },
+ "WP_083930349.1": {
+  "replacedby": "",
+  "slen": 650,
+  "status": "suppressed"
+ },
+ "WP_083967189.1": {
+  "replacedby": "",
+  "slen": 461,
+  "status": "suppressed"
+ },
+ "WP_084097100.1": {
+  "replacedby": "",
+  "slen": 699,
+  "status": "suppressed"
+ },
+ "WP_084106721.1": {
+  "replacedby": "",
+  "slen": 781,
+  "status": "suppressed"
+ },
+ "WP_084176749.1": {
+  "replacedby": "",
+  "slen": 703,
+  "status": "live"
+ },
+ "WP_084234542.1": {
+  "replacedby": "",
+  "slen": 1050,
+  "status": "live"
+ },
+ "WP_084238347.1": {
+  "replacedby": "",
+  "slen": 501,
+  "status": "live"
+ },
+ "WP_084286803.1": {
+  "replacedby": "",
+  "slen": 792,
+  "status": "suppressed"
+ },
+ "WP_084316793.1": {
+  "replacedby": "",
+  "slen": 773,
+  "status": "suppressed"
+ },
+ "WP_084326285.1": {
+  "replacedby": "",
+  "slen": 382,
+  "status": "suppressed"
+ },
+ "WP_084462763.1": {
+  "replacedby": "",
+  "slen": 1019,
+  "status": "suppressed"
+ },
+ "WP_084480083.1": {
+  "replacedby": "",
+  "slen": 227,
+  "status": "suppressed"
+ },
+ "WP_084602981.1": {
+  "replacedby": "",
+  "slen": 802,
+  "status": "live"
+ },
+ "WP_084668949.1": {
+  "replacedby": "",
+  "slen": 711,
+  "status": "suppressed"
+ },
+ "WP_084739342.1": {
+  "replacedby": "",
+  "slen": 765,
+  "status": "suppressed"
+ },
+ "WP_085354659.1": {
+  "replacedby": "",
+  "slen": 510,
+  "status": "live"
+ },
+ "WP_085471791.1": {
+  "replacedby": "",
+  "slen": 763,
+  "status": "live"
+ },
+ "WP_085474560.1": {
+  "replacedby": "",
+  "slen": 1060,
+  "status": "live"
+ },
+ "WP_085482892.1": {
+  "replacedby": "",
+  "slen": 1048,
+  "status": "live"
+ },
+ "WP_085772138.1": {
+  "replacedby": "",
+  "slen": 470,
+  "status": "live"
+ },
+ "WP_085789107.1": {
+  "replacedby": "",
+  "slen": 707,
+  "status": "suppressed"
+ },
+ "WP_085809852.1": {
+  "replacedby": "",
+  "slen": 468,
+  "status": "live"
+ },
+ "WP_085870579.1": {
+  "replacedby": "",
+  "slen": 483,
+  "status": "live"
+ },
+ "WP_085933357.1": {
+  "replacedby": "",
+  "slen": 499,
+  "status": "live"
+ },
+ "WP_085936214.1": {
+  "replacedby": "",
+  "slen": 473,
+  "status": "live"
+ },
+ "WP_085937813.1": {
+  "replacedby": "",
+  "slen": 484,
+  "status": "live"
+ },
+ "WP_085938215.1": {
+  "replacedby": "",
+  "slen": 789,
+  "status": "live"
+ },
+ "WP_086023002.1": {
+  "replacedby": "",
+  "slen": 484,
+  "status": "suppressed"
+ },
+ "WP_086102656.1": {
+  "replacedby": "",
+  "slen": 694,
+  "status": "suppressed"
+ },
+ "WP_086549030.1": {
+  "replacedby": "",
+  "slen": 632,
+  "status": "live"
+ },
+ "WP_086833853.1": {
+  "replacedby": "",
+  "slen": 769,
+  "status": "suppressed"
+ },
+ "WP_086904404.1": {
+  "replacedby": "",
+  "slen": 730,
+  "status": "live"
+ },
+ "WP_087252836.1": {
+  "replacedby": "",
+  "slen": 1045,
+  "status": "live"
+ },
+ "WP_087287470.1": {
+  "replacedby": "",
+  "slen": 1047,
+  "status": "live"
+ },
+ "WP_087292483.1": {
+  "replacedby": "",
+  "slen": 1050,
+  "status": "suppressed"
+ },
+ "WP_087337819.1": {
+  "replacedby": "",
+  "slen": 1045,
+  "status": "live"
+ },
+ "WP_087406053.1": {
+  "replacedby": "",
+  "slen": 1040,
+  "status": "live"
+ },
+ "WP_087527547.1": {
+  "replacedby": "",
+  "slen": 730,
+  "status": "live"
+ },
+ "WP_087738801.1": {
+  "replacedby": "",
+  "slen": 481,
+  "status": "live"
+ },
+ "WP_087838767.1": {
+  "replacedby": "",
+  "slen": 473,
+  "status": "live"
+ },
+ "WP_088100472.1": {
+  "replacedby": "",
+  "slen": 482,
+  "status": "suppressed"
+ },
+ "WP_088193538.1": {
+  "replacedby": "",
+  "slen": 483,
+  "status": "suppressed"
+ },
+ "WP_088194762.1": {
+  "replacedby": "",
+  "slen": 517,
+  "status": "live"
+ },
+ "WP_088257333.1": {
+  "replacedby": "",
+  "slen": 638,
+  "status": "live"
+ },
+ "WP_088264063.1": {
+  "replacedby": "",
+  "slen": 763,
+  "status": "live"
+ },
+ "WP_088326165.1": {
+  "replacedby": "",
+  "slen": 473,
+  "status": "live"
+ },
+ "WP_088347300.1": {
+  "replacedby": "",
+  "slen": 763,
+  "status": "live"
+ },
+ "WP_088492884.1": {
+  "replacedby": "",
+  "slen": 1046,
+  "status": "live"
+ },
+ "WP_088656112.1": {
+  "replacedby": "",
+  "slen": 628,
+  "status": "live"
+ },
+ "WP_088664286.1": {
+  "replacedby": "",
+  "slen": 491,
+  "status": "suppressed"
+ },
+ "WP_088696231.1": {
+  "replacedby": "",
+  "slen": 703,
+  "status": "live"
+ },
+ "WP_088712621.1": {
+  "replacedby": "",
+  "slen": 471,
+  "status": "live"
+ },
+ "WP_088891256.1": {
+  "replacedby": "",
+  "slen": 728,
+  "status": "suppressed"
+ },
+ "WP_088892392.1": {
+  "replacedby": "",
+  "slen": 488,
+  "status": "live"
+ },
+ "WP_088912163.1": {
+  "replacedby": "",
+  "slen": 731,
+  "status": "suppressed"
+ },
+ "WP_089215968.1": {
+  "replacedby": "",
+  "slen": 499,
+  "status": "live"
+ },
+ "WP_089230993.1": {
+  "replacedby": "",
+  "slen": 737,
+  "status": "live"
+ },
+ "WP_089318527.1": {
+  "replacedby": "",
+  "slen": 470,
+  "status": "live"
+ },
+ "WP_089320882.1": {
+  "replacedby": "",
+  "slen": 767,
+  "status": "live"
+ },
+ "WP_089334213.1": {
+  "replacedby": "",
+  "slen": 508,
+  "status": "suppressed"
+ },
+ "WP_089355803.1": {
+  "replacedby": "",
+  "slen": 505,
+  "status": "live"
+ },
+ "WP_089408463.1": {
+  "replacedby": "",
+  "slen": 654,
+  "status": "live"
+ },
+ "WP_089457547.1": {
+  "replacedby": "",
+  "slen": 1048,
+  "status": "live"
+ },
+ "WP_089668176.1": {
+  "replacedby": "",
+  "slen": 742,
+  "status": "live"
+ },
+ "WP_089699122.1": {
+  "replacedby": "",
+  "slen": 472,
+  "status": "live"
+ },
+ "WP_089708808.1": {
+  "replacedby": "",
+  "slen": 797,
+  "status": "live"
+ },
+ "WP_089761446.1": {
+  "replacedby": "",
+  "slen": 257,
+  "status": "suppressed"
+ },
+ "WP_089764886.1": {
+  "replacedby": "",
+  "slen": 762,
+  "status": "live"
+ },
+ "WP_089765999.1": {
+  "replacedby": "",
+  "slen": 686,
+  "status": "live"
+ },
+ "WP_089769894.1": {
+  "replacedby": "",
+  "slen": 356,
+  "status": "suppressed"
+ },
+ "WP_089880661.1": {
+  "replacedby": "",
+  "slen": 892,
+  "status": "live"
+ },
+ "WP_090072729.1": {
+  "replacedby": "",
+  "slen": 518,
+  "status": "suppressed"
+ },
+ "WP_090164194.1": {
+  "replacedby": "",
+  "slen": 747,
+  "status": "live"
+ },
+ "WP_090229045.1": {
+  "replacedby": "",
+  "slen": 478,
+  "status": "suppressed"
+ },
+ "WP_090270686.1": {
+  "replacedby": "",
+  "slen": 518,
+  "status": "live"
+ },
+ "WP_090525847.1": {
+  "replacedby": "",
+  "slen": 252,
+  "status": "live"
+ },
+ "WP_090548054.1": {
+  "replacedby": "",
+  "slen": 481,
+  "status": "live"
+ },
+ "WP_090603244.1": {
+  "replacedby": "",
+  "slen": 1052,
+  "status": "live"
+ },
+ "WP_090604190.1": {
+  "replacedby": "",
+  "slen": 760,
+  "status": "live"
+ },
+ "WP_090624110.1": {
+  "replacedby": "",
+  "slen": 1061,
+  "status": "live"
+ },
+ "WP_090634261.1": {
+  "replacedby": "",
+  "slen": 731,
+  "status": "live"
+ },
+ "WP_090674307.1": {
+  "replacedby": "",
+  "slen": 482,
+  "status": "live"
+ },
+ "WP_090828644.1": {
+  "replacedby": "",
+  "slen": 467,
+  "status": "live"
+ },
+ "WP_090949002.1": {
+  "replacedby": "",
+  "slen": 710,
+  "status": "live"
+ },
+ "WP_090979254.1": {
+  "replacedby": "",
+  "slen": 759,
+  "status": "live"
+ },
+ "WP_090996333.1": {
+  "replacedby": "",
+  "slen": 802,
+  "status": "live"
+ },
+ "WP_090997755.1": {
+  "replacedby": "",
+  "slen": 509,
+  "status": "suppressed"
+ },
+ "WP_091097633.1": {
+  "replacedby": "",
+  "slen": 483,
+  "status": "live"
+ },
+ "WP_091126758.1": {
+  "replacedby": "",
+  "slen": 476,
+  "status": "live"
+ },
+ "WP_091133620.1": {
+  "replacedby": "",
+  "slen": 473,
+  "status": "live"
+ },
+ "WP_091170676.1": {
+  "replacedby": "",
+  "slen": 1060,
+  "status": "live"
+ },
+ "WP_091374193.1": {
+  "replacedby": "",
+  "slen": 681,
+  "status": "suppressed"
+ },
+ "WP_091379925.1": {
+  "replacedby": "",
+  "slen": 481,
+  "status": "suppressed"
+ },
+ "WP_091471580.1": {
+  "replacedby": "",
+  "slen": 470,
+  "status": "live"
+ },
+ "WP_091516915.1": {
+  "replacedby": "",
+  "slen": 486,
+  "status": "live"
+ },
+ "WP_091535645.1": {
+  "replacedby": "",
+  "slen": 503,
+  "status": "live"
+ },
+ "WP_091639651.1": {
+  "replacedby": "",
+  "slen": 479,
+  "status": "suppressed"
+ },
+ "WP_091781164.1": {
+  "replacedby": "",
+  "slen": 1048,
+  "status": "suppressed"
+ },
+ "WP_091823002.1": {
+  "replacedby": "",
+  "slen": 508,
+  "status": "live"
+ },
+ "WP_091870084.1": {
+  "replacedby": "",
+  "slen": 743,
+  "status": "live"
+ },
+ "WP_091963793.1": {
+  "replacedby": "",
+  "slen": 504,
+  "status": "live"
+ },
+ "WP_091963850.1": {
+  "replacedby": "",
+  "slen": 466,
+  "status": "live"
+ },
+ "WP_091970176.1": {
+  "replacedby": "",
+  "slen": 772,
+  "status": "live"
+ },
+ "WP_091979398.1": {
+  "replacedby": "",
+  "slen": 499,
+  "status": "live"
+ },
+ "WP_092022087.1": {
+  "replacedby": "",
+  "slen": 480,
+  "status": "suppressed"
+ },
+ "WP_092037576.1": {
+  "replacedby": "",
+  "slen": 436,
+  "status": "suppressed"
+ },
+ "WP_092048391.1": {
+  "replacedby": "",
+  "slen": 486,
+  "status": "suppressed"
+ },
+ "WP_092119516.1": {
+  "replacedby": "",
+  "slen": 1053,
+  "status": "suppressed"
+ },
+ "WP_092177586.1": {
+  "replacedby": "",
+  "slen": 523,
+  "status": "suppressed"
+ },
+ "WP_092208436.1": {
+  "replacedby": "",
+  "slen": 703,
+  "status": "live"
+ },
+ "WP_092226355.1": {
+  "replacedby": "",
+  "slen": 500,
+  "status": "live"
+ },
+ "WP_092265422.1": {
+  "replacedby": "",
+  "slen": 674,
+  "status": "live"
+ },
+ "WP_092282753.1": {
+  "replacedby": "",
+  "slen": 497,
+  "status": "live"
+ },
+ "WP_092395190.1": {
+  "replacedby": "",
+  "slen": 636,
+  "status": "suppressed"
+ },
+ "WP_092416777.1": {
+  "replacedby": "",
+  "slen": 525,
+  "status": "live"
+ },
+ "WP_092447190.1": {
+  "replacedby": "",
+  "slen": 703,
+  "status": "live"
+ },
+ "WP_092459742.1": {
+  "replacedby": "",
+  "slen": 507,
+  "status": "live"
+ },
+ "WP_092468852.1": {
+  "replacedby": "",
+  "slen": 703,
+  "status": "live"
+ },
+ "WP_092569305.1": {
+  "replacedby": "",
+  "slen": 730,
+  "status": "live"
+ },
+ "WP_092580646.1": {
+  "replacedby": "",
+  "slen": 703,
+  "status": "live"
+ },
+ "WP_092662338.1": {
+  "replacedby": "",
+  "slen": 346,
+  "status": "suppressed"
+ },
+ "WP_092684838.1": {
+  "replacedby": "",
+  "slen": 484,
+  "status": "live"
+ },
+ "WP_092694377.1": {
+  "replacedby": "",
+  "slen": 472,
+  "status": "suppressed"
+ },
+ "WP_092721547.1": {
+  "replacedby": "",
+  "slen": 777,
+  "status": "suppressed"
+ },
+ "WP_092820763.1": {
+  "replacedby": "",
+  "slen": 483,
+  "status": "suppressed"
+ },
+ "WP_092838824.1": {
+  "replacedby": "",
+  "slen": 518,
+  "status": "live"
+ },
+ "WP_092907645.1": {
+  "replacedby": "",
+  "slen": 472,
+  "status": "live"
+ },
+ "WP_092910137.1": {
+  "replacedby": "",
+  "slen": 516,
+  "status": "suppressed"
+ },
+ "WP_092996166.1": {
+  "replacedby": "",
+  "slen": 499,
+  "status": "live"
+ },
+ "WP_093007728.1": {
+  "replacedby": "",
+  "slen": 704,
+  "status": "live"
+ },
+ "WP_093026608.1": {
+  "replacedby": "",
+  "slen": 687,
+  "status": "live"
+ },
+ "WP_093039140.1": {
+  "replacedby": "",
+  "slen": 513,
+  "status": "live"
+ },
+ "WP_093081848.1": {
+  "replacedby": "",
+  "slen": 469,
+  "status": "live"
+ },
+ "WP_093153062.1": {
+  "replacedby": "",
+  "slen": 403,
+  "status": "suppressed"
+ },
+ "WP_093163280.1": {
+  "replacedby": "",
+  "slen": 471,
+  "status": "live"
+ },
+ "WP_093228074.1": {
+  "replacedby": "",
+  "slen": 630,
+  "status": "live"
+ },
+ "WP_093281619.1": {
+  "replacedby": "",
+  "slen": 476,
+  "status": "suppressed"
+ },
+ "WP_093307953.1": {
+  "replacedby": "",
+  "slen": 479,
+  "status": "live"
+ },
+ "WP_093590748.1": {
+  "replacedby": "",
+  "slen": 479,
+  "status": "suppressed"
+ },
+ "WP_093736218.1": {
+  "replacedby": "",
+  "slen": 417,
+  "status": "suppressed"
+ },
+ "WP_093831857.1": {
+  "replacedby": "",
+  "slen": 809,
+  "status": "live"
+ },
+ "WP_093896622.1": {
+  "replacedby": "",
+  "slen": 483,
+  "status": "suppressed"
+ },
+ "WP_093920437.1": {
+  "replacedby": "",
+  "slen": 666,
+  "status": "live"
+ },
+ "WP_093992233.1": {
+  "replacedby": "",
+  "slen": 481,
+  "status": "suppressed"
+ },
+ "WP_093994043.1": {
+  "replacedby": "",
+  "slen": 518,
+  "status": "live"
+ },
+ "WP_094023191.1": {
+  "replacedby": "",
+  "slen": 518,
+  "status": "live"
+ },
+ "WP_094072910.1": {
+  "replacedby": "",
+  "slen": 756,
+  "status": "live"
+ },
+ "WP_094134973.1": {
+  "replacedby": "",
+  "slen": 675,
+  "status": "live"
+ },
+ "WP_094214393.1": {
+  "replacedby": "",
+  "slen": 483,
+  "status": "live"
+ },
+ "WP_094238542.1": {
+  "replacedby": "",
+  "slen": 710,
+  "status": "suppressed"
+ },
+ "WP_094264667.1": {
+  "replacedby": "",
+  "slen": 713,
+  "status": "live"
+ },
+ "WP_094291738.1": {
+  "replacedby": "",
+  "slen": 401,
+  "status": "suppressed"
+ },
+ "WP_094382636.1": {
+  "replacedby": "",
+  "slen": 768,
+  "status": "live"
+ },
+ "WP_094530881.1": {
+  "replacedby": "",
+  "slen": 474,
+  "status": "live"
+ },
+ "WP_094551617.1": {
+  "replacedby": "",
+  "slen": 793,
+  "status": "live"
+ },
+ "WP_094590818.1": {
+  "replacedby": "",
+  "slen": 912,
+  "status": "live"
+ },
+ "WP_094593095.1": {
+  "replacedby": "",
+  "slen": 847,
+  "status": "live"
+ },
+ "WP_095387428.1": {
+  "replacedby": "",
+  "slen": 485,
+  "status": "live"
+ },
+ "WP_095447451.1": {
+  "replacedby": "",
+  "slen": 501,
+  "status": "live"
+ },
+ "WP_095565912.1": {
+  "replacedby": "",
+  "slen": 480,
+  "status": "suppressed"
+ },
+ "WP_095832385.1": {
+  "replacedby": "",
+  "slen": 761,
+  "status": "live"
+ },
+ "WP_095840539.1": {
+  "replacedby": "",
+  "slen": 484,
+  "status": "suppressed"
+ },
+ "WP_096078421.1": {
+  "replacedby": "",
+  "slen": 471,
+  "status": "live"
+ },
+ "WP_096354083.1": {
+  "replacedby": "",
+  "slen": 686,
+  "status": "live"
+ },
+ "WP_096386367.1": {
+  "replacedby": "",
+  "slen": 718,
+  "status": "suppressed"
+ },
+ "WP_096391836.1": {
+  "replacedby": "",
+  "slen": 473,
+  "status": "live"
+ },
+ "WP_096462201.1": {
+  "replacedby": "",
+  "slen": 472,
+  "status": "live"
+ },
+ "WP_096483473.1": {
+  "replacedby": "",
+  "slen": 500,
+  "status": "live"
+ },
+ "WP_096534863.1": {
+  "replacedby": "",
+  "slen": 757,
+  "status": "suppressed"
+ },
+ "WP_096581191.1": {
+  "replacedby": "",
+  "slen": 756,
+  "status": "suppressed"
+ },
+ "WP_096644251.1": {
+  "replacedby": "",
+  "slen": 752,
+  "status": "suppressed"
+ },
+ "WP_096683444.1": {
+  "replacedby": "",
+  "slen": 504,
+  "status": "suppressed"
+ },
+ "WP_096732917.1": {
+  "replacedby": "",
+  "slen": 477,
+  "status": "suppressed"
+ },
+ "WP_096861749.1": {
+  "replacedby": "",
+  "slen": 751,
+  "status": "live"
+ },
+ "WP_096885432.1": {
+  "replacedby": "",
+  "slen": 699,
+  "status": "live"
+ },
+ "WP_097007364.1": {
+  "replacedby": "",
+  "slen": 884,
+  "status": "live"
+ },
+ "WP_097031605.1": {
+  "replacedby": "",
+  "slen": 482,
+  "status": "live"
+ },
+ "WP_097082795.1": {
+  "replacedby": "",
+  "slen": 518,
+  "status": "live"
+ },
+ "WP_097200709.1": {
+  "replacedby": "",
+  "slen": 1031,
+  "status": "suppressed"
+ },
+ "WP_097378604.1": {
+  "replacedby": "",
+  "slen": 887,
+  "status": "live"
+ },
+ "WP_097544715.1": {
+  "replacedby": "",
+  "slen": 517,
+  "status": "live"
+ },
+ "WP_097613865.1": {
+  "replacedby": "",
+  "slen": 1062,
+  "status": "live"
+ },
+ "WP_098063474.1": {
+  "replacedby": "",
+  "slen": 1055,
+  "status": "live"
+ },
+ "WP_098075782.1": {
+  "replacedby": "",
+  "slen": 678,
+  "status": "suppressed"
+ },
+ "WP_098195163.1": {
+  "replacedby": "",
+  "slen": 513,
+  "status": "live"
+ },
+ "WP_098195322.1": {
+  "replacedby": "",
+  "slen": 1052,
+  "status": "live"
+ },
+ "WP_099009389.1": {
+  "replacedby": "",
+  "slen": 645,
+  "status": "suppressed"
+ },
+ "WP_099070251.1": {
+  "replacedby": "",
+  "slen": 1122,
+  "status": "live"
+ },
+ "WP_099084822.1": {
+  "replacedby": "",
+  "slen": 485,
+  "status": "suppressed"
+ },
+ "WP_099215415.1": {
+  "replacedby": "",
+  "slen": 687,
+  "status": "live"
+ },
+ "WP_099290241.1": {
+  "replacedby": "",
+  "slen": 1043,
+  "status": "live"
+ },
+ "WP_099325248.1": {
+  "replacedby": "",
+  "slen": 672,
+  "status": "live"
+ },
+ "WP_099372365.1": {
+  "replacedby": "",
+  "slen": 482,
+  "status": "live"
+ },
+ "WP_099412865.1": {
+  "replacedby": "",
+  "slen": 744,
+  "status": "live"
+ },
+ "WP_099434566.1": {
+  "replacedby": "",
+  "slen": 698,
+  "status": "live"
+ },
+ "WP_099438430.1": {
+  "replacedby": "",
+  "slen": 760,
+  "status": "suppressed"
+ },
+ "WP_099463422.1": {
+  "replacedby": "",
+  "slen": 567,
+  "status": "suppressed"
+ },
+ "WP_099503353.1": {
+  "replacedby": "",
+  "slen": 469,
+  "status": "suppressed"
+ },
+ "WP_099531684.1": {
+  "replacedby": "",
+  "slen": 751,
+  "status": "live"
+ },
+ "WP_099701147.1": {
+  "replacedby": "",
+  "slen": 738,
+  "status": "live"
+ },
+ "WP_099746951.1": {
+  "replacedby": "",
+  "slen": 476,
+  "status": "live"
+ },
+ "WP_099799291.1": {
+  "replacedby": "",
+  "slen": 737,
+  "status": "live"
+ },
+ "WP_099799494.1": {
+  "replacedby": "",
+  "slen": 721,
+  "status": "live"
+ },
+ "WP_099812941.1": {
+  "replacedby": "",
+  "slen": 724,
+  "status": "live"
+ },
+ "WP_099832012.1": {
+  "replacedby": "",
+  "slen": 481,
+  "status": "live"
+ },
+ "WP_099834802.1": {
+  "replacedby": "",
+  "slen": 729,
+  "status": "live"
+ },
+ "WP_099966378.1": {
+  "replacedby": "",
+  "slen": 680,
+  "status": "suppressed"
+ },
+ "WP_100085051.1": {
+  "replacedby": "",
+  "slen": 1002,
+  "status": "suppressed"
+ },
+ "WP_100161590.1": {
+  "replacedby": "",
+  "slen": 789,
+  "status": "live"
+ },
+ "WP_100217698.1": {
+  "replacedby": "",
+  "slen": 726,
+  "status": "suppressed"
+ },
+ "WP_100228132.1": {
+  "replacedby": "",
+  "slen": 484,
+  "status": "suppressed"
+ },
+ "WP_100239904.1": {
+  "replacedby": "",
+  "slen": 518,
+  "status": "live"
+ },
+ "WP_100241429.1": {
+  "replacedby": "",
+  "slen": 619,
+  "status": "live"
+ },
+ "WP_100402176.1": {
+  "replacedby": "",
+  "slen": 739,
+  "status": "live"
+ },
+ "WP_100483095.1": {
+  "replacedby": "",
+  "slen": 436,
+  "status": "suppressed"
+ },
+ "WP_100572090.1": {
+  "replacedby": "",
+  "slen": 483,
+  "status": "live"
+ },
+ "WP_100626894.1": {
+  "replacedby": "",
+  "slen": 699,
+  "status": "suppressed"
+ },
+ "WP_100787857.1": {
+  "replacedby": "",
+  "slen": 660,
+  "status": "live"
+ },
+ "WP_100788469.1": {
+  "replacedby": "",
+  "slen": 1043,
+  "status": "live"
+ },
+ "WP_100990083.1": {
+  "replacedby": "",
+  "slen": 829,
+  "status": "live"
+ },
+ "WP_100991967.1": {
+  "replacedby": "",
+  "slen": 1058,
+  "status": "live"
+ },
+ "WP_101018292.1": {
+  "replacedby": "",
+  "slen": 1052,
+  "status": "live"
+ },
+ "WP_101237571.1": {
+  "replacedby": "",
+  "slen": 1045,
+  "status": "live"
+ },
+ "WP_101294153.1": {
+  "replacedby": "",
+  "slen": 436,
+  "status": "live"
+ },
+ "WP_101603479.1": {
+  "replacedby": "",
+  "slen": 1040,
+  "status": "suppressed"
+ },
+ "WP_101726682.1": {
+  "replacedby": "",
+  "slen": 763,
+  "status": "live"
+ },
+ "WP_101944481.1": {
+  "replacedby": "",
+  "slen": 474,
+  "status": "live"
+ },
+ "WP_102073886.1": {
+  "replacedby": "",
+  "slen": 485,
+  "status": "live"
+ },
+ "WP_102182189.1": {
+  "replacedby": "",
+  "slen": 737,
+  "status": "live"
+ },
+ "WP_102206006.1": {
+  "replacedby": "",
+  "slen": 477,
+  "status": "live"
+ },
+ "YP_001314988.1": {
+  "replacedby": "WP_011971022.1",
+  "slen": 517,
+  "status": "dead"
+ },
+ "YP_145307.1": {
+  "replacedby": "WP_011229221.1",
+  "slen": 685,
+  "status": "dead"
+ }
+}
