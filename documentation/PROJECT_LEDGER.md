@@ -119,8 +119,7 @@ cherry-pick / reimplementation / refactor decided case by case.
 ### Sources
 Owner clarification, 2026-09-09.
 Retrospective audit preserved as
-`documentation/history/2026-08-30-phase-a-audit.md` by this
-retrospective-reconstruction PR.
+`documentation/history/2026-08-30-phase-a-audit.md` by PR #30.
 
 ## 2026-09-09 — Agent scratch directories stay out of the versioned project
 
@@ -328,7 +327,7 @@ Commits: `175a12a` … `0013c6d`
 PR: No historical PR found
 Historical roadmap reference: Phase A
 Audit / notes: `documentation/history/2026-08-30-phase-a-audit.md`
-(preserved by this retrospective-reconstruction PR)
+(preserved by PR #30)
 
 ### Supersedes
 Exact-accession-only recall matching; `PIWI_RE` as a `pago_clade` value;
@@ -390,7 +389,7 @@ Historical roadmap reference: Phase B, milestones B0–B4.3
 Audit / notes: `src/pago_pipeline/resources/apaz_seed/curation_notes.md`,
 `src/pago_pipeline/resources/clade_seed/ryazansky_s1_catalog_notes.md`
 (staging); `documentation/history/2026-08-31-pago-annotation-ontology-staging.md`
-(preserved by this retrospective-reconstruction PR — verbatim, with a header
+(preserved by PR #30 — verbatim, with a header
 terminology note that the staging text uses "homology cluster" for the
 operational 90/80 grouping now
 called a "high-similarity split group"; the historical content is not
@@ -461,8 +460,7 @@ TECHNICAL + SCIENTIFIC (documentation and provenance only)
 CURRENT
 
 ### Integration status
-INTEGRATED (on merge of this retrospective reconstruction PR — PR number to be
-substituted here before merge)
+INTEGRATED (PR #30)
 
 ### Epistemic status
 N/A
@@ -487,8 +485,7 @@ material lived only in `tmp/` and in a never-integrated staging document.
   labels or holdouts from the staging branch were reintegrated.**
 
 ### Sources
-PR: this retrospective-reconstruction PR — `(docs) Reconstruct the rationale and
-provenance of major historical decisions` (PR number to be added before merge)
+PR: #30 — `(docs) Reconstruct the rationale and provenance of major historical decisions`
 
 ---
 
