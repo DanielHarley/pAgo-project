@@ -23,7 +23,8 @@ data/*
 *.npz
 *.html
 !data/01-raw/
-!data/01-raw/**
+data/01-raw/**
+!data/01-raw/README.md
 
 # Test runtime artifacts
 .pytest_cache/
@@ -32,6 +33,9 @@ htmlcov/
 
 # SWeeP original (intellectual property — must not be committed)
 scripts/sweep-2.1.3.0/
+
+# Local scratch / working directory (report builds, dev iterations, downloads)
+tmp/
 
 # Local agent scratch / config directories — never versioned
 .agents/
