@@ -116,3 +116,25 @@ historical Issue or PR (much of the pre-framework history), write
 `No historical Issue found` / `No historical PR found` rather than
 manufacturing one. An audit Issue created now is allowed, but must be labelled
 as retrospective.
+
+## Index
+
+Retrospectively reconstructed decisions. `Lc` = lifecycle, `Int` = integration,
+`Ep` = epistemic status.
+
+| ADR | Decision | Type | Lc | Int | Ep |
+| --- | --- | --- | --- | --- | --- |
+| [0001](0001-canonical-ncbi-retrieval-identifier-is-the-protein-uid.md) | Canonical NCBI retrieval identifier is the protein UID | T | CURRENT | INTEGRATED | SUPPORTED |
+| [0002](0002-immutable-snapshot-and-provenance-architecture.md) | Immutable snapshot + manifest + SHA-256 provenance architecture | T | CURRENT | INTEGRATED | SUPPORTED |
+| [0003](0003-ncbi-retrieval-performance-and-correctness-rework.md) | NCBI retrieval performance & correctness rework (F1–F12 / P0–P5) | T | CURRENT | NOT_INTEGRATED | SUPPORTED |
+| [0004](0004-annotation-enriched-candidate-set-and-technical-only-prefilter.md) | Annotation-enriched candidate set; technical-only prefilter | T+S | CURRENT | NOT_INTEGRATED | SUPPORTED |
+| [0005](0005-query-recall-reference-panel-and-sequence-identity-matching.md) | Query-recall reference panel; sequence-identity matching | S | CURRENT | NOT_INTEGRATED | SUPPORTED |
+| [0006](0006-sweep-pca-kmeans-is-exploratory-not-validated-classification.md) | SWeeP → PCA → KMeans is exploratory, not validated classification | S | CURRENT | INTEGRATED | PARTIALLY_SUPPORTED |
+| [0007](0007-provenance-and-defensible-labels-before-supervised-ml.md) | Provenance / defensible labels / protected holdout before supervised ML | S | CURRENT | NOT_INTEGRATED | PARTIALLY_SUPPORTED |
+| [0008](0008-pinned-pfam-38-2-hmm-bundle.md) | Pinned Pfam 38.2 HMM bundle (10 profiles, versioned, SHA-256) | T+S | CURRENT | NOT_INTEGRATED | PARTIALLY_SUPPORTED |
+| [0009](0009-apaz-s3-reference-and-high-similarity-split-group-partitioning.md) | APAZ S3 reference; high-similarity split-group partitioning (v2 supersedes v1) | T+S | CURRENT | NOT_INTEGRATED | PARTIALLY_SUPPORTED |
+| [0010](0010-apaz-profile-hmms-built-from-build-only.md) | Six APAZ profile HMMs built from BUILD only | T+S | CURRENT | NOT_INTEGRATED | PARTIALLY_SUPPORTED |
+| [0011](0011-ryazansky-1010-pago-catalog-and-mid-piwi-reference-extraction.md) | Ryazansky 1010-pAgo catalog reconciliation; MID-PIWI extraction | T+S | CURRENT | NOT_INTEGRATED | SUPPORTED |
+| [0012](0012-annotation-ontology-family-versus-clade.md) | Ontology: `ago_family` vs `pago_clade`; PIWI-RE is a family | S | CURRENT | NOT_INTEGRATED | SUPPORTED |
+| [0013](0013-mid-piwi-high-similarity-split-groups.md) | MID-PIWI high-similarity split groups over the Ryazansky catalog | T+S | CURRENT | NOT_INTEGRATED | SUPPORTED |
+| [0014](0014-independent-piwi-re-reference-arm.md) | Independent PIWI-RE reference arm (proposed, not executed) | S | PROPOSED | NOT_INTEGRATED | UNRESOLVED |
