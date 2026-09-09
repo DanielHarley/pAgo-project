@@ -64,7 +64,9 @@ query is `INTEGRATED` but `SUPERSEDED` (see §1.1 and §3).
   from memory-mapped `.npy` files (PR #21).
 - Snapshot reuse requires declared artifact hashes and, for SWeeP, a matching
   package-root identity (PR #21).
-- CI runs the snapshot-reuse regressions on `windows-latest` as a required job.
+- CI includes a `windows-snapshot-reuse` job on `windows-latest`. `master` has
+  no branch protection or required status checks configured.
+  `NEW_ISSUE_REQUIRED` — enforce CI / status checks on `master` if desired.
 
 ### 1.3 Exploratory analysis (integrated, exploratory only)
 
@@ -299,9 +301,15 @@ Not resolved. Do not assume an answer.
    original tree are not available as published supplementary artifacts. The
    project's own reference tree, alignment, and substitution model have not
    been built; the method is not yet decided or executed.
-4. **Independent PIWI-RE reference arm.** A PIWI-RE curation arm sourced from
-   Burroughs 2013 plus the recall set, independent of Ryazansky, is planned but
-   not started (historical roadmap reference: B4.4).
+4. **Independent PIWI-RE reference arm.** An independent PIWI-RE reference arm,
+   separate from Ryazansky, must be curated from primary PIWI-RE literature —
+   starting with Burroughs et al. 2013 and subsequent experimental sources —
+   with explicit circularity auditing of every included reference. The existing
+   recall-panel PIWI-RE references are **not** automatically eligible as an
+   independent validation set: 6 of the 7 are `CURATED_COMPUTATIONAL` and were
+   selected using PIWI-RE profile models, so scoring a profile-based detector
+   against them would be circular. This arm is planned but not started
+   (historical roadmap reference: B4.4).
 5. **Enumeration of the APAZ v1 cross-partition leaks.** Only one worked example
    is documented; the full set and the exact discovery procedure could not be
    reconstructed (no versioned v1 artifact).

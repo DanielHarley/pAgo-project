@@ -16,8 +16,10 @@ A fact about Git:
 
 ## Epistemic status
 
-Whether the decision itself is sound. For `SCIENTIFIC` and `TECHNICAL +
-SCIENTIFIC` decisions only; otherwise `N/A`.
+Whether the decision itself is sound. Use it for `SCIENTIFIC` and
+`TECHNICAL + SCIENTIFIC` decisions, and also for `TECHNICAL` decisions when
+there is an evidence-bearing claim about technical soundness or validation.
+`N/A` when no epistemic / evidential judgment is meaningful.
 
 `SUPPORTED` | `PARTIALLY_SUPPORTED` | `UNRESOLVED` | `N/A`
 

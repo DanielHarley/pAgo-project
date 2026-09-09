@@ -42,7 +42,10 @@ CURRENT | PROPOSED | HISTORICAL | SUPERSEDED | EXPERIMENTAL | DEPRECATED
 INTEGRATED | NOT_INTEGRATED | WAS_INTEGRATED_REMOVED | N/A
 
 ### Epistemic status
-SUPPORTED | PARTIALLY_SUPPORTED | UNRESOLVED | N/A   (scientific decisions only)
+SUPPORTED | PARTIALLY_SUPPORTED | UNRESOLVED | N/A
+(for SCIENTIFIC / TECHNICAL + SCIENTIFIC decisions, and TECHNICAL decisions with
+an evidence-bearing soundness or validation claim; N/A when no such judgment
+applies)
 
 ### Summary
 One or two sentences: problem -> decision.
@@ -179,10 +182,11 @@ Owner clarification, 2026-09-09; existing project branch naming.
 
 # Decision events
 
-> The detailed reconstruction of the events below — one ADR each, with
-> evidence, alternatives, and provenance — is added by the follow-up PR
+> The detailed reconstruction of the events below is added by the follow-up PR
 > `(docs) Reconstruct the rationale and provenance of major historical decisions`.
-> The entries here establish the timeline and the integration state.
+> The retrospective reconstruction adds ADRs as needed, one per significant
+> conceptual decision — a broad historical ledger entry may map to multiple
+> ADRs. The entries here establish the timeline and the status axes.
 
 ## 2026-02-03 — Repository scaffold
 

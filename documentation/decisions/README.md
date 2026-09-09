@@ -54,11 +54,13 @@ decision stands, independently of Git:
 | `INTEGRATED` | Merged into `master` (add `(via PR #N)`). |
 | `NOT_INTEGRATED` | The implementation exists only on a staging / historical branch. |
 | `WAS_INTEGRATED_REMOVED` | Merged into `master` and later removed. |
-| `N/A` | Documentation-only or process decision. |
+| `N/A` | No meaningful Git integration state applies to this record. |
 
-`Epistemic status` (for `SCIENTIFIC` and `TECHNICAL + SCIENTIFIC` ADRs only) is
-whether the decision itself is sound, regardless of Git:
-`SUPPORTED` / `PARTIALLY_SUPPORTED` / `UNRESOLVED` / `N/A`.
+`Epistemic status` is whether the decision itself is sound, regardless of Git:
+`SUPPORTED` / `PARTIALLY_SUPPORTED` / `UNRESOLVED` / `N/A`. Use it for
+`SCIENTIFIC` and `TECHNICAL + SCIENTIFIC` ADRs, and also for `TECHNICAL` ADRs
+when there is an evidence-bearing claim about technical soundness or validation.
+`N/A` when no epistemic / evidential judgment is meaningful.
 
 A retrospectively reconstructed decision that currently lives only on the
 staging branch and is well evidenced is:
@@ -74,13 +76,17 @@ NOT_INTEGRATED
 SUPPORTED
 ```
 
-After the work is reintegrated through a reviewed PR, only the integration axis
-moves:
+When the work is reintegrated through a reviewed PR: if the same decision is
+accepted unchanged, only the integration axis moves —
 
 ```
 ## Integration status
 INTEGRATED (via PR #N)
 ```
+
+If review changes the decision, its rationale, or its evidential support,
+update the relevant axes and record a revised or superseding decision
+explicitly (a new ADR under *Superseded by* / *Supersedes*).
 
 The `## Historical source` section is preserved across that transition so the
 decision that *existed on the staging branch* stays distinguishable from the

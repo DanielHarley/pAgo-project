@@ -76,7 +76,7 @@ evidence does.
 | `INTEGRATED` | Merged into `master`. |
 | `NOT_INTEGRATED` | Exists only on a staging / historical branch. |
 | `WAS_INTEGRATED_REMOVED` | Merged into `master` and later removed. |
-| `N/A` | Documentation-only or process decision. |
+| `N/A` | No meaningful Git integration state applies to this record. |
 
 ### Lifecycle status — where the decision stands
 
@@ -91,7 +91,11 @@ evidence does.
 
 ### Epistemic status — is it scientifically / technically sound
 
-For `SCIENTIFIC` and `TECHNICAL + SCIENTIFIC` decisions; otherwise `N/A`.
+Use it for `SCIENTIFIC` and `TECHNICAL + SCIENTIFIC` decisions, and also for
+`TECHNICAL` decisions when there is an evidence-bearing claim about technical
+soundness or validation (a passing test suite, a reproducibility check, a
+measured baseline). Use `N/A` when no epistemic / evidential judgment is
+meaningful.
 
 | Value | Meaning |
 | --- | --- |
