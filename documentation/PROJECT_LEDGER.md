@@ -25,7 +25,10 @@ This file answers **"how did we get here?"**. For **"what is valid now?"** see
   guessing.
 - An entry whose integration status names an unopened or unmerged Pull Request
   (e.g. `INTEGRATED (on merge of this ... PR)`) is conditional; the explicit PR
-  number replaces that wording once the PR has one, before merge.
+  number replaces that wording once the PR has one, before merge. When a change
+  reached `master` outside the Pull Request flow, the entry records the actual
+  merge commit and states the exception rather than crediting a PR that was not
+  the integration mechanism.
 
 ## Entry template
 
@@ -119,8 +122,8 @@ cherry-pick / reimplementation / refactor decided case by case.
 ### Sources
 Owner clarification, 2026-09-09.
 Retrospective audit preserved as
-`documentation/history/2026-08-30-phase-a-audit.md` by this
-retrospective-reconstruction PR.
+`documentation/history/2026-08-30-phase-a-audit.md` by the retrospective
+reconstruction (merge commit `3ab5079`).
 
 ## 2026-09-09 — Agent scratch directories stay out of the versioned project
 
@@ -328,7 +331,7 @@ Commits: `175a12a` … `0013c6d`
 PR: No historical PR found
 Historical roadmap reference: Phase A
 Audit / notes: `documentation/history/2026-08-30-phase-a-audit.md`
-(preserved by this retrospective-reconstruction PR)
+(preserved by the retrospective reconstruction, merge commit `3ab5079`)
 
 ### Supersedes
 Exact-accession-only recall matching; `PIWI_RE` as a `pago_clade` value;
@@ -390,8 +393,9 @@ Historical roadmap reference: Phase B, milestones B0–B4.3
 Audit / notes: `src/pago_pipeline/resources/apaz_seed/curation_notes.md`,
 `src/pago_pipeline/resources/clade_seed/ryazansky_s1_catalog_notes.md`
 (staging); `documentation/history/2026-08-31-pago-annotation-ontology-staging.md`
-(preserved by this retrospective-reconstruction PR — verbatim, with a header
-terminology note that the staging text uses "homology cluster" for the
+(preserved by the retrospective reconstruction, merge commit `3ab5079` —
+verbatim, with a header terminology note that the staging text uses
+"homology cluster" for the
 operational 90/80 grouping now
 called a "high-similarity split group"; the historical content is not
 rewritten)
@@ -461,11 +465,17 @@ TECHNICAL + SCIENTIFIC (documentation and provenance only)
 CURRENT
 
 ### Integration status
-INTEGRATED (on merge of this retrospective reconstruction PR — PR number to be
-substituted here before merge)
+INTEGRATED — direct merge `3ab5079`; provenance reconciliation in PR #30
 
 ### Epistemic status
 N/A
+
+### Integration note
+The reconstruction commits were integrated into `master` by a direct `--no-ff`
+merge (`3ab5079`), not through the Pull Request flow described in
+`documentation/README.md`. PR #30 was already open at the time; it carries only
+this post-merge provenance reconciliation. This is a recorded exception to the
+governance flow, not the intended integration mechanism.
 
 ### Problem
 The rationale and provenance of the project's major technical and scientific
@@ -487,8 +497,13 @@ material lived only in `tmp/` and in a never-integrated staging document.
   labels or holdouts from the staging branch were reintegrated.**
 
 ### Sources
-PR: this retrospective-reconstruction PR — `(docs) Reconstruct the rationale and
-provenance of major historical decisions` (PR number to be added before merge)
+Merge commit: `3ab5079` — `(docs) reconstruct project decision history and
+preserve point-in-time records`
+PR #30: post-merge provenance reconciliation —
+`(docs) Reconstruct the rationale and provenance of major historical decisions`
+Branch: `(docs)-reconstruct-historical-project-decisions`
+Reconstruction commits: `442a442`, `7622986`, `7ef7cbf`, `e0284d6`, `6e58e13`
+Provenance-reconciliation commits: `4ed0462`, `e605c37`, and this commit
 
 ---
 
