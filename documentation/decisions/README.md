@@ -30,58 +30,61 @@ implement a single conceptual change.
 The title states the decision, not the roadmap step. Prefer
 `0017-split-group-as-indivisible-train-test-unit.md` over `0017-b2-partitions.md`.
 
-## Status and integration status
+## Status axes
 
-ADRs carry **two** independent fields.
+ADRs carry up to **three independent** fields. No field mixes two axes. See
+[`README.md`](../README.md#status-axes) for the full definitions.
 
-`Status` is the epistemic lifecycle of the decision:
+`Lifecycle status` is the decision lifecycle / governance status — where the
+decision stands, independently of Git:
 
-| Status | Meaning |
+| Value | Meaning |
 | --- | --- |
-| `Proposed` | Under discussion. |
-| `Historical decision` | The decision was genuinely made and acted on, on a historical / staging branch, and has not yet been re-accepted onto `master` through review. |
-| `Accepted` | Accepted on the integration line. |
-| `Superseded` | Replaced by a later decision (link it under *Superseded by*). |
-| `Deprecated` | No longer relevant, not replaced. |
+| `CURRENT` | The operative decision for its topic. |
+| `PROPOSED` | Drafted, not yet acted on. |
+| `HISTORICAL` | Made and recorded, no longer driving current work, no direct successor. |
+| `SUPERSEDED` | Replaced by a specific later decision (link it under *Superseded by*). |
+| `EXPERIMENTAL` | A trial that was not adopted as the operative decision. |
+| `DEPRECATED` | Withdrawn, not replaced. |
 
-`Integration status` is a statement about Git:
+`Integration status` is a fact about Git:
 
-| Integration status | Meaning |
+| Value | Meaning |
 | --- | --- |
-| `NOT INTEGRATED INTO MASTER` | The decision's implementation exists only on a historical / staging branch. |
-| `Integrated into master via PR #N` | Merged. |
+| `INTEGRATED` | Merged into `master` (add `(via PR #N)`). |
+| `NOT_INTEGRATED` | The implementation exists only on a staging / historical branch. |
+| `WAS_INTEGRATED_REMOVED` | Merged into `master` and later removed. |
 | `N/A` | Documentation-only or process decision. |
 
-A retrospectively reconstructed decision that currently lives only on
-`(feat)-siepe-ready-project` therefore starts as:
+`Epistemic status` (for `SCIENTIFIC` and `TECHNICAL + SCIENTIFIC` ADRs only) is
+whether the decision itself is sound, regardless of Git:
+`SUPPORTED` / `PARTIALLY_SUPPORTED` / `UNRESOLVED` / `N/A`.
+
+A retrospectively reconstructed decision that currently lives only on the
+staging branch and is well evidenced is:
 
 ```
-## Status
-Historical decision
+## Lifecycle status
+CURRENT
 
 ## Integration status
-NOT INTEGRATED INTO MASTER
+NOT_INTEGRATED
+
+## Epistemic status
+SUPPORTED
 ```
 
-and, after the work is reintegrated through a reviewed PR, becomes:
+After the work is reintegrated through a reviewed PR, only the integration axis
+moves:
 
 ```
-## Status
-Accepted
-
 ## Integration status
-Integrated into master via PR #N
+INTEGRATED (via PR #N)
 ```
 
 The `## Historical source` section is preserved across that transition so the
-decision that *existed* stays distinguishable from the decision that has been
-*accepted on the integration line*.
-
-`SCIENTIFIC` and `TECHNICAL + SCIENTIFIC` ADRs also carry a third, independent
-field, `Epistemic status` (`SUPPORTED` / `PARTIALLY_SUPPORTED` / `UNRESOLVED` /
-`N/A`): is the decision itself scientifically sound, regardless of whether it is
-merged? A staging-branch decision can be `Historical decision`,
-`NOT INTEGRATED INTO MASTER`, and `SUPPORTED` at once.
+decision that *existed on the staging branch* stays distinguishable from the
+decision *accepted on the integration line*.
 
 ## Required sections
 

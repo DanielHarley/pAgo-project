@@ -10,9 +10,12 @@ This file answers **"how did we get here?"**. For **"what is valid now?"** see
 ## Conventions
 
 - Entries are chronological.
-- Each entry states an **integration state**: `INTEGRATED`,
-  `VALIDATED_NOT_INTEGRATED`, or `HISTORICAL_OR_EXPERIMENTAL`
-  (see [`README.md`](README.md#integration-states)).
+- Each entry states, on **independent** axes: **lifecycle status**
+  (`CURRENT` / `PROPOSED` / `HISTORICAL` / `SUPERSEDED` / `EXPERIMENTAL` /
+  `DEPRECATED`), **integration status** (`INTEGRATED` / `NOT_INTEGRATED` /
+  `WAS_INTEGRATED_REMOVED` / `N/A`), and, for scientific decisions,
+  **epistemic status** (`SUPPORTED` / `PARTIALLY_SUPPORTED` / `UNRESOLVED` /
+  `N/A`). No field mixes two axes. See [`README.md`](README.md#status-axes).
 - Historical Git commits keep their original SHAs and messages. Where a commit
   message names only a roadmap step, the entry adds a **semantic
   interpretation** and keeps the roadmap label as
@@ -20,8 +23,9 @@ This file answers **"how did we get here?"**. For **"what is valid now?"** see
 - Where the historical record cannot support a field, the entry says so
   (`HISTORICAL_EVIDENCE_INSUFFICIENT`, `RATIONALE_NOT_RECOVERABLE`) instead of
   guessing.
-- Entries labelled `INTEGRATED (this PR)` describe the state that becomes true
-  when the Pull Request introducing this framework is merged into `master`.
+- An entry whose integration status says `INTEGRATED (on merge of this PR)`
+  describes the state that becomes true when the Pull Request introducing this
+  framework is merged into `master`.
 
 ## Entry template
 
@@ -31,8 +35,14 @@ This file answers **"how did we get here?"**. For **"what is valid now?"** see
 ### Type
 TECHNICAL | SCIENTIFIC | TECHNICAL + SCIENTIFIC
 
-### Integration state
-INTEGRATED | VALIDATED_NOT_INTEGRATED | HISTORICAL_OR_EXPERIMENTAL
+### Lifecycle status
+CURRENT | PROPOSED | HISTORICAL | SUPERSEDED | EXPERIMENTAL | DEPRECATED
+
+### Integration status
+INTEGRATED | NOT_INTEGRATED | WAS_INTEGRATED_REMOVED | N/A
+
+### Epistemic status
+SUPPORTED | PARTIALLY_SUPPORTED | UNRESOLVED | N/A   (scientific decisions only)
 
 ### Summary
 One or two sentences: problem -> decision.
@@ -60,15 +70,21 @@ Audit / notes:
 ### Type
 TECHNICAL (process)
 
-### Integration state
-INTEGRATED (this PR)
+### Lifecycle status
+CURRENT
+
+### Integration status
+INTEGRATED (on merge of this PR)
+
+### Epistemic status
+N/A
 
 ### Summary
 `master` is where accepted changes are integrated, through review + PR + merge.
-Being in `master` is a statement about integration, not about scientific truth.
-Three states are used throughout the documentation: `INTEGRATED`,
-`VALIDATED_NOT_INTEGRATED`, `HISTORICAL_OR_EXPERIMENTAL`. A branch's age never
-implies its state — evidence does.
+Being in `master` is a fact about integration, not a claim of scientific truth.
+The documentation describes decisions on three independent axes — lifecycle
+status, integration status, and epistemic status — and never merges two into
+one field. A branch's age never implies any of them; evidence does.
 
 ### Sources
 ADR: (governance ADR, retrospective backfill PR)
@@ -79,9 +95,14 @@ PR: this PR — `(docs) Establish a tracked decision-traceability framework`
 ### Type
 TECHNICAL (process)
 
-### Integration state
-HISTORICAL_OR_EXPERIMENTAL (as a branch); its content is
-VALIDATED_NOT_INTEGRATED
+### Lifecycle status
+HISTORICAL (as a branch)
+
+### Integration status
+NOT_INTEGRATED (its content)
+
+### Epistemic status
+N/A (per-item epistemic status is in `SCIENTIFIC_STATE.md` §2)
 
 ### Summary
 The branch was created to prepare project state for the SIEPE report. It holds
@@ -102,19 +123,25 @@ Retrospective audit (added under `documentation/history/` by the backfill PR).
 ### Type
 TECHNICAL (process)
 
-### Integration state
-INTEGRATED (policy)
+### Lifecycle status
+CURRENT
+
+### Integration status
+INTEGRATED (on merge of this PR)
+
+### Epistemic status
+N/A
 
 ### Summary
-`.agents/`, `.codex/`, and local agent plans (`~/.claude/plans/...`) are not
-part of the scientific or technical source that gets published. They may be
-used as historical evidence during reconstruction, but a confirmed decision is
-migrated into tracked documentation (with a confidence level) rather than the
-directory being versioned. If a rationale exists only there, extract the
-decision; do not commit the directory.
+Local agent scratch and configuration directories, and local agent plan files,
+are not part of the scientific or technical source that gets published. They
+may be used as historical evidence during reconstruction, but a confirmed
+decision is migrated into tracked documentation (with a confidence level)
+rather than the directory being versioned. If a rationale exists only there,
+extract the decision; do not commit the directory.
 
-As of `master` `9d1e55a`, `.agents/` and `.codex/` were not listed in
-`.gitignore`. This PR adds `.agents/`, `.codex/`, and `.claude/` to `.gitignore`
+As of `master` `9d1e55a` these directories were not all listed in `.gitignore`.
+This PR adds ignore rules for local agent scratch and configuration directories
 in an isolated commit so the policy is enforced, not merely stated. Nothing was
 already tracked under those paths (`git ls-files` returned empty).
 
@@ -127,8 +154,14 @@ Commit: `(chore) ignore local agent scratch directories`
 ### Type
 TECHNICAL (process)
 
-### Integration state
-INTEGRATED (policy)
+### Lifecycle status
+CURRENT
+
+### Integration status
+INTEGRATED (on merge of this PR)
+
+### Epistemic status
+N/A
 
 ### Summary
 Branches `(<scope>)-<semantic-kebab-description>`, commits
@@ -156,8 +189,14 @@ Owner clarification, 2026-09-09; existing project branch naming.
 ### Type
 TECHNICAL
 
-### Integration state
+### Lifecycle status
+HISTORICAL
+
+### Integration status
 INTEGRATED
+
+### Epistemic status
+N/A
 
 ### Summary
 Initial pipeline scaffold.
@@ -170,8 +209,17 @@ Commits: `83ba528`, `2c0db28`
 ### Type
 TECHNICAL + SCIENTIFIC
 
-### Integration state
+### Lifecycle status
+CURRENT (the integrated pipeline; the narrow search query within it is
+`SUPERSEDED` — see `SCIENTIFIC_STATE.md` §3)
+
+### Integration status
 INTEGRATED
+
+### Epistemic status
+PARTIALLY_SUPPORTED — acquisition and snapshot behaviour are verified; the
+exploratory SWeeP / PCA / KMeans analysis is exploratory only and the textual
+QC labels are audit features, not ground truth
 
 ### Summary
 The integrated pipeline was built over this period: NCBI protein retrieval
@@ -194,8 +242,14 @@ Audit / notes: `documentation/pago_qc.md`, `data/01-raw/README.md`,
 ### Type
 TECHNICAL
 
-### Integration state
-VALIDATED_NOT_INTEGRATED
+### Lifecycle status
+CURRENT
+
+### Integration status
+NOT_INTEGRATED
+
+### Epistemic status
+SUPPORTED — technically validated by the available evidence
 
 ### Summary
 Measured baseline plus a phased rework (findings F1–F12, phases P0–P5): keep the
@@ -213,7 +267,8 @@ Commits: `f5671b8` … `0b4ed5a`
 PR: No historical PR found (committed directly to the staging branch)
 Historical roadmap reference: pre-Phase-A
 Audit / notes: `documentation/ncbi_retrieval_performance_plan.md`,
-`documentation/ncbi_retrieval_performance_implementation.md` (staging copies)
+`documentation/ncbi_retrieval_performance_implementation.md`
+(staging source; preserved / integrated by the retrospective backfill)
 
 ### Open at reintegration
 Relationship to the PR #27 failure controls already in `master`
@@ -224,8 +279,15 @@ Relationship to the PR #27 failure controls already in `master`
 ### Type
 TECHNICAL + SCIENTIFIC
 
-### Integration state
-VALIDATED_NOT_INTEGRATED
+### Lifecycle status
+CURRENT
+
+### Integration status
+NOT_INTEGRATED
+
+### Epistemic status
+SUPPORTED — sound design, audited execution; the candidate set is explicitly
+not a pAgo universe and the recall panel is not a validation gold standard
 
 ### Summary
 Second NCBI acquisition with a broad query
@@ -260,8 +322,16 @@ query.
 ### Type
 TECHNICAL + SCIENTIFIC
 
-### Integration state
-VALIDATED_NOT_INTEGRATED
+### Lifecycle status
+CURRENT
+
+### Integration status
+NOT_INTEGRATED
+
+### Epistemic status
+PARTIALLY_SUPPORTED — resources, construction, and integrity checks are in
+place; predictive performance is not yet evaluated, and the ontology's future
+phylogenetic-placement protocol is `PROPOSED` and not executed
 
 ### Summary
 Pinned Pfam 38.2 HMM bundle (versioned accessions, SHA-256 lock). A
@@ -308,14 +378,21 @@ groups could cross BUILD / CALIBRATION boundaries).
 ### Type
 TECHNICAL (process)
 
-### Integration state
-INTEGRATED (this PR)
+### Lifecycle status
+CURRENT
+
+### Integration status
+INTEGRATED (on merge of this PR)
+
+### Epistemic status
+N/A
 
 ### Summary
 Added `documentation/README.md`, this ledger, `SCIENTIFIC_STATE.md`,
 `decisions/` with an ADR convention and template, and PR / Issue templates, so
 that the rationale and provenance of decisions live in the repository rather
-than in `tmp/`, agent memory, or a private plan.
+than in `tmp/`, agent memory, or a private plan. A follow-up commit separates
+the lifecycle, integration, and epistemic axes into independent fields.
 
 ### Sources
 PR: this PR — `(docs) Establish a tracked decision-traceability framework`

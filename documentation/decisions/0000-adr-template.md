@@ -1,22 +1,28 @@
 # ADR-NNNN — <semantic title: what was decided>
 
-## Status
+The three status fields are independent. No field mixes two axes.
 
-`Proposed` | `Historical decision` | `Accepted` | `Superseded` | `Deprecated`
+## Lifecycle status
+
+Decision lifecycle / governance status:
+
+`CURRENT` | `PROPOSED` | `HISTORICAL` | `SUPERSEDED` | `EXPERIMENTAL` | `DEPRECATED`
 
 ## Integration status
 
-`NOT INTEGRATED INTO MASTER` | `Integrated into master via PR #N` | `N/A`
+A fact about Git:
+
+`INTEGRATED (via PR #N)` | `NOT_INTEGRATED` | `WAS_INTEGRATED_REMOVED` | `N/A`
 
 ## Epistemic status
 
-For `SCIENTIFIC` and `TECHNICAL + SCIENTIFIC` decisions only; otherwise `N/A`.
+Whether the decision itself is sound. For `SCIENTIFIC` and `TECHNICAL +
+SCIENTIFIC` decisions only; otherwise `N/A`.
 
 `SUPPORTED` | `PARTIALLY_SUPPORTED` | `UNRESOLVED` | `N/A`
 
-This is independent of `Status` and `Integration status`. A decision can be a
-`Historical decision`, `NOT INTEGRATED INTO MASTER`, and `SUPPORTED` at the same
-time.
+A staging-branch decision can be `CURRENT` (lifecycle), `NOT_INTEGRATED` (Git),
+and `SUPPORTED` (evidence) at the same time.
 
 ## Type
 

@@ -26,15 +26,14 @@ answer, for any significant change:
 | [`decisions/`](decisions/) | Architecture / methodology Decision Records (ADRs) — one per decision, with full rationale and provenance. Start at [`decisions/README.md`](decisions/README.md). |
 | `pago_annotation_ontology.md` | The formal semantics of every annotation field (family, clade, detection, architecture, evidence tiers). **Not yet present as an authoritative document** — see [The staging ontology](#the-staging-ontology). |
 | [`pago_qc.md`](pago_qc.md) | The legacy metadata-derived QC labelling layer that is integrated in `master`. Its labels are audit features, not ground truth. |
-| [`ncbi_retrieval_performance_plan.md`](ncbi_retrieval_performance_plan.md) / [`ncbi_retrieval_performance_implementation.md`](ncbi_retrieval_performance_implementation.md) | The measured baseline, findings, and phased rework of NCBI retrieval. A design document plus implementation record; referenced by the relevant ADR. |
+| `ncbi_retrieval_performance_plan.md` / `ncbi_retrieval_performance_implementation.md` | The measured baseline, findings, and phased rework of NCBI retrieval. Staging sources not yet in `master`; preserved / integrated by the retrospective backfill, which turns these into real links. |
 | `history/` | Point-in-time audits and staging documents preserved verbatim as provenance. Never authoritative for current behaviour. Populated by the retrospective backfill PR. |
 
 ## How Git and this documentation relate
 
 The decision comes before the implementation. An ADR may be written on the same
 branch and approved in the same PR as the code, but it records a choice that was
-reasoned through — not a rationalisation written after an agent already produced
-the diff.
+reasoned through — not a rationalisation written after the diff already exists.
 
 ```
 problem / Issue          what problem exists, and the evidence for it
@@ -64,21 +63,47 @@ Git history plus this documentation is the decision chain. Reading a diff
 should not be required in order to understand what a change means, or why it
 was made.
 
-## Integration states
+## Status axes
 
-Every documented decision carries one of three states. **The age of a branch
-never implies a state — evidence does.**
+Every documented decision is described on up to three **independent** axes. No
+single field mixes two of them. The age of a branch never implies a status —
+evidence does.
 
-| State | Meaning |
+### Integration status — a fact about Git
+
+| Value | Meaning |
 | --- | --- |
-| `INTEGRATED` | Merged into `master`. `master` is the authoritative integration line. |
-| `VALIDATED_NOT_INTEGRATED` | Strong technical / scientific evidence exists, but the work lives only on a historical / staging branch and has not been reintegrated through a reviewed Pull Request. |
-| `HISTORICAL_OR_EXPERIMENTAL` | Superseded, abandoned, experimental, or otherwise without current authority. |
+| `INTEGRATED` | Merged into `master`. |
+| `NOT_INTEGRATED` | Exists only on a staging / historical branch. |
+| `WAS_INTEGRATED_REMOVED` | Merged into `master` and later removed. |
+| `N/A` | Documentation-only or process decision. |
 
-`INTEGRATED` is a statement about Git, not about scientific truth. Something can
-be integrated and still be wrong; something can be validated and not yet
-integrated. [`SCIENTIFIC_STATE.md`](SCIENTIFIC_STATE.md) keeps the two axes
-separate.
+### Lifecycle status — where the decision stands
+
+| Value | Meaning |
+| --- | --- |
+| `CURRENT` | The operative decision for its topic. |
+| `PROPOSED` | Drafted, not yet acted on. |
+| `HISTORICAL` | Made and recorded, no longer driving current work, no direct successor. |
+| `SUPERSEDED` | Replaced by a specific later decision (linked). |
+| `EXPERIMENTAL` | A trial that was not adopted as the operative decision. |
+| `DEPRECATED` | Withdrawn, not replaced. |
+
+### Epistemic status — is it scientifically / technically sound
+
+For `SCIENTIFIC` and `TECHNICAL + SCIENTIFIC` decisions; otherwise `N/A`.
+
+| Value | Meaning |
+| --- | --- |
+| `SUPPORTED` | The available evidence supports the decision. |
+| `PARTIALLY_SUPPORTED` | Some parts are evidenced; others are proposed or not yet evaluated. |
+| `UNRESOLVED` | The evidence does not yet settle it. |
+| `N/A` | Not a scientific / methodological decision. |
+
+`master` is the authoritative integration line. `INTEGRATED` is a fact about
+Git, not a claim of scientific truth: a decision can be `INTEGRATED` and
+`SUPERSEDED`, or `SUPPORTED` and `NOT_INTEGRATED`. `SCIENTIFIC_STATE.md` keeps
+the axes apart.
 
 ## Branches, and where authority lives
 
