@@ -237,7 +237,12 @@ NCBI XML failure controls.
 
 ### Sources
 PRs: #1–#27 (merged to `master`).
-ADRs: to be added by the backfill PR.
+ADRs: [0001](decisions/0001-canonical-ncbi-retrieval-identifier-is-the-protein-uid.md)
+(UID identifier),
+[0002](decisions/0002-immutable-snapshot-and-provenance-architecture.md)
+(snapshot / provenance architecture),
+[0006](decisions/0006-sweep-pca-kmeans-is-exploratory-not-validated-classification.md)
+(exploratory SWeeP → PCA → KMeans).
 Audit / notes: `documentation/pago_qc.md`, `data/01-raw/README.md`,
 `.github/workflows/ci.yml`.
 
@@ -267,12 +272,14 @@ Retrieve NCBI records via History paging with bounded concurrency and resumable
 batches, and prove the payload contract is stable.
 
 ### Sources
+ADR: [0003](decisions/0003-ncbi-retrieval-performance-and-correctness-rework.md)
 Commits: `f5671b8` … `0b4ed5a`
 PR: No historical PR found (committed directly to the staging branch)
 Historical roadmap reference: pre-Phase-A
 Audit / notes: `documentation/ncbi_retrieval_performance_plan.md`,
 `documentation/ncbi_retrieval_performance_implementation.md`
-(staging source; preserved / integrated by the retrospective backfill)
+(staging source, not yet in `master`; to be preserved / integrated when that
+work is reintegrated)
 
 ### Open at reintegration
 Relationship to the PR #27 failure controls already in `master`
@@ -310,16 +317,22 @@ evidence-tiered query-recall report; recognise references retrieved under a
 different accession by identical sequence.
 
 ### Sources
+ADRs: [0004](decisions/0004-annotation-enriched-candidate-set-and-technical-only-prefilter.md)
+(candidate set + prefilter),
+[0005](decisions/0005-query-recall-reference-panel-and-sequence-identity-matching.md)
+(recall panel + matching),
+[0012](decisions/0012-annotation-ontology-family-versus-clade.md)
+(family vs clade — the `PIWI_RE`-is-not-a-clade change starts here, commit `98e66c6`).
 Commits: `175a12a` … `0013c6d`
 PR: No historical PR found
 Historical roadmap reference: Phase A
 Audit / notes: `documentation/history/2026-08-30-phase-a-audit.md`
-(added by the backfill PR)
+(preserved by this PR)
 
 ### Supersedes
 Exact-accession-only recall matching; `PIWI_RE` as a `pago_clade` value;
 (pending reintegration) the narrow `PIWI[All Fields] AND Bacteria[Organism]`
-query.
+query and its 41,345-record filtered set.
 
 ## 2026-08-31 — pAgo reference layer and annotation ontology
 
@@ -361,17 +374,25 @@ structure recorded as diagnostic only. A formal annotation ontology.
 - `(ontology) Separate PIWI-RE family identity from pAgo phylogenetic clades`
 
 ### Sources
+ADRs:
+[0007](decisions/0007-provenance-and-defensible-labels-before-supervised-ml.md) (methodological priority),
+[0008](decisions/0008-pinned-pfam-38-2-hmm-bundle.md) (Pfam bundle, B1),
+[0009](decisions/0009-apaz-s3-reference-and-high-similarity-split-group-partitioning.md) (APAZ S3 + partitioning v2, B2),
+[0010](decisions/0010-apaz-profile-hmms-built-from-build-only.md) (APAZ HMMs, B3),
+[0011](decisions/0011-ryazansky-1010-pago-catalog-and-mid-piwi-reference-extraction.md) (Ryazansky catalog, B4.2),
+[0012](decisions/0012-annotation-ontology-family-versus-clade.md) (ontology),
+[0013](decisions/0013-mid-piwi-high-similarity-split-groups.md) (MID-PIWI split groups, B4.3).
 Commits: `3de5f1b` (B0), `69ca40e` (B1), `4d8aa99` `620ff85` `45cc637` (B2),
 `9e76e78` `c11732a` (B3), `b7490e4` `481d0c2` (B4.2), `18c35e4` `49651f1` (B4.3)
 PR: No historical PR found
 Historical roadmap reference: Phase B, milestones B0–B4.3
 Audit / notes: `src/pago_pipeline/resources/apaz_seed/curation_notes.md`,
-`src/pago_pipeline/resources/clade_seed/ryazansky_s1_catalog_notes.md`,
-`documentation/history/2026-08-31-pago-annotation-ontology-staging.md`
-(added by the backfill PR — preserved verbatim, with a header terminology note
-that the staging text uses "homology cluster" for the operational 90/80
-grouping now called a "high-similarity split group"; the historical content is
-not rewritten)
+`src/pago_pipeline/resources/clade_seed/ryazansky_s1_catalog_notes.md`
+(staging); `documentation/history/2026-08-31-pago-annotation-ontology-staging.md`
+(preserved by this PR — verbatim, with a header terminology note that the
+staging text uses "homology cluster" for the operational 90/80 grouping now
+called a "high-similarity split group"; the historical content is not
+rewritten)
 
 ### Supersedes
 APAZ reference partitioning v1 (accession-hash split unit; high-similarity split
@@ -399,4 +420,88 @@ than in `tmp/`, agent memory, or a private plan. A follow-up commit separates
 the lifecycle, integration, and epistemic axes into independent fields.
 
 ### Sources
-PR: this PR — `(docs) Establish a tracked decision-traceability framework`
+PR: #28 — `(docs) Establish a tracked decision-traceability framework`
+
+## 2026-09-09 — Harden local-artifact ignore rules
+
+### Type
+TECHNICAL (process)
+
+### Lifecycle status
+CURRENT
+
+### Integration status
+INTEGRATED (PR #29)
+
+### Epistemic status
+N/A
+
+### Problem
+`.gitignore`'s `!data/01-raw/**` exception force-included the whole
+`data/01-raw/` subtree, so `git add -A` would stage local NCBI snapshot runs
+(hundreds of MB of XML); `tmp/` was not ignored at all.
+
+### Decision
+`.gitignore` only: `data/01-raw/` becomes default-deny
+(`!data/01-raw/` + `data/01-raw/**` + `!data/01-raw/README.md`), and `tmp/` is
+ignored. No file was added, deleted or moved; already-tracked raw files stay
+tracked.
+
+### Sources
+PR: #29 — commit `7fc2efe`
+
+## 2026-09-09 — Retrospective reconstruction of historical project decisions
+
+### Type
+TECHNICAL + SCIENTIFIC (documentation and provenance only)
+
+### Lifecycle status
+CURRENT
+
+### Integration status
+INTEGRATED (this PR)
+
+### Epistemic status
+N/A
+
+### Problem
+The rationale and provenance of the project's major technical and scientific
+decisions were not reconstructed in a tracked, evidence-based form. Point-in-time
+material lived only in `tmp/` and in a never-integrated staging document.
+
+### Decision
+- Preserve `tmp/auditoria_fase_A.md` as
+  `documentation/history/2026-08-30-phase-a-audit.md` and the staging ontology as
+  `documentation/history/2026-08-31-pago-annotation-ontology-staging.md`, both
+  verbatim with a point-in-time header.
+- Add retrospective ADRs 0001–0014 (see `decisions/README.md#index`), each with
+  the three status axes, evidence, and a historical-reconstruction note; where a
+  rationale could not be recovered, `RATIONALE_NOT_RECOVERABLE` /
+  `HISTORICAL_EVIDENCE_INSUFFICIENT` is recorded rather than invented.
+- Expand this ledger; align small parts of `SCIENTIFIC_STATE.md`, the root
+  `README.md`, and `documentation/pago_qc.md` with the reconstructed history.
+- **No code, data, notebooks, tests, HMMs, results, pipelines, partitions,
+  labels or holdouts from the staging branch were reintegrated.**
+
+### Sources
+PR: this PR — `(docs) Reconstruct the rationale and provenance of major
+historical decisions`
+
+---
+
+## Local bibliographic material (not an authority)
+
+Local research notes exist under `tmp/` (gitignored):
+`corpus_metodologico_defensavel_pAgo_IC_UFPR_repesquisa_2026-08-31.md`,
+`deep-research-report - baseline-stripped.md`,
+`deep-research-report - mais artigos.md`. They are a **map of bibliographic
+leads** produced during report preparation. They are **not published, not
+cited as scientific authority, and not a source for any `SUPPORTED` claim**.
+Whenever a scientific claim in the documentation depends on them, the primary
+paper or official source is used instead; if a primary source cannot be
+verified, the claim is marked unconfirmed and is not promoted to `SUPPORTED`.
+
+## ADR index
+
+See [`decisions/README.md#index`](decisions/README.md#index) for the full list
+of retrospective ADRs with their three-axis status.
