@@ -1,5 +1,15 @@
 # pAgo QC Curation
 
+> This is the **legacy metadata-derived QC labelling layer**, integrated in
+> `master`. It predates the annotation ontology
+> ([`decisions/0012-*`](decisions/0012-annotation-ontology-family-versus-clade.md),
+> preserved staging draft in
+> [`history/2026-08-31-pago-annotation-ontology-staging.md`](history/2026-08-31-pago-annotation-ontology-staging.md)).
+> Its labels are deterministic **audit features**, not ground truth, and must
+> not be promoted to ontology fields such as `ago_detection_status`,
+> `ago_family`, `pago_clade`, or `catalytic_site_status`. See
+> [`SCIENTIFIC_STATE.md`](SCIENTIFIC_STATE.md) §1.4.
+
 This document describes the pAgo QC workflow added after the initial metadata,
 FASTA, embedding, PCA, and KMeans stages. The goal is to turn a broad NCBI query
 result into auditable evidence flags, conservative biological labels, and
@@ -213,9 +223,10 @@ The filter snapshot manifest records:
 Changing the filter policy changes `filter_policy_sha256`, which prevents
 accidental reuse of an outdated `latest/` filtered snapshot.
 
-## Current Local Counts
+## Historical filtered counts (earlier query)
 
-The current local filtered snapshot produced:
+The filtered snapshot for the **earlier, narrower query**
+(`PIWI[All Fields] AND Bacteria[Organism]`) produced:
 
 ```text
 classic_pago_high_precision   2,629
@@ -225,8 +236,11 @@ excluded                     16,957
 total                        41,345
 ```
 
-These counts are useful for audit, but downstream code should depend on the
-snapshot manifests and CSVs rather than hard-coded counts.
+These counts describe that **historical snapshot only**. They are **not** the
+Phase A 52,473-record annotation-enriched candidate set (a different query and a
+later run — see [`SCIENTIFIC_STATE.md`](SCIENTIFIC_STATE.md) §1.4 and §2.2), and
+they are **not** an estimate of the number of pAgos. Downstream code should
+depend on the snapshot manifests and CSVs, never on hard-coded counts.
 
 ## Known Boundaries
 

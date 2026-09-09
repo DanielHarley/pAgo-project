@@ -13,12 +13,13 @@ This document keeps three axes separate and never merges two into one field:
 staging branch" does not mean "it is authoritative". See
 [`README.md`](README.md#status-axes).
 
-Reference commits: `master` at `9d1e55a`; staging branch
-`(feat)-siepe-ready-project` at `49651f1` (as of 2026-09-09).
+Reference commits (as of 2026-09-09): `master` at `0b9a576` (after PRs #28 and
+#29); the historical staging branch `(feat)-siepe-ready-project` at `49651f1`.
 
 Detailed rationale and provenance for the items below live in
-[`decisions/`](decisions/) and [`PROJECT_LEDGER.md`](PROJECT_LEDGER.md); the
-retrospective ADRs are added by a follow-up backfill PR.
+[`decisions/`](decisions/) (retrospective ADRs 0001–0014, see
+[`decisions/README.md#index`](decisions/README.md#index)) and
+[`PROJECT_LEDGER.md`](PROJECT_LEDGER.md).
 
 ---
 
@@ -316,6 +317,13 @@ Not resolved. Do not assume an answer.
 6. **Sequence-based discovery route** (HMM / PSI-BLAST over RefSeq) to reach
    pAgos not annotated with "PIWI" / "Argonaute" — out of current scope,
    documented as future work.
+7. **Mesophily focus.** The project's stated interest in mesophilic pAgos is an
+   interest in **organism ecology** — the source organism's optimal growth
+   temperature (OGT). That is a distinct property from the **catalytic
+   temperature optimum or working range of the encoded pAgo protein**, which
+   requires biochemical data on the specific protein. The two must not be
+   conflated. No mesophily-based selection and no OGT computation has been done;
+   the relevant primary literature has not been re-verified here.
 
 ---
 
@@ -330,3 +338,11 @@ Not resolved. Do not assume an answer.
   steps are conditionally reproducible.
 - **The legacy textual QC layer** (§1.4) predates the ontology (§2.7) and its
   labels must not be promoted to ontology fields.
+- **`master` has no branch protection or required status checks.** CI runs on
+  every push, but nothing enforces a green CI or a review before merge.
+  `NEW_ISSUE_REQUIRED` — enforce CI / status checks on `master` if desired.
+- **B5, B6 and all final validation are not integrated.** The clade-HMM builder,
+  the MID-PIWI reference-tree validator, and the leakage-controlled
+  profile / placement validators exist only as local untracked staging files.
+  `FINAL_HOLDOUT` and `PLACEMENT_HOLDOUT` must not be consulted before that work
+  is reintegrated and the calibration is frozen.

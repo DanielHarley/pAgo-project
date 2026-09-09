@@ -155,8 +155,10 @@ The filtered datasets currently materialized are:
 `excluded_records.csv` means excluded from the conservative classic pAgo
 positive dataset. It is not a biologically validated negative class.
 
-See `docs/pago_qc.md` for the QC labels, decisions, output contracts, and
-snapshot integrity rules.
+See [`documentation/pago_qc.md`](documentation/pago_qc.md) for the QC labels,
+decisions, output contracts, and snapshot integrity rules, and
+[`documentation/README.md`](documentation/README.md) for the project's decision
+history, scientific state, and architecture decision records.
 
 ## Generated feature outputs
 
