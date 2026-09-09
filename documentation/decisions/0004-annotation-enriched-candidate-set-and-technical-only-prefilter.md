@@ -84,9 +84,10 @@ for other query formulations.
 - One execution (2026-08-30/31) returned **52,473** records; the technical
   prefilter retained all 52,473 (0 exclusions) with **8,299** carrying
   `length_warning`.
-- The retained proteome contains textual false positives (transposases,
-  methyltransferases, restriction endonucleases) to be removed by a later
-  domain scan.
+- The retained candidate set contains records whose textual annotations are not
+  sufficient to establish pAgo identity. Those records require later domain /
+  architecture evidence; they are not removed at acquisition solely because of
+  annotation text, and no record is pre-classified as a non-pAgo here.
 - The 52,473-record execution artifacts are regenerable but not versioned.
 
 ## Limitations

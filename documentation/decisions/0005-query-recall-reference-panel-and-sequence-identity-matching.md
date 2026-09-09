@@ -69,12 +69,19 @@ Matching only on `accession.version` (and its version-stripped form).
 ## Rationale
 
 Stated in the curation notes and audit: the tiers make label strength explicit;
-`SEQUENCE_SHA256` measures **biological** recovery (RsAgo `ABP72561.1` is
-retrieved under the byte-identical IPG alias `A4WYU7.1`) offline and
-deterministically, without falsifying the fixture; keeping both readings avoids
-hiding either the exact-accession miss or the biological recovery. SHA-256 gives
-a practical byte-identity signature: equal hashes ⇒ byte-identical content with
-extremely high probability.
+`SEQUENCE_SHA256` records a **sequence-equivalent** recovery — the reference's
+exact normalized protein sequence appears in the retrieved set under some
+accession (RsAgo `ABP72561.1` under the byte-identical IPG alias `A4WYU7.1`) —
+offline, deterministically, and without falsifying the fixture; keeping both
+readings avoids hiding either the exact-accession miss or the
+sequence-equivalent recovery.
+
+Equal normalized-sequence SHA-256 demonstrates **sequence equivalence for the
+recall report** (equal hashes ⇒ byte-identical normalized sequence with
+extremely high probability). It does **not**, on its own, demonstrate locus
+identity, record provenance, or biological context. The reported recall is that
+the 21 selected references were recovered by sequence equivalence — not a
+statement about all known pAgos.
 
 ## Alternatives considered
 

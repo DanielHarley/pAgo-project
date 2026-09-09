@@ -76,9 +76,13 @@ No MID-PIWI similarity analysis.
 ## Rationale
 
 Stated in the commits: using the same, already-validated workflow keeps the
-methodology consistent; 0 cross-clade groups at 90/80 supports splitting the
-regions between partitions without label leakage; the 50 % cross-clade component
-is a similarity observation, not a tree.
+methodology consistent. Zero resolved cross-clade groups at the operational
+90/80 threshold supports using these high-similarity split groups as indivisible
+units to prevent 90/80-defined high-similarity cross-partition leakage. It does
+**not** establish statistical independence, absence of evolutionary
+relatedness, or absence of other forms of leakage. The 50 % cross-clade
+component is a similarity observation only, with no phylogenetic
+interpretation.
 
 ## Alternatives considered
 

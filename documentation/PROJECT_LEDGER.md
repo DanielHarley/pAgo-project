@@ -23,9 +23,9 @@ This file answers **"how did we get here?"**. For **"what is valid now?"** see
 - Where the historical record cannot support a field, the entry says so
   (`HISTORICAL_EVIDENCE_INSUFFICIENT`, `RATIONALE_NOT_RECOVERABLE`) instead of
   guessing.
-- An entry whose integration status says `INTEGRATED (on merge of this PR)`
-  describes the state that becomes true when the Pull Request introducing this
-  framework is merged into `master`.
+- An entry whose integration status names an unopened or unmerged Pull Request
+  (e.g. `INTEGRATED (on merge of this ... PR)`) is conditional; the explicit PR
+  number replaces that wording once the PR has one, before merge.
 
 ## Entry template
 
@@ -77,7 +77,7 @@ TECHNICAL (process)
 CURRENT
 
 ### Integration status
-INTEGRATED (on merge of this PR)
+INTEGRATED (PR #28)
 
 ### Epistemic status
 N/A
@@ -90,8 +90,7 @@ status, integration status, and epistemic status — and never merges two into
 one field. A branch's age never implies any of them; evidence does.
 
 ### Sources
-ADR: (governance ADR, retrospective backfill PR)
-PR: this PR — `(docs) Establish a tracked decision-traceability framework`
+PR: #28 — `(docs) Establish a tracked decision-traceability framework`
 
 ## 2026-09-09 — `(feat)-siepe-ready-project` is a historical / staging branch
 
@@ -119,7 +118,9 @@ cherry-pick / reimplementation / refactor decided case by case.
 
 ### Sources
 Owner clarification, 2026-09-09.
-Retrospective audit (added under `documentation/history/` by the backfill PR).
+Retrospective audit preserved as
+`documentation/history/2026-08-30-phase-a-audit.md` by this
+retrospective-reconstruction PR.
 
 ## 2026-09-09 — Agent scratch directories stay out of the versioned project
 
@@ -130,7 +131,7 @@ TECHNICAL (process)
 CURRENT
 
 ### Integration status
-INTEGRATED (on merge of this PR)
+INTEGRATED (PR #28)
 
 ### Epistemic status
 N/A
@@ -161,7 +162,7 @@ TECHNICAL (process)
 CURRENT
 
 ### Integration status
-INTEGRATED (on merge of this PR)
+INTEGRATED (PR #28)
 
 ### Epistemic status
 N/A
@@ -327,7 +328,7 @@ Commits: `175a12a` … `0013c6d`
 PR: No historical PR found
 Historical roadmap reference: Phase A
 Audit / notes: `documentation/history/2026-08-30-phase-a-audit.md`
-(preserved by this PR)
+(preserved by this retrospective-reconstruction PR)
 
 ### Supersedes
 Exact-accession-only recall matching; `PIWI_RE` as a `pago_clade` value;
@@ -389,8 +390,9 @@ Historical roadmap reference: Phase B, milestones B0–B4.3
 Audit / notes: `src/pago_pipeline/resources/apaz_seed/curation_notes.md`,
 `src/pago_pipeline/resources/clade_seed/ryazansky_s1_catalog_notes.md`
 (staging); `documentation/history/2026-08-31-pago-annotation-ontology-staging.md`
-(preserved by this PR — verbatim, with a header terminology note that the
-staging text uses "homology cluster" for the operational 90/80 grouping now
+(preserved by this retrospective-reconstruction PR — verbatim, with a header
+terminology note that the staging text uses "homology cluster" for the
+operational 90/80 grouping now
 called a "high-similarity split group"; the historical content is not
 rewritten)
 
@@ -407,7 +409,7 @@ TECHNICAL (process)
 CURRENT
 
 ### Integration status
-INTEGRATED (on merge of this PR)
+INTEGRATED (PR #28)
 
 ### Epistemic status
 N/A
@@ -459,7 +461,8 @@ TECHNICAL + SCIENTIFIC (documentation and provenance only)
 CURRENT
 
 ### Integration status
-INTEGRATED (this PR)
+INTEGRATED (on merge of this retrospective reconstruction PR — PR number to be
+substituted here before merge)
 
 ### Epistemic status
 N/A
@@ -484,8 +487,8 @@ material lived only in `tmp/` and in a never-integrated staging document.
   labels or holdouts from the staging branch were reintegrated.**
 
 ### Sources
-PR: this PR — `(docs) Reconstruct the rationale and provenance of major
-historical decisions`
+PR: this retrospective-reconstruction PR — `(docs) Reconstruct the rationale and
+provenance of major historical decisions` (PR number to be added before merge)
 
 ---
 

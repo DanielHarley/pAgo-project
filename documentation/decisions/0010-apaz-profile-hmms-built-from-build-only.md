@@ -86,8 +86,9 @@ lines from `sys.argv` and a timestamp.
 
 ## Limitations
 
-Not integrated. Subgroup III has only 12 representatives (BUILD 8), so
-III-specific performance cannot be estimated with useful precision.
+Not integrated. Subgroup III has 12 representatives, with 8 in BUILD; this
+leaves comparatively little evidence for subgroup-specific modelling. No
+subgroup-III performance estimate has been produced.
 
 ## Supersedes
 

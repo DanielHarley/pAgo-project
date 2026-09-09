@@ -13,8 +13,10 @@ This document keeps three axes separate and never merges two into one field:
 staging branch" does not mean "it is authoritative". See
 [`README.md`](README.md#status-axes).
 
-Reference commits (as of 2026-09-09): `master` at `0b9a576` (after PRs #28 and
-#29); the historical staging branch `(feat)-siepe-ready-project` at `49651f1`.
+Retrospective reconstruction baseline (2026-09-09): `master` at `0b9a576`
+(after PRs #28 and #29) — the starting point of this reconstruction, not a
+claim about the current `master` HEAD after later merges; the historical staging
+branch `(feat)-siepe-ready-project` at `49651f1`.
 
 Detailed rationale and provenance for the items below live in
 [`decisions/`](decisions/) (retrospective ADRs 0001–0014, see

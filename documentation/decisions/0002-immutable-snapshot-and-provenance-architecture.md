@@ -11,7 +11,9 @@
 ## Epistemic status
 
 `SUPPORTED` — the reuse / invalidation / Windows-safety behaviours are covered
-by tests, including a required `windows-snapshot-reuse` CI job.
+by tests, including a dedicated `windows-snapshot-reuse` CI job on
+`windows-latest`. `master` has no branch protection or required status checks,
+so nothing enforces that the job stays green before a merge.
 
 ## Type
 

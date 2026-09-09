@@ -58,11 +58,11 @@ Use the protein UID as the canonical retrieval and XML-validation identifier.
 
 ## Rationale
 
-`RATIONALE_NOT_RECOVERABLE` in full. The commit and PR record only state the
-switch. The most a verifiable reading supports: a numeric UID is the stable
-internal record identifier and pairs cleanly with the Entrez History paging
-already adopted in PR #3, whereas `accession.version` changes when a sequence is
-revised.
+`RATIONALE_NOT_RECOVERABLE`. The commit and PR record only state the switch; no
+design document weighs the two identifiers. NCBI's own documentation states that
+when a sequence changes, a **new** GI is assigned and the `accession.version`
+suffix is incremented — so neither identifier is invariant across a sequence
+revision. No stability advantage is claimed here.
 
 ## Alternatives considered
 
@@ -123,13 +123,14 @@ Identifier convention only; no label or partition change.
 
 ## Reproducibility impact
 
-Positive: a UID is stable across sequence revisions, so a UID list plus the
-frozen XML reconstructs the exact analysed set.
+The recorded UID list, together with the frozen consolidated XML and the
+manifest hashes, identifies the set of records that was actually analysed.
+(No claim is made that a UID is invariant across a sequence revision — it is
+not; see *Rationale*.)
 
 ## Historical reconstruction note
 
 - Directly demonstrated: PR #5 merged into `master`; current code uses UIDs; the
   reversal branch predates PR #5 and contains no reversal.
-- Inferred: the pairing with History paging and the version-stability argument
-  (stated as inference, not as the original rationale).
+- Inferred: nothing material.
 - Not recoverable: the original rationale for the switch.
