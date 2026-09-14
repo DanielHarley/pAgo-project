@@ -46,15 +46,6 @@ translation matters.
 
 # Governance baseline
 
-## 2026-09-09 — `master` is the authoritative integration line
-
-### Summary
-`master` is where accepted repository changes are integrated. A merge is a fact
-about repository history, not evidence that a scientific claim is true.
-
-### Sources
-PR #28 — `(docs) Establish a tracked decision-traceability framework`.
-
 ## 2026-09-09 — Treat `(feat)-siepe-ready-project` as historical/staging evidence
 
 ### Summary
@@ -82,17 +73,6 @@ paths was already tracked.
 Owner clarification, 2026-09-09.
 Commit: `(chore) ignore local agent scratch directories`.
 PR #28.
-
-## 2026-09-09 — Use semantic names; keep roadmap IDs as historical metadata
-
-### Summary
-Branches, commits, PRs, decisions, and records describe what a change means.
-Roadmap identifiers such as `Phase B` or `B4.3` may appear as historical
-metadata when useful, but not as the primary identity of new work.
-
-### Sources
-Owner clarification, 2026-09-09.
-`documentation/README.md`.
 
 ---
 
@@ -269,24 +249,6 @@ Branch: `(chore)-protect-local-reference-validation-staging-files`.
 Operation Record:
 [`operations/2026-09-14-local-reference-validation-staging-protection.md`](operations/2026-09-14-local-reference-validation-staging-protection.md).
 Historical roadmap reference: B5/B6.
-
-## 2026-09-14 — Simplify documentation governance
-
-### Summary
-Removed the lifecycle/integration/epistemic documentation state machine and
-made **minimal sufficient documentation** the governing rule. Documentation now
-records decisions, scientific meaning, history, and exceptional operations in
-plain language without maintaining duplicate classifications of repository or
-scientific state.
-
-ADR templates and directory guidance were simplified so sections are optional
-unless they materially improve understanding, traceability, reproducibility, or
-scientific interpretation.
-
-### Sources
-`documentation/README.md`.
-`documentation/decisions/README.md`.
-`documentation/decisions/0000-adr-template.md`.
 
 ---
 

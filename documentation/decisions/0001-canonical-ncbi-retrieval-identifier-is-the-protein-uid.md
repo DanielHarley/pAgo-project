@@ -21,9 +21,9 @@ Use the protein UID as the canonical retrieval and XML-validation identifier.
 ## Evidence
 
 - PR #5 merge `71ff9b2` — *"(feat) switch NCBI protein snapshot retrieval from
-  accession version IDs to UIDs"* — and implementation commit `a10d89b`
-- current `ncbi_snapshot.py` extracts the UID from `GBSeqid` fields and validates
-  XML record UIDs against the requested UIDs
+  accession version IDs to UIDs"* — and implementation commit `a10d89b`, which
+  extracts the UID from `GBSeqid` fields and validates XML record UIDs against
+  the requested UIDs
 - the historical branch named for reverting to `accession.version` predates PR
   #5 and contains no implemented reversal
 
@@ -63,7 +63,8 @@ NCBI snapshot workflow.
 
 ## Historical reconstruction note
 
-- Directly demonstrated: PR #5 merged, current code uses UIDs, and the later
-  reversal-named branch contains no reversal.
+- Directly demonstrated: PR #5 merged, commit `a10d89b` implements UID
+  extraction and validation, and the later reversal-named branch contains no
+  reversal.
 - Not recoverable: the original rationale for choosing UID over
   `accession.version`.
