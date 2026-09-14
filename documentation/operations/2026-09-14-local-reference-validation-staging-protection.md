@@ -168,6 +168,6 @@ fourteen protected files.
 
 - `../PROJECT_LEDGER.md` — entry dated 2026-09-14, "Protect local reference
   and validation staging files from accidental staging".
-- PR: not yet opened at the time this record was written — number to be
-  added here once available.
+- PR: #31 — merged 2026-09-14, merge commit
+  `06c52140dfc0b2ce24240df76f7f9acd7cf2ed8c`.
 - Historical roadmap reference: B5/B6 (metadata only).
