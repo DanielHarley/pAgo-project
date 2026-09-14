@@ -41,3 +41,32 @@ tmp/
 .agents/
 .codex/
 .claude/
+
+# Local-only reference-tree and profile/placement validation staging files
+# (clade-HMM builder, MID-PIWI reference tree, domain/clade placement
+# validation, and their tests/notebooks). Historical roadmap reference: B5/B6
+# (see documentation/SCIENTIFIC_STATE.md §5) — not the name of this rule.
+#
+# These rules exist only to keep broad Git staging (e.g. `git add -A`) from
+# sweeping these files into an unrelated commit. They do not represent a
+# scientific rejection of this work, and they do not represent integration.
+# They also do not make these files backed up — a separate, verified
+# byte-for-byte external copy is the backup; this list only affects staging.
+#
+# When any of these components is formally reintegrated through its own
+# reviewed PR, its ignore rule below must be removed (or deliberately
+# replaced) in that same PR.
+documentation/pago_annotation_ontology.md
+notebooks/11_reference_profiles_and_tree.ipynb
+notebooks/12_profile_validation.ipynb
+src/pago_pipeline/clade_hmm_build.py
+src/pago_pipeline/clade_hmm_build_snapshot.py
+src/pago_pipeline/midpiwi_reference_tree.py
+src/pago_pipeline/midpiwi_reference_tree_snapshot.py
+src/pago_pipeline/pago_clade_placement_validation.py
+src/pago_pipeline/pago_domain_profile_validation.py
+tests/reference_builder_fixtures.py
+tests/test_midpiwi_reference_tree.py
+tests/test_pago_clade_placement_validation.py
+tests/test_pago_domain_profile_validation.py
+tests/test_reference_hmm_builders.py
