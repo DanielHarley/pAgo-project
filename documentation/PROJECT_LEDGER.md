@@ -514,10 +514,10 @@ TECHNICAL (process)
 CURRENT
 
 ### Integration status
-NOT_INTEGRATED — branch `(chore)-protect-local-reference-validation-staging-files`.
-This entry is written from that branch, before the branch has a PR number and
-before any merge; it must not be read as a claim that this change is in
-`master`.
+INTEGRATED (PR #31) — merge commit `06c52140dfc0b2ce24240df76f7f9acd7cf2ed8c`.
+This records that the repository-safety change itself reached `master`; it is
+not a claim about the fourteen protected files, which remain untracked and
+`NOT_INTEGRATED` (see Problem/Decision below).
 
 ### Epistemic status
 N/A
@@ -558,7 +558,9 @@ reintegrated through its own reviewed PR, that PR must remove or deliberately
 replace its `.gitignore` entry.
 
 ### Sources
-PR: not yet opened at the time of this commit — see the branch below
+PR: #31 — `(chore) Protect local reference and validation staging files from
+accidental staging` — merged 2026-09-14, merge commit
+`06c52140dfc0b2ce24240df76f7f9acd7cf2ed8c`
 Branch: `(chore)-protect-local-reference-validation-staging-files`
 Commits: `7c9d243` (protection), plus a follow-up documentation commit adding
 the Operation Record below
