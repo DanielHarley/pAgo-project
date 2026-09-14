@@ -95,6 +95,7 @@ that genuinely helps reconstruct earlier work.
 | [`history/`](history/) | Point-in-time historical evidence preserved for provenance. It is not rewritten to match later project state. |
 | [`operations/`](operations/) | Detailed records of unusual operational events whose forensic detail is worth preserving beyond normal Git history. |
 | [`pago_qc.md`](pago_qc.md) | Documentation of the integrated legacy metadata-derived QC workflow and its scientific boundaries. |
+| [`git_conventions.md`](git_conventions.md) | Authority for branch, commit, Pull Request, and Issue naming and writing conventions. |
 
 There is currently no authoritative `pago_annotation_ontology.md` in
 `documentation/`. The staging draft is preserved under `history/`, while the
@@ -114,6 +115,8 @@ matters.
   Operation Record.
 - If the information is already adequately preserved by the commit and PR, do
   not create another document.
+- When creating a branch, commit, PR, or Issue, consult
+  `git_conventions.md` for naming and writing conventions.
 
 Most ordinary code changes do not require changes to every documentation layer.
 
@@ -164,14 +167,5 @@ copy of the same fact synchronized.
 
 ## Naming convention
 
-Branches, commits, and PRs use the project's parenthetical-scope pattern and
-must describe what the change does.
-
-| Kind | Format | Example |
-| --- | --- | --- |
-| branch | `(<scope>)-<semantic-kebab-description>` | `(reference)-pin-pfam-38-2-hmm-bundle` |
-| commit | `(<scope>) <semantic imperative description>` | `(docs) simplify documentation governance` |
-| PR | `(<scope>) <Semantic description>` | `(docs) Simplify documentation governance` |
-
-A title such as `Phase B`, `B5 files`, or `misc changes` is not sufficiently
-semantic.
+Branch, commit, PR, and Issue naming and writing conventions are defined in
+[`git_conventions.md`](git_conventions.md).
