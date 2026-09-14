@@ -560,7 +560,12 @@ replace its `.gitignore` entry.
 ### Sources
 PR: not yet opened at the time of this commit — see the branch below
 Branch: `(chore)-protect-local-reference-validation-staging-files`
-Commits: this commit
+Commits: `7c9d243` (protection), plus a follow-up documentation commit adding
+the Operation Record below
+Operation Record:
+[`operations/2026-09-14-local-reference-validation-staging-protection.md`](operations/2026-09-14-local-reference-validation-staging-protection.md)
+— full forensic detail: the 14 paths, the old-manifest audit, the hash
+verification, and the backup this entry summarizes
 Historical roadmap reference: B5/B6 — see `SCIENTIFIC_STATE.md` §5 ("B5, B6
 and all final validation are not integrated"). This roadmap label identifies
 which staging milestone these fourteen files belong to; it is not the name of
