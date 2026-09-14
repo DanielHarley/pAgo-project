@@ -9,6 +9,8 @@ methodological, and scientific decisions — not only software architecture.
 The goal is not to classify every decision. The goal is to preserve enough
 context that a future reader can understand what was decided and why.
 
+Write ADR content in English.
+
 ## When to write an ADR
 
 Write an ADR when a future maintainer or researcher would reasonably need to
@@ -76,6 +78,10 @@ Use:
 Numbers are four-digit, zero-padded, and allocated in order.
 `0000-adr-template.md` is a template and is not a decision.
 
+Do not renumber existing ADRs. Do not reuse a number that has already
+appeared in repository history, even for a deleted, historical, superseded,
+or abandoned ADR.
+
 The title must state the decision itself, not a roadmap step or vague topic.
 
 Prefer:
@@ -92,6 +98,11 @@ useful, but never as the primary semantic identity.
 ## Evidence and scientific claims
 
 Evidence should be as specific as necessary to support the decision.
+
+Do not invent evidence, alternatives, historical intent, validation results,
+or decision provenance. If evidence is genuinely missing, say so explicitly
+(see `RATIONALE_NOT_RECOVERABLE` and `HISTORICAL_EVIDENCE_INSUFFICIENT`
+below) rather than reconstructing it from guesswork.
 
 Distinguish what was observed, computed, inferred, decided, validated, and left
 unresolved. Do not silently collapse those categories.
