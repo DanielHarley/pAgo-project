@@ -1,350 +1,279 @@
 # Scientific state
 
-What the project currently considers valid, and where each item stands relative
-to the `master` integration line.
+This document summarizes the project's current scientific interpretation: what
+the datasets and analyses mean, what they do not establish, and which questions
+remain unresolved.
 
-This document keeps three axes separate and never merges two into one field:
+It does not mirror Git state. Use Git, PRs, and commits to determine where an
+implementation lives or whether it has been merged.
 
-- **lifecycle status** — is this the current decision, or superseded / historical / experimental?
-- **integration status** — is it merged into `master` (`INTEGRATED` / `NOT_INTEGRATED` / `WAS_INTEGRATED_REMOVED`)?
-- **epistemic status** — is the result / decision scientifically or technically sound (`SUPPORTED` / `PARTIALLY_SUPPORTED` / `UNRESOLVED`)?
-
-"It is in `master`" does not mean "it is scientifically true". "It is on the
-staging branch" does not mean "it is authoritative". See
-[`README.md`](README.md#status-axes).
-
-Retrospective reconstruction baseline (2026-09-09): `master` at `0b9a576`
-(after PRs #28 and #29) — the starting point of this reconstruction, not a
-claim about the current `master` HEAD after later merges; the historical staging
-branch `(feat)-siepe-ready-project` at `49651f1`.
-
-Detailed rationale and provenance for the items below live in
-[`decisions/`](decisions/) (retrospective ADRs 0001–0014, see
-[`decisions/README.md#index`](decisions/README.md#index)) and
+Detailed rationale and provenance live in [`decisions/`](decisions/) and
 [`PROJECT_LEDGER.md`](PROJECT_LEDGER.md).
 
----
+## Dataset acquisition and meaning
 
-## 1. Integrated authoritative state
+### Text-query datasets are candidate sets, not confirmed pAgos
 
-Everything in this section has `Integration status: INTEGRATED` (in `master`).
-Lifecycle status is `CURRENT` unless a row says otherwise — the narrow search
-query is `INTEGRATED` but `SUPERSEDED` (see §1.1 and §3).
+NCBI text queries recover proteins whose records contain the searched
+terminology. They do not define the biological universe of pAgos.
 
-### 1.1 Data acquisition
+Two different acquisition contexts must not be conflated:
 
-- **Canonical NCBI record identifier: protein UID (GI).** Retrieval and XML
-  validation operate on protein UIDs (PR #5). A later branch named for reverting
-  this to `accession.version` (`(fix)-change-canon-id-from-UID-to-accession-version`)
-  never implemented or integrated a reversal; UID remains authoritative.
-- **ESearch pagination via Entrez History (WebEnv / QueryKey)** for
-  reproducibility (PR #3).
-- **Search query (integrated):** `PIWI[All Fields] AND Bacteria[Organism]`.
-  This is the narrow, earlier query. It has been superseded on the staging
-  branch by a broader annotation-enriched query (see §2.2); that replacement is
-  not yet in `master`.
-- **Consolidated XML snapshot is the reproducibility source of record.**
-  Re-fetching the same UIDs from NCBI is not guaranteed to reproduce the inputs
-  because NCBI records change. Raw XML is tracked with Git LFS; snapshot runs
-  under `snapshots/` are published one at a time together with the `latest/`
-  pointer that names them.
-- **Custom CA / TLS configuration** is supported without disabling certificate
-  verification (PR #13).
-- **NCBI failure controls** — retry / backoff, circuit breaker, deadlines,
-  resumable XML batch workspace, batch audit cache (PR #27).
+- the earlier narrow query `PIWI[All Fields] AND Bacteria[Organism]`, whose
+  downstream legacy QC run contained **41,345** records
+- the later annotation-enriched query
+  `(PIWI[All Fields] OR Argonaute[All Fields]) AND (Bacteria[Organism] OR Archaea[Organism])`,
+  whose audited 2026-08-30/31 execution returned **52,473** records
 
-### 1.2 Snapshot and provenance system
+The 52,473-record set is appropriately described as **candidate proteins
+enriched by textual annotation associated with PIWI/Argonaute**. It is not an
+estimate of the total number of pAgos.
 
-- Immutable `snapshots/<timestamp>__<hash>/` directories plus a replaceable
-  `latest/`, each with a `manifest.json` recording SHA-256 hashes of outputs
-  and of parent snapshots.
-- `reuse_latest_or_create`: a `latest/` snapshot is reused only when every
-  input hash it declares still matches; upstream input changes invalidate it
-  (PR #20).
-- Manifest-only validation happens before any `.npy` array is loaded, and a
-  compatible immutable snapshot is republished as `latest/` before the old
-  `latest/` is touched — this avoids Windows `PermissionError` / `WinError 32`
-  from memory-mapped `.npy` files (PR #21).
-- Snapshot reuse requires declared artifact hashes and, for SWeeP, a matching
-  package-root identity (PR #21).
-- CI includes a `windows-snapshot-reuse` job on `windows-latest`. `master` has
-  no branch protection or required status checks configured.
-  `NEW_ISSUE_REQUIRED` — enforce CI / status checks on `master` if desired.
+A strictly technical prefilter may remove technically unusable records, but
+annotation text and sequence length alone are not sufficient biological reasons
+to declare a candidate a non-pAgo. In the audited 52,473-record execution, the
+technical prefilter removed 0 records and marked 8,299 with a length warning.
 
-### 1.3 Exploratory analysis (integrated, exploratory only)
+See ADR-0004 and the Phase A historical audit.
 
-- SWeeP Genes embeddings (SWeeP 2.1.3.0 is **not** committed — intellectual
-  property restriction; reproducibility of this step is conditional), PCA,
-  KMeans, and a 3-D PCA plot (PRs #9–#11).
+## Query-recall panel
 
-### 1.4 Legacy textual QC layer
+The query-recall panel contains 21 curated references: 14 pAgo references across
+LONG_A, LONG_B, and SHORT, plus 7 PIWI-RE references.
 
-Implemented by `pago_qc*` and documented in [`pago_qc.md`](pago_qc.md).
+It is a **query-coverage instrument**, not a classifier gold standard and not a
+final holdout.
 
-- Three separated contracts: `evidence_flags` -> `labelled_records` ->
-  `filtered_datasets`.
-- **`excluded_records.csv` is not a biologically validated negative class** —
-  it means "excluded from the conservative classic-pAgo positive set".
-- **PIWI-RE is handled as a separate class** (`separate_dataset`), not as a
-  doubtful classic pAgo.
-- **QC labels are deterministic audit features, not ground truth.** They are
-  not equivalent to HMMER / Pfam / CDD / InterProScan validation.
-- The filtered-dataset counts in `pago_qc.md`
-  (`classic_pago_high_precision` 2,629 / `classic_pago_review` 6,703 /
-  `piwi_re` 15,056 / `excluded` 16,957 / total **41,345**) describe the run of
-  the **earlier narrow query** only. They are not an estimate of the number of
-  pAgos and are not the staging-branch 52,473-record candidate set (§2.2).
+Reference matching keeps three distinct possibilities:
 
-### 1.5 Notebooks
+1. exact `accession.version`
+2. the same base accession
+3. normalized-sequence SHA-256 equivalence
 
-`notebooks/00`–`09` (acquisition -> metadata -> QC -> FASTA -> SWeeP -> PCA ->
-KMeans -> 3-D plot -> QC evidence -> QC filtered datasets).
+Sequence-hash equivalence means that the same normalized protein sequence was
+retrieved under another accession. It does not by itself establish identical
+locus identity, record provenance, or biological context.
 
----
+Six of the seven PIWI-RE panel references were selected using PIWI-RE profile
+models. They therefore cannot be reused uncritically as an independent
+validation set for a profile-based PIWI-RE detector; that would be circular.
 
-## 2. Work awaiting integration
+See ADR-0005 and ADR-0014.
 
-Present only on `(feat)-siepe-ready-project`. Not yet reintegrated onto `master`
-through a reviewed PR.
+## Legacy metadata-derived QC
 
-| Field | Value |
-| --- | --- |
-| Integration status | `NOT_INTEGRATED` (every item in this section) |
-| Lifecycle status | `CURRENT` (every item — none is superseded) |
-| Epistemic status | `MIXED` — stated per item below; some items are technically verified, some are supported designs with audited execution, and some contain parts that are still `PROPOSED` and not executed |
-| Source branch | `(feat)-siepe-ready-project` |
-| Reintegration | separate, semantically described PRs — **not** one monolithic merge |
+The workflow documented in [`pago_qc.md`](pago_qc.md) derives deterministic
+flags and labels from NCBI metadata.
 
-### 2.1 NCBI retrieval performance and correctness rework
+Those labels are **audit features, not biological ground truth**.
 
-- **Epistemic status:** `SUPPORTED` — technically validated by the available
-  evidence.
-- **Evidence:** `documentation/ncbi_retrieval_performance_plan.md` and
-  `documentation/ncbi_retrieval_performance_implementation.md` (staging source;
-  preserved / integrated by the retrospective backfill), measured baselines,
-  `rettype=gp` invariance test, byte-identical consolidation at full scale.
-- **Content:** UID retrieval keeps the History handle, streaming persistence,
-  larger XML batches, selective resume, bounded concurrency (default off),
-  truncated responses reclassified as transient, order-safe `latest/` publish.
-- **Historical commits:** `f5671b8` … `0b4ed5a`.
-- **Historical roadmap reference:** pre-Phase-A.
-- **Open at reintegration:** relationship to the PR #27 failure controls already
-  in `master` must be reconciled (overlap vs supersession).
+Important boundaries:
 
-### 2.2 Annotation-enriched pAgo candidate set
+- `excluded_records.csv` means excluded from the conservative classic-pAgo
+  positive set; it is not a biologically validated negative class
+- PIWI-RE is handled separately rather than treated as a doubtful classic pAgo
+- metadata-derived labels are not equivalent to domain validation with HMMER,
+  Pfam, CDD, InterProScan, or experimentally supported biological labels
+- the historical 2,629 / 6,703 / 15,056 / 16,957 filtered counts belong only to
+  the earlier 41,345-record query
 
-- **Epistemic status:** `SUPPORTED` — sound design with an audited execution.
-  It is explicitly **not** a pAgo universe; a text query only recovers proteins
-  already annotated with the terminology.
-- **Evidence:** `documentation/history/2026-08-30-phase-a-audit.md` (added by the
-  backfill PR), notebook 10, execution manifests on the author's disk (not
-  versioned).
-- **Content:** query
-  `(PIWI[All Fields] OR Argonaute[All Fields]) AND (Bacteria[Organism] OR Archaea[Organism])`;
-  dataset named `annotation_enriched_candidate_set`, explicitly **not** the pAgo
-  universe (a text query only recovers proteins already annotated with the
-  terminology). One execution (2026-08-30/31) returned **52,473** protein
-  records. The 52,473-record execution artifacts are regenerable but **not
-  versioned**.
-- **Historical commits:** `175a12a` … `0013c6d`.
-- **Historical roadmap reference:** Phase A.
+These QC labels must not be promoted directly into the formal annotation
+ontology.
 
-### 2.3 Technical prefilter
+## SWeeP, PCA, and KMeans are exploratory
 
-- **Epistemic status:** `SUPPORTED` — behaviour verified by tests.
-- **Content:** excludes only technically unusable records (missing / invalid
-  sequence, missing `protein_uid`, technical duplicates). **Never** excludes by
-  annotation text or by sequence length; length outside a band sets
-  `length_warning` and the record is kept. On the 52,473-record run: 0
-  exclusions, 8,299 `length_warning`.
-- **Rationale:** the pAgo / non-pAgo separation is a domain / HMM task for a
-  later phase, decided on structural evidence.
+SWeeP converts biological sequences into fixed-length numerical vectors. PCA
+(Principal Component Analysis) linearly reduces dimensionality, and KMeans
+partitions points around centroids.
 
-### 2.4 Query-recall reference panel
+The SWeeP → PCA → KMeans workflow is an **exploratory analysis of sequence
+space**, not a validated biological classifier.
 
-- **Epistemic status:** `SUPPORTED` for auditing query recall. It is **not** a
-  validation gold standard and **not** a holdout (see the circularity note
-  below).
-- **Content:** 21 curated references (14 pAgo across LONG_A / LONG_B / SHORT,
-  7 PIWI-RE), each with a `reference_label_evidence` tier
-  (`EXPERIMENTAL` / `LITERATURE_PHYLOGENETIC` / `CURATED_COMPUTATIONAL` /
-  `DATABASE_ANNOTATION`). Matching hierarchy: exact `accession.version` ->
-  base accession -> normalized-sequence SHA-256. Two recall readings are kept
-  (`exact_accession_recall`, `retrieval_equivalent_recall`).
-- **This panel is not a global gold standard and not a validation holdout.**
-  The 6 `CURATED_COMPUTATIONAL` PIWI-RE members were selected *using* PIWI-RE
-  profile models — scoring a profile detector against them would be circular.
-- **Evidence:** `tests/fixtures/query_recall_reference_set_curation_notes.md`
-  (staging).
+Silhouette scores describe geometric cohesion/separation of a partition. ARI
+(Adjusted Rand Index) measures agreement between clusterings with chance
+correction. Neither establishes that a cluster is a biological class.
 
-### 2.5 Sequence-identity equivalence in recall matching
+For the historical 41,345-record run, the local summary recorded approximately:
 
-- **Epistemic status:** `SUPPORTED` — technically validated (deterministic,
-  offline, tested).
-- **Content:** a third matching tier, `SEQUENCE_SHA256` (normalized
-  whitespace-stripped uppercased sequence hash), offline and deterministic,
-  pinned by `matching_strategy_sha256`. Motivated by RsAgo (`ABP72561.1`),
-  which is retrieved under the byte-identical IPG alias `A4WYU7.1`. The
-  reference fixture accession was **not** changed.
-- **Supersedes:** exact-accession-only matching (§3).
+- selected `k = 3`
+- sampled silhouette ≈ 0.656
+- selected-init ARI minimum ≈ 0.998
+- selected-subsample ARI minimum ≈ 0.993
+- Cramér's V between cluster and legacy primary label ≈ 0.386
+- Spearman ρ between PC2 and sequence length ≈ 0.878
 
-### 2.6 pAgo reference layer (HMM / phylogenetics instruments)
+The strong PC2/length association is an important confounding signal. No
+biological validation of those clusters has been demonstrated.
 
-- **Epistemic status:** `PARTIALLY_SUPPORTED` — the reference resources,
-  construction procedures, and integrity checks are in place and verified; the
-  **predictive performance** of the instruments has not yet been evaluated
-  (no calibration or holdout results).
+See ADR-0006.
 
-- **Pfam 38.2 bundle** — 10 version-pinned HMMs (PIWI, PAZ, ArgoN, ArgoL1,
-  ArgoL2, ArgoMid, SIR2, TIR_2, TIR, Mrr_cat), SHA-256 lock, unversioned Pfam
-  accessions rejected. Historical roadmap reference: B1.
-- **`split_group` as the indivisible train/test unit** — a connected component
-  of a MMseqs2 graph with edges at >= 90 % identity **and** >= 80 % coverage,
-  identity and coverage recomputed from the aligned strings (never MMseqs
-  `pident` / `alnlen`), with a prior union of exact-sequence duplicates. **This
-  is a high-similarity / redundancy control unit. It is not a definition of
-  homology and does not assert absence of homology below 90 %.** The 481
-  Ryazansky S3 representatives (UCLUST 90 %) are an upstream reduction, not this
-  unit. Historical roadmap reference: B2.
-- **APAZ partition `apaz_partition_v2_mmseqs90_80`** — whole split groups
-  assigned to `FINAL_HOLDOUT` first, then `CALIBRATION`, then `BUILD`, by a
-  deterministic subset-sum search that aborts rather than silently adjusting an
-  unreachable target. Hard negatives HisG (`PF01634`) and EIIB (`PF00367`)
-  never enter `BUILD`. **The FINAL_HOLDOUT partition is frozen — no
-  redistribution may be motivated by HMM performance.** Supersedes v1 (§3).
-  Historical roadmap reference: B2.
-- **6 APAZ profile HMMs** (global + Ia / Ib / IIa / IIb / III) built **only from
-  BUILD** sequences, bit-for-bit reproducible (volatile `COM` / `DATE` lines
-  stripped), re-validated structurally from the on-disk artifact. Generated
-  `.hmm` files are gitignored — a generated artifact is not the versioned
-  source. Historical roadmap reference: B3.
-- **Ryazansky Table S1 clade catalog** — the 1010-protein catalog, which
-  precedes redundancy reduction. Ryazansky reports a 721-protein nonredundant
-  set used for phylogenetic analysis, derived by 90 % clustering of the broader
-  catalog; the reusable 721-member tree-input mapping, the MID-PIWI tree MSA,
-  and the Newick tree that this project would need to reuse the original tree
-  are not available as published supplementary artifacts. MID-PIWI coordinate
-  convention proven from the data before slicing. NCBI record status recorded
-  (LIVE / SUPPRESSED / DEAD_REPLACED); nothing excluded. Architecture is kept
-  separate from clade. Historical roadmap reference: B4.2.
-- **Quarantine of conflicting references** — AfAgo (`WP_010878815.1`) and SiAgo
-  (`WP_012735993.1`) held at `curated_pago_clade = UNRESOLVED` (architecture
-  SHORT vs Ryazansky truncated-long). NgAgo kept as Ryazansky `longA` (the
-  recall panel's LONG_B label contradicts the source it cites and is treated as
-  a probable recall-panel error; the earlier recall-panel artifact is not
-  modified). The two
-  Ryazansky `unkn` proteins -> `UNRESOLVED`. Historical roadmap reference: B4.2.
-- **MID-PIWI high-similarity split groups** — the B2 workflow applied to the
-  1002 extracted MID-PIWI regions: 701 groups, 697 partition-eligible, **0
-  cross-clade groups at 90 / 80**. Cross-clade structure appears only at 50 %
-  identity and is recorded as **diagnostic evidence only** — no quarantine, no
-  exclusion. Byte-identical across two independent runs. Historical roadmap
-  reference: B4.3.
-- **Formal annotation ontology** — see §2.7.
+## Reference-layer boundaries
 
-### 2.7 Annotation ontology
+### Pfam 38.2 bundle
 
-- **Epistemic status:** `PARTIALLY_SUPPORTED` — the semantic separation
-  (family vs clade, the detection-vs-identity epistemic axis, disjoint evidence
-  namespaces, `catalytic_site_status = UNKNOWN` in v1) is supported. The future
-  **phylogenetic-placement protocol** (TREE_BUILD / PLACEMENT_CALIBRATION /
-  PLACEMENT_HOLDOUT, the three LWR thresholds) is `PROPOSED` and not executed.
-- **Content:** `ago_family` in {PAGO, PIWI_RE, UNRESOLVED} — **PIWI-RE is a
-  family, not a pAgo clade**; `pago_clade` in {LONG_A, LONG_B, SHORT,
-  UNRESOLVED}, defined only within PAGO and only by phylogenetic placement plus
-  three calibrated thresholds; `ago_detection_status` /
-  `detection_evidence_status` as an epistemic axis where a triage-only MID-PIWI
-  signal never becomes `DETECTED`; disjoint evidence namespaces (Pfam / APAZ /
-  clade-HMM); `catalytic_site_status = UNKNOWN` in version 1; the
-  BUILD / CALIBRATION / FINAL_HOLDOUT protocol for custom HMMs and the
-  TREE_BUILD / PLACEMENT_CALIBRATION / PLACEMENT_HOLDOUT protocol for placement;
-  reference-label evidence tiers as provenance, not interchangeable ground
-  truth.
-- **Status:** drafted on the staging branch as
-  `documentation/pago_annotation_ontology.md`; preserved under `history/` by the
-  backfill PR; becomes authoritative only when reintegrated.
+The selected Pfam 38.2 reference bundle contains ten version-pinned profiles:
+PIWI, PAZ, ArgoN, ArgoL1, ArgoL2, ArgoMid, SIR2, TIR_2, TIR, and Mrr_cat.
 
----
+Pinned accession versions and SHA-256 hashes establish reference identity and
+support reproducible integrity checks. Structural parsing or byte-level
+reproducibility does **not** establish sensitivity, specificity, or predictive
+performance for pAgo detection.
 
-## 3. Superseded, historical, and currently-integrated legacy states
+The original rationale for exactly these ten profiles and for choosing Pfam
+38.2 has not been recovered.
 
-Two axes shown, kept separate: **lifecycle status** and **integration status**.
-An item can be `SUPERSEDED` (lifecycle) and still be `INTEGRATED` (the behaviour
-that runs in `master`).
+See ADR-0008.
 
-| Item | Lifecycle status | Integration status | Replacement / note |
-| --- | --- | --- | --- |
-| Query `PIWI[All Fields] AND Bacteria[Organism]` and its 41,345-record filtered set | `SUPERSEDED` by the annotation-enriched design | `INTEGRATED` — **current `master` behaviour** | The annotation-enriched query and candidate set (§2.2), on the staging branch, replace it once reintegrated. |
-| APAZ partition v1 (split unit keyed on an accession hash; one singleton per accession; high-similarity groups could cross BUILD / CALIBRATION) | `SUPERSEDED` | `NOT_INTEGRATED` (staging only) | `apaz_partition_v2_mmseqs90_80` (§2.6). v1 was never used for predictive evaluation. |
-| Exact-accession-only recall matching | `SUPERSEDED` | `NOT_INTEGRATED` (staging only) | Three-tier matching with `SEQUENCE_SHA256` (§2.5). |
-| `PIWI_RE` as a value of `pago_clade` (early fixtures / tests) | `SUPERSEDED` | `NOT_INTEGRATED` (staging only) | `PIWI_RE` as a value of `ago_family`; PIWI-RE rows carry `pago_clade = UNRESOLVED` (§2.7). |
-| Branch `(fix)-change-canon-id-from-UID-to-accession-version` | `HISTORICAL` — a reversal that was never designed or argued | `NOT_INTEGRATED` | UID remains canonical (§1.1). Kept as a historical pointer, not a competing decision. |
-| Minimal GA-KMeans clustering prototype | `EXPERIMENTAL` — not adopted | `WAS_INTEGRATED_REMOVED` from `master` | — |
-| Branches `backup/original-messages`, `(perf)-improve-ncbi-fetch-performance` | `HISTORICAL` — a rewritten parallel history of the retrieval rework (§2.1) | `NOT_INTEGRATED` | Kept for provenance; the motivation for the rewrite is not documented. |
-| `HisG PF00815` (as written in the private architecture plan) | `SUPERSEDED` — corrected to `PF01634` | `N/A` (plan text, not code) | Fixed in the staging code and curation notes before use. |
+### High-similarity split groups
 
----
+A `split_group` is an operational redundancy-control unit built as a connected
+component of a sequence-similarity graph using the declared 90% identity and
+80% coverage criterion, with exact-sequence duplicates joined first.
 
-## 4. Open scientific questions
+This 90/80 rule is **not a definition of homology**. Homology means shared
+evolutionary ancestry and has no universal sequence-identity threshold.
 
-Not resolved. Do not assume an answer.
+Keeping a whole high-similarity group within one development/evaluation
+partition reduces one important leakage mechanism. It does not prove complete
+statistical independence between partitions.
 
-1. **Origin and justification of the 90 / 80 threshold.** The 90 % identity
-   echoes Ryazansky's UCLUST 90 % reduction; the 80 % coverage requirement
-   appears operational. Whether 90 / 80 was chosen deliberately to match the
-   literature or independently is only partially recoverable.
+The origin of the exact 90/80 choice is only partially recoverable: the 90%
+identity value resembles Ryazansky's UCLUST reduction, while the 80% coverage
+requirement appears operational.
+
+See ADR-0009 and ADR-0013.
+
+### APAZ references and profile HMMs
+
+Ryazansky Data Set S3 contains 481 representative APAZ domains derived from 632
+sequences by a reported UCLUST 90% reduction.
+
+The project's later high-similarity grouping of those 481 representatives
+produced 460 split groups. Whole groups are kept together when partitioning the
+reference set. HisG (`PF01634`) and EIIB (`PF00367`) are used as hard-negative
+families and do not enter the HMM BUILD references.
+
+Six APAZ profile HMMs — global plus Ia, Ib, IIa, IIb, and III — are constructed
+from BUILD references only. Their deterministic construction and byte-level
+reproducibility do not constitute a performance evaluation.
+
+No sensitivity, specificity, F1, or frozen predictive threshold result should
+be claimed from HMM construction alone.
+
+See ADR-0009 and ADR-0010.
+
+### Ryazansky pAgo catalog and MID-PIWI regions
+
+Ryazansky Table S1 contains a 1,010-pAgo catalog before the paper's reported
+90%-identity redundancy reduction.
+
+The historical reconstruction recovered sequences for all 1,010 accessions and
+extracted MID-PIWI regions for 1,002 of them after proving the coordinate
+convention from the table data.
+
+The reusable mapping of the reported 721 nonredundant tree representatives, the
+MID-PIWI tree alignment, and the original Newick tree are not available as
+published supplementary artifacts. The project's own validated reference-tree
+construction and placement calibration therefore remain separate work.
+
+AfAgo and SiAgo are retained as unresolved where source clade and architecture
+conflict. NgAgo follows the Ryazansky `longA` source label; the older recall
+panel's LONG_B label is treated as a probable curation error rather than as a
+reason to rewrite the source catalog.
+
+See ADR-0011.
+
+### MID-PIWI high-similarity groups
+
+For the 1,002 extracted MID-PIWI regions, the historical 90/80 workflow produced
+701 groups, 697 of them eligible for later partitioning, with no resolved
+cross-clade group at the operational 90/80 threshold.
+
+A cross-clade component appears at a 50% identity diagnostic threshold. That
+observation is a similarity diagnostic only; it is not a phylogenetic inference
+and is not a reason by itself to relabel or quarantine the affected reference.
+
+See ADR-0013.
+
+## Annotation semantics
+
+The project keeps several biological concepts separate.
+
+- `ago_family ∈ {PAGO, PIWI_RE, UNRESOLVED}` describes family identity.
+- `pago_clade ∈ {LONG_A, LONG_B, SHORT, UNRESOLVED}` describes pAgo
+  phylogenetic clade and is meaningful only within the PAGO family.
+- **PIWI-RE is a family, not a pAgo clade.**
+- domain architecture does not by itself determine phylogenetic clade
+- a triage signal is not automatically a confirmed Argonaute detection
+- absence of one profile hit is not automatically a biological negative
+- catalytic-site annotation is separate from family, clade, architecture, and
+  experimentally demonstrated catalytic activity
+
+The historical staging ontology contains additional proposed placement and
+validation machinery. Its historical body is not current authority merely
+because it is detailed; current semantic decisions should be checked against the
+ADRs and current implementation.
+
+See ADR-0012 and `documentation/history/2026-08-31-pago-annotation-ontology-staging.md`.
+
+## Superseded or corrected interpretations
+
+The following older interpretations should not be reused as current scientific
+claims:
+
+- `PIWI_RE` as a value of `pago_clade` → PIWI-RE is represented at the family
+  level, while `pago_clade` remains unresolved for PIWI-RE
+- exact-accession-only query-recall matching → sequence-equivalent recovery is
+  also recorded explicitly while preserving the exact-accession reading
+- APAZ accession-hash partition units → high-similarity split groups are kept
+  intact across evaluation partitions
+- the claim that TtAgo and RsAgo were absent from Ryazansky Table S1 because of
+  the 90% reduction → Table S1 is the pre-reduction 1,010-protein catalog and
+  contains the relevant entries
+- `HisG PF00815` in an old private architecture plan → the curated hard-negative
+  family uses `PF01634`
+
+## Open scientific questions
+
+1. **Origin and justification of the 90/80 threshold.** The precise rationale
+   for combining 90% identity with 80% coverage has not been fully recovered.
 2. **Canonical TtAgo accession for the recall panel.** The panel's
-   `WP_011174533.1` is a non-matching *T. thermophilus* isolate; the
-   crystallographic HB8 TtAgo is Table S1 `YP_145307.1` (dead ->
-   `WP_011229221.1`). The panel entry is a pending curation decision.
-3. **Construction of the MID-PIWI reference tree.** Ryazansky reports a
-   721-protein nonredundant set used for phylogenetic analysis, derived by 90 %
-   clustering of the broader catalog. The reusable 721-member tree-input
-   mapping, the MID-PIWI tree MSA, and the Newick tree required to reuse the
-   original tree are not available as published supplementary artifacts. The
-   project's own reference tree, alignment, and substitution model have not
-   been built; the method is not yet decided or executed.
-4. **Independent PIWI-RE reference arm.** An independent PIWI-RE reference arm,
-   separate from Ryazansky, must be curated from primary PIWI-RE literature —
-   starting with Burroughs et al. 2013 and subsequent experimental sources —
-   with explicit circularity auditing of every included reference. The existing
-   recall-panel PIWI-RE references are **not** automatically eligible as an
-   independent validation set: 6 of the 7 are `CURATED_COMPUTATIONAL` and were
-   selected using PIWI-RE profile models, so scoring a profile-based detector
-   against them would be circular. This arm is planned but not started
-   (historical roadmap reference: B4.4).
-5. **Enumeration of the APAZ v1 cross-partition leaks.** Only one worked example
-   is documented; the full set and the exact discovery procedure could not be
-   reconstructed (no versioned v1 artifact).
-6. **Sequence-based discovery route** (HMM / PSI-BLAST over RefSeq) to reach
-   pAgos not annotated with "PIWI" / "Argonaute" — out of current scope,
-   documented as future work.
-7. **Mesophily focus.** The project's stated interest in mesophilic pAgos is an
-   interest in **organism ecology** — the source organism's optimal growth
-   temperature (OGT). That is a distinct property from the **catalytic
-   temperature optimum or working range of the encoded pAgo protein**, which
-   requires biochemical data on the specific protein. The two must not be
-   conflated. No mesophily-based selection and no OGT computation has been done;
-   the relevant primary literature has not been re-verified here.
+   `WP_011174533.1` is not the crystallographic HB8 reference represented in
+   Table S1 as `YP_145307.1` (later `WP_011229221.1`). The panel entry still
+   requires curation.
+3. **Construction of the MID-PIWI reference tree.** The original reusable tree
+   inputs are not available from the paper's supplements, and the project's own
+   tree-building/placement method has not yet been scientifically finalized and
+   validated.
+4. **Independent PIWI-RE reference arm.** A detector-validation reference set
+   must be curated independently from primary PIWI-RE literature with explicit
+   circularity auditing. The existing recall-panel PIWI-RE rows are not
+   automatically eligible.
+5. **Complete reconstruction of APAZ v1 leakage.** One worked example is
+   documented, but the full historical procedure used to enumerate the reported
+   v1 cross-partition leaks has not been recovered.
+6. **Sequence-based discovery beyond text annotation.** A sequence-driven route
+   such as profile-HMM or PSI-BLAST discovery over an appropriate protein
+   database remains future work for finding poorly annotated or divergent
+   pAgos.
+7. **Mesophily.** Mesophily is a property of the source organism's ecology,
+   commonly described using its optimal growth temperature (OGT). It is distinct
+   from the catalytic temperature optimum or working range of a specific pAgo
+   protein, which requires biochemical evidence for that protein. The two must
+   not be conflated.
 
----
+## Standing limitations
 
-## 5. Standing limitations
-
-- **Execution artifacts are not versioned.** The 52,473-record acquisition
-  chain and the reference-layer HMM builds are regenerable but absent from the
-  repository; a clean clone does not reproduce them without re-running against
-  NCBI / external tools.
-- **Conditional external tools.** SWeeP 2.1.3.0 (not committed), and — when
-  their phases arrive — MMseqs2 and EPA-ng, have no pip-wheel contract; those
-  steps are conditionally reproducible.
-- **The legacy textual QC layer** (§1.4) predates the ontology (§2.7) and its
-  labels must not be promoted to ontology fields.
-- **`master` has no branch protection or required status checks.** CI runs on
-  every push, but nothing enforces a green CI or a review before merge.
-  `NEW_ISSUE_REQUIRED` — enforce CI / status checks on `master` if desired.
-- **B5, B6 and all final validation are not integrated.** The clade-HMM builder,
-  the MID-PIWI reference-tree validator, and the leakage-controlled
-  profile / placement validators exist only as local untracked staging files.
-  `FINAL_HOLDOUT` and `PLACEMENT_HOLDOUT` must not be consulted before that work
-  is reintegrated and the calibration is frozen.
+- The 52,473-record acquisition execution and several reference-layer build
+  artifacts were local rather than versioned; exact historical executions are
+  therefore not reproduced by a clean clone without rerunning external data or
+  tools.
+- SWeeP is not distributed with the repository, and later tools such as MMseqs2
+  or EPA-ng require external environments. Reproducibility of those stages is
+  conditional on the declared tool/environment contract.
+- Legacy textual QC labels must not be promoted directly into formal biological
+  ontology fields.
+- No final predictive-performance result has been established for the pAgo
+  reference/profile/placement instruments described above.
+- Protected final holdouts must not be used to make development or calibration
+  decisions before the corresponding method and thresholds are frozen.

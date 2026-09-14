@@ -1,21 +1,4 @@
-# ADR-0001 — The canonical NCBI retrieval identifier is the protein UID
-
-## Lifecycle status
-
-`CURRENT`
-
-## Integration status
-
-`INTEGRATED` (via PR #5)
-
-## Epistemic status
-
-`SUPPORTED` — the choice is a technical convention; the code on `master` operates
-on protein UIDs consistently.
-
-## Type
-
-`TECHNICAL`
+# ADR-0001 — Use the protein UID as the canonical NCBI retrieval identifier
 
 ## Date
 
@@ -28,109 +11,59 @@ Early retrieval used the NCBI `accession.version` string as the record
 identifier. NCBI protein records also carry a numeric UID (a GI number in the
 `db=protein` context).
 
-## Problem
-
-The pipeline needs one stable identifier to key ESearch → EFetch → XML
-validation and the snapshot manifests.
-
-## Evidence
-
-- PR #5 merge `71ff9b2` — *"(feat) switch NCBI protein snapshot retrieval from
-  accession version IDs to UIDs"* — is an ancestor of `master`.
-- Implementation commit `a10d89b`.
-- `master` code: `src/pago_pipeline/ncbi_snapshot.py` extracts the UID from
-  `GBSeqid` fields with `re.fullmatch(r"gi\|(\d+)\|?", ...)` and validates the
-  XML record UIDs against the requested UIDs; `fetch_ncbi_protein_uid_snapshot`
-  is the retrieval entry point.
-- The branch `(fix)-change-canon-id-from-UID-to-accession-version` exists on the
-  remote. Its tip `0177e37` is the *"Merge pull request #4"* commit, which
-  **predates** PR #5, is ~53 commits behind `master`, and contains **no**
-  reversal. It never implemented or integrated a change back to
-  `accession.version`.
-
-## Previous state
-
-`accession.version` was the retrieval / query identifier.
+The pipeline needs one canonical identifier to key ESearch → EFetch → XML
+validation and snapshot manifests.
 
 ## Decision
 
 Use the protein UID as the canonical retrieval and XML-validation identifier.
 
+## Evidence
+
+- PR #5 merge `71ff9b2` — *"(feat) switch NCBI protein snapshot retrieval from
+  accession version IDs to UIDs"* — and implementation commit `a10d89b`
+- current `ncbi_snapshot.py` extracts the UID from `GBSeqid` fields and validates
+  XML record UIDs against the requested UIDs
+- the historical branch named for reverting to `accession.version` predates PR
+  #5 and contains no implemented reversal
+
 ## Rationale
 
-`RATIONALE_NOT_RECOVERABLE`. The commit and PR record only state the switch; no
-design document weighs the two identifiers. NCBI's own documentation states that
-when a sequence changes, a **new** GI is assigned and the `accession.version`
-suffix is incremented — so neither identifier is invariant across a sequence
-revision. No stability advantage is claimed here.
+`RATIONALE_NOT_RECOVERABLE`. The surviving commit and PR record the switch but
+do not preserve a design comparison between the identifiers.
 
-## Alternatives considered
-
-`accession.version` — it was the previous choice and the target of a
-never-completed reversal branch. No design document weighs the two.
-`HISTORICAL_EVIDENCE_INSUFFICIENT` for any other alternative.
+NCBI documentation indicates that sequence revision changes can assign a new GI
+and increment the `accession.version` suffix, so no claim is made that either
+identifier is invariant across sequence revisions.
 
 ## Consequences
 
-- All raw snapshots and manifests key on `protein_uid`.
-- The Phase A query-recall matcher (see ADR-0005) matches references by
-  `accession.version` → base accession → normalized-sequence SHA-256. That is a
-  **benchmark matching strategy for a specific report**, not the canonical
-  retrieval identifier — the two coexist without conflict.
-
-## Limitations
-
-The rationale for the switch is not documented.
+- raw snapshots and manifests key on `protein_uid`
+- the Phase A query-recall matcher may still use `accession.version`, base
+  accession, and normalized-sequence SHA-256 as benchmark-matching strategies;
+  that does not change the canonical retrieval identifier
+- the recorded UID list, frozen XML, and manifest hashes together identify the
+  records actually analysed
 
 ## Supersedes
 
 `accession.version` as the canonical retrieval identifier.
 
-## Superseded by
-
-None.
-
-## Related Issue
-
-`No historical Issue found`.
-
-## Related PR
-
-PR #5 (`71ff9b2`). The unrelated, incomplete branch
-`(fix)-change-canon-id-from-UID-to-accession-version` had no merged PR that
-reverted this.
-
-## Related commits
-
-`a10d89b`, `71ff9b2`.
-
-## Related data / artifacts
-
-`data/01-raw/**/manifest.json` (`protein_uids_sha256`, per-record `protein_uid`).
-
 ## Validation
 
-`master` test suite covers `ncbi_snapshot` UID extraction and XML-vs-UID
-validation.
+The repository test suite covers UID extraction and XML-vs-UID validation in the
+NCBI snapshot workflow.
 
-## Scientific impact
+## Related records
 
-None directly. It does not change any biological interpretation.
-
-## Data impact
-
-Identifier convention only; no label or partition change.
-
-## Reproducibility impact
-
-The recorded UID list, together with the frozen consolidated XML and the
-manifest hashes, identifies the set of records that was actually analysed.
-(No claim is made that a UID is invariant across a sequence revision — it is
-not; see *Rationale*.)
+- PR #5, merge `71ff9b2`
+- commit `a10d89b`
+- `data/01-raw/**/manifest.json`
+- ADR-0005 for query-recall matching semantics
 
 ## Historical reconstruction note
 
-- Directly demonstrated: PR #5 merged into `master`; current code uses UIDs; the
-  reversal branch predates PR #5 and contains no reversal.
-- Inferred: nothing material.
-- Not recoverable: the original rationale for the switch.
+- Directly demonstrated: PR #5 merged, current code uses UIDs, and the later
+  reversal-named branch contains no reversal.
+- Not recoverable: the original rationale for choosing UID over
+  `accession.version`.

@@ -1,133 +1,72 @@
-# ADR-0008 — Pinned Pfam 38.2 HMM bundle (ten profiles, versioned, SHA-256-locked)
-
-## Lifecycle status
-
-`CURRENT`
-
-## Integration status
-
-`NOT_INTEGRATED` — Phase B (milestone B1) on `(feat)-siepe-ready-project`.
-
-## Epistemic status
-
-`PARTIALLY_SUPPORTED` — the bundle is pinned and offline-verified; the
-predictive performance of scanning with it has not been evaluated.
-
-## Type
-
-`TECHNICAL + SCIENTIFIC`
+# ADR-0008 — Pin the Pfam 38.2 HMM reference bundle
 
 ## Date
 
-`UNKNOWN — reconstructed retrospectively on 2026-09-09` (staging commit
+`UNKNOWN — reconstructed retrospectively on 2026-09-09` (historical commit
 `69ca40e`, 2026-08-31)
 
 ## Context
 
-**Pfam** is a database of protein families and domains represented by profile
-models. An **HMM** (Hidden Markov Model) is a probabilistic model used here to
-recognise conserved sequence patterns of a domain. The pAgo work needs a fixed
-set of core-Argonaute and system-associated domain profiles.
-
-## Problem
-
-A domain scan must use a fixed, reproducible set of profiles; a silent Pfam
-release or profile-version change would alter results without a trace.
-
-## Evidence
-
-- Staging commit `69ca40e` — *"(feat) B1 pinned Pfam HMM reference bundle"*:
-  ten version-pinned HMMs (PIWI, PAZ, ArgoN, ArgoL1, ArgoL2, ArgoMid, SIR2,
-  TIR_2, TIR, Mrr_cat), a SHA-256 lock, structural validation against PyHMMER
-  (single model, amino alphabet, gathering cutoffs, exact accession/name),
-  canonical concatenation, and `hmmpress`.
-- The commit adds a rule that an **unversioned** Pfam accession is rejected,
-  with a positive and a negative test.
-- `documentation/history/2026-08-31-pago-annotation-ontology-staging.md` —
-  "Reference integrity": committed Phase B resources pin source releases, file
-  inventories, SHA-256 values.
-- Staging: `src/pago_pipeline/resources/pfam_hmm/` +
-  `pfam_hmm_bundle_lock.json`; `scripts/materialize_pfam_hmm_bundle.py`.
-
-## Previous state
-
-No committed domain-profile set.
+The pAgo reference layer needs a fixed set of Pfam profile HMMs for core
+Argonaute and associated-system domains. A silent change in Pfam release,
+profile accession version, or file contents would change downstream scans
+without a trace.
 
 ## Decision
 
-Commit ten Pfam 38.2 profiles as `<Name>__<ACC.version>.hmm` with a SHA-256
-lock; reject an unversioned accession; concatenate in canonical order and press
-via `pyhmmer.hmmer.hmmpress`; verify the whole chain offline with
-`scripts/verify_reference_data.py --scope pfam`.
+Pin ten Pfam 38.2 profiles — PIWI, PAZ, ArgoN, ArgoL1, ArgoL2, ArgoMid, SIR2,
+TIR_2, TIR, and Mrr_cat — using versioned accessions and SHA-256 identities.
+
+Reject unversioned Pfam accessions, concatenate the profiles in a canonical
+order, press the bundle with PyHMMER, and provide an offline verifier for the
+reference chain.
+
+## Evidence
+
+Historical commit `69ca40e` added the ten HMM resources, a lock file with
+versioned accessions and SHA-256 values, canonical concatenation, structural
+validation, `hmmpress`, and tests that reject unversioned accessions.
+
+The historical ontology's reference-integrity section also requires pinned
+source releases, file inventories, and hashes for committed reference resources.
 
 ## Rationale
 
-Stated in the commit and the ontology's reference-integrity section: pinning
-release + version + hash makes the instrument reproducible and prevents a silent
-upstream change.
+Pinning release, profile version, and file hash makes the reference instrument
+identifiable and guards against silent upstream changes.
 
-## Alternatives considered
-
-`RATIONALE_NOT_RECOVERABLE` for **which** ten profiles and **why Pfam 38.2** —
-the commit lists the names ("core Argonaute and system-associated domains") but
-no design document weighs the selection or the release.
+`RATIONALE_NOT_RECOVERABLE` for why exactly these ten profiles were selected and
+why Pfam 38.2 was chosen over another release.
 
 ## Consequences
 
-- Any domain scan (Phase C) uses exactly this bundle.
-- Changing a profile version or the Pfam release requires a new lock and an
-  explicit decision.
+- downstream domain scans can refer to an exact, reproducible reference bundle
+- changing the Pfam release or a profile version requires an explicit reference
+  update rather than silently changing results
+- structural parsing and byte-level integrity do **not** establish predictive
+  sensitivity, specificity, or biological validity
 
 ## Limitations
 
-Not integrated. The profile selection rationale is not documented. Scanning
-performance (sensitivity / specificity) is not evaluated.
-
-## Supersedes
-
-Nothing.
-
-## Superseded by
-
-None.
-
-## Related Issue
-
-`No historical Issue found`.
-
-## Related PR
-
-`No historical PR found`.
-
-## Related commits
-
-`3de5f1b` (pin `pyhmmer==0.12.3`), `69ca40e` (B1 bundle).
-
-## Related data / artifacts
-
-`src/pago_pipeline/resources/pfam_hmm/**`, `pfam_hmm_bundle_lock.json`
-(staging).
+The original selection rationale for the ten profiles and the release choice is
+not documented. Predictive performance has not been established by the bundle's
+integrity checks.
 
 ## Validation
 
-`scripts/verify_reference_data.py --scope pfam` on the staging branch;
-`tests/test_pfam_hmm_bundle*`.
+The historical reference verifier checks the pinned files offline, and the
+historical tests cover expected profile identity and rejection of unversioned
+accessions.
 
-## Scientific impact
+## Related records
 
-Fixes the domain vocabulary used to describe pAgo architecture.
-
-## Data impact
-
-Adds committed reference resources; no candidate-protein label assigned.
-
-## Reproducibility impact
-
-Positive: release + version + hash pinned; offline verifier.
+- historical commits `3de5f1b` and `69ca40e`
+- historical `src/pago_pipeline/resources/pfam_hmm/**`
+- historical `pfam_hmm_bundle_lock.json`
+- historical roadmap reference: B1
 
 ## Historical reconstruction note
 
-- Directly demonstrated: the commit, the lock file, the ontology text.
-- Inferred: none material.
-- Not recoverable: the rationale for the specific ten profiles and the release
-  choice.
+- Directly demonstrated: historical commit, lock file, tests, and ontology text.
+- Not recoverable: the rationale for the exact ten-profile selection and Pfam
+  release choice.

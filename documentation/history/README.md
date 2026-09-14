@@ -1,19 +1,29 @@
 # Historical records
 
-Point-in-time documents preserved verbatim as provenance. A *point-in-time*
-record is a snapshot of the project on a specific date, not a description of the
-current situation.
+Historical records inherit the documentation principles in
+[`../README.md`](../README.md).
 
-**Nothing in this directory is authoritative for current behaviour.** Read the
-current state from [`../SCIENTIFIC_STATE.md`](../SCIENTIFIC_STATE.md) and the
-current [`../decisions/`](../decisions/) ADRs.
+This directory preserves point-in-time evidence: snapshots of what the project
+looked like, what a branch contained, or what a staging document said at a
+specific moment.
 
-Each file carries a header stating its date, the branch and commit it reflects,
-and an explicit `Authoritative current state: NO`. The body below each header is
-preserved without semantic rewriting; later corrections are recorded elsewhere
-(ADRs, `SCIENTIFIC_STATE.md`), never by editing the historical body.
+Nothing in this directory should be treated as a description of current project
+state merely because it is detailed or searchable.
+
+For current scientific interpretation, read
+[`../SCIENTIFIC_STATE.md`](../SCIENTIFIC_STATE.md) and the relevant current
+ADRs.
+
+Historical bodies are preserved without semantic rewriting. If terminology,
+interpretation, or decisions change later, record the correction in current
+documentation rather than editing the old body to make history look cleaner.
+
+This matters especially for agent/tool search: a search result may return a
+fragment from the middle of a historical file without its header. Always check
+the file path and current documentation before treating a historical fragment
+as current authority.
 
 | File | What it is |
 | --- | --- |
-| `2026-08-30-phase-a-audit.md` | A read-only technical audit of the Phase A work, written on 2026-08-30 against the historical staging branch. |
-| `2026-08-31-pago-annotation-ontology-staging.md` | The annotation ontology drafted during the Phase B staging work, never integrated into `master`. |
+| `2026-08-30-phase-a-audit.md` | Read-only technical audit of the Phase A staging work as it existed on 2026-08-30. |
+| `2026-08-31-pago-annotation-ontology-staging.md` | Annotation-ontology draft from staging work, preserved as historical provenance rather than rewritten as a current ontology. |
