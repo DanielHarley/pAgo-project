@@ -1,61 +1,80 @@
 # Operation records
 
-An Operation Record documents a factual, non-scientific, non-architectural
-operation on the repository or its provenance — a backup, a migration, a
-recovery, an incident, a staging-safety change, or an administrative action
-whose operational detail (before/after state, hashes, paths, verification
-steps) is worth preserving but does not belong in a more compact document.
+Operation Records inherit the documentation principles in
+[`../README.md`](../README.md).
+
+An Operation Record preserves the factual detail of an unusual repository or
+provenance operation when that detail is important enough to outlive the commit
+and PR.
+
+Typical examples include:
+
+- a backup or recovery operation
+- a repository migration
+- an incident with meaningful forensic detail
+- protection of important local files from accidental staging
+- an administrative change whose before/after state and verification matter
+
+Most day-to-day work does **not** need an Operation Record.
 
 ## When to write one
 
-Write an Operation Record when the operation:
+Create an Operation Record only when the event contains details such as paths,
+hashes, before/after state, recovery evidence, or verification steps that a
+future maintainer may genuinely need.
 
-- involves concrete forensic detail (hashes, paths, before/after state,
-  verification steps) that would make `PROJECT_LEDGER.md` unwieldy if inlined
-  there in full;
-- is not itself a decision about project methodology, architecture, or a
-  scientific conclusion — that is an ADR (`decisions/`);
-- does not, by itself, change what the project currently considers
-  scientifically valid — that is `SCIENTIFIC_STATE.md`;
-- is not a scientific or computational execution whose result matters for a
-  conclusion — that is a Run Record plus its manifest.
+Do not create one for a routine `git status`, an ordinary commit, a normal PR,
+or any event already explained adequately by Git history and a compact Project
+Ledger entry.
 
-Do not write one for a routine `git status` check, a routine commit with an
-obvious diff, or anything a single `PROJECT_LEDGER.md` line already covers on
-its own. Most day-to-day work needs no Operation Record.
+An Operation Record is not an ADR. It records what happened during an operation;
+it does not manufacture a methodological or scientific decision.
 
-## How it differs from the other documents
+An Operation Record is not a substitute for scientific interpretation. If an
+event changes what the project can scientifically claim, update the appropriate
+scientific documentation separately.
 
-| Document | Answers |
-| --- | --- |
-| `decisions/*.md` (ADR) | Why was a significant technical / scientific / architectural decision made, over what alternatives? |
-| `PROJECT_LEDGER.md` | When did this happen, and what decision or event does it belong to — one compact, chronological entry? |
-| `operations/*.md` (this directory) | What exactly happened during an important operational event — the full forensic detail: before/after state, discoveries, verification, hashes? |
-| `SCIENTIFIC_STATE.md` | What does the project currently consider scientifically valid, right now? |
-| A Run Record + manifest | What execution produced a specific artifact or result, from what inputs, verified how? |
+## Content
 
-An Operation Record never replaces an ADR, a `PROJECT_LEDGER.md` entry, a
-commit, or a Pull Request — it sits alongside them, and the corresponding
-`PROJECT_LEDGER.md` entry links to it.
+Use only the sections required by the event.
 
-## Format
+Useful content may include:
 
-- File name: `YYYY-MM-DD-semantic-kebab-title.md` — semantic, not a roadmap
-  step (same naming rule as branches/commits/PRs; see
-  `documentation/README.md#naming-convention`).
-- Plain factual record: purpose, initial state, what was found, what was
-  done, verification performed, Git provenance (branch, commit), and explicit
-  scope limits — what the operation does **not** claim (e.g. it does not
-  integrate, does not validate, does not itself constitute a backup or a
-  scientific result).
-- Never include the content of files being backed up or protected, holdout
-  data, or scientific results in the record itself — reference paths and
-  hashes, not payloads.
-- A historical roadmap reference (e.g. `B5/B6`) may appear as metadata only,
-  never as the record's primary identity.
+- purpose
+- relevant initial state
+- what was found
+- what was done
+- verification performed
+- important paths or hashes
+- Git provenance when it materially helps reconstruction
+- explicit scope limits when a future reader could otherwise overinterpret the
+  operation
 
-## Related
+Do not add empty sections merely to follow a template.
 
-See `documentation/README.md` for how this fits the rest of the decision
-chain, and `documentation/decisions/README.md` for when something is an ADR
-instead.
+## Naming
+
+Use:
+
+`YYYY-MM-DD-semantic-kebab-title.md`
+
+The name must describe the operation itself. Historical roadmap identifiers may
+appear inside the record as provenance metadata when useful, but not as the
+record's primary identity.
+
+## Sensitive or unnecessary payloads
+
+Reference paths and hashes when they are sufficient. Do not copy holdout data,
+large backed-up payloads, or unrelated scientific results into an Operation
+Record merely for completeness.
+
+## Relationship to the rest of the documentation
+
+- [`PROJECT_LEDGER.md`](../PROJECT_LEDGER.md) may contain a compact chronological
+  pointer to an important operation.
+- [`decisions/`](../decisions/) records significant decisions and their
+  rationale.
+- [`SCIENTIFIC_STATE.md`](../SCIENTIFIC_STATE.md) records current scientific
+  interpretation and boundaries.
+
+Use the smallest set of documents that preserves the information that matters.

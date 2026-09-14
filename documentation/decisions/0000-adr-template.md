@@ -1,138 +1,103 @@
 # ADR-NNNN — <semantic title: what was decided>
 
-The three status fields are independent. No field mixes two axes.
+This template is a guide, not a mandatory schema.
 
-## Lifecycle status
+Delete any section that does not materially help explain the decision. Do not
+add empty, trivial, redundant, speculative, or `N/A` sections merely to make an
+ADR look complete.
 
-Decision lifecycle / governance status:
-
-`CURRENT` | `PROPOSED` | `HISTORICAL` | `SUPERSEDED` | `EXPERIMENTAL` | `DEPRECATED`
-
-## Integration status
-
-A fact about Git:
-
-`INTEGRATED (via PR #N)` | `NOT_INTEGRATED` | `WAS_INTEGRATED_REMOVED` | `N/A`
-
-## Epistemic status
-
-Whether the decision itself is sound. Use it for `SCIENTIFIC` and
-`TECHNICAL + SCIENTIFIC` decisions, and also for `TECHNICAL` decisions when
-there is an evidence-bearing claim about technical soundness or validation.
-`N/A` when no epistemic / evidential judgment is meaningful.
-
-`SUPPORTED` | `PARTIALLY_SUPPORTED` | `UNRESOLVED` | `N/A`
-
-A staging-branch decision can be `CURRENT` (lifecycle), `NOT_INTEGRATED` (Git),
-and `SUPPORTED` (evidence) at the same time.
-
-## Type
-
-`TECHNICAL` | `SCIENTIFIC` | `TECHNICAL + SCIENTIFIC`
+For many decisions, `Context`, `Decision`, `Rationale`, and `Consequences` are
+sufficient.
 
 ## Date
 
-Original date of the decision, if recoverable (ISO `YYYY-MM-DD`).
-Otherwise: `UNKNOWN — reconstructed retrospectively on YYYY-MM-DD`.
+Include the decision date when it is useful and recoverable.
+
+For a retrospective record, say that the date is reconstructed if the original
+date is uncertain.
 
 ## Context
 
-The situation and constraints in which the decision was taken.
-
-## Problem
-
-What problem existed. When it was identified.
-
-## Evidence
-
-What evidence demonstrated the problem (tests, artifacts, manifests, hashes,
-literature, logs, prior audits). Cite commits / files / line ranges.
-
-## Previous state
-
-How the project behaved before this decision.
+What situation, constraint, or scientific/technical need made the decision
+necessary?
 
 ## Decision
 
-What was changed, precisely.
+State the decision clearly enough that a future contributor can tell whether a
+proposed change follows or contradicts it.
 
 ## Rationale
 
-Why this option was chosen over the others.
+Why was this option chosen?
 
-## Alternatives considered
-
-Each alternative and why it was not chosen. If none are recoverable from the
-historical record, write `HISTORICAL_EVIDENCE_INSUFFICIENT` — do not invent
-alternatives.
+Do not invent rationale. If the original rationale cannot be recovered, write
+`RATIONALE_NOT_RECOVERABLE` and preserve only what the surviving evidence
+supports.
 
 ## Consequences
 
-What became different. Positive and negative.
+What important constraints, requirements, or trade-offs follow from the
+decision?
+
+---
+
+The sections below are optional. Add only the ones that materially improve the
+record.
+
+## Problem
+
+Use when the specific problem is not already clear from `Context`.
+
+## Evidence
+
+Use when evidence is central to understanding or defending the decision.
+Separate observed or executed evidence from interpretation.
+
+## Previous state
+
+Use when the earlier behaviour or interpretation is necessary to understand the
+change.
+
+## Alternatives considered
+
+Use only for alternatives that are actually supported by the historical or
+contemporaneous record.
+
+If historical evidence cannot reconstruct them, write
+`HISTORICAL_EVIDENCE_INSUFFICIENT` rather than manufacturing alternatives.
 
 ## Limitations
 
-Known limits of the decision as made.
-
-## Supersedes
-
-Earlier decision(s) this one replaces. Preserve, do not delete, the old
-decision: OLD STATE -> EVIDENCE -> NEW DECISION -> SUPERSEDED.
-
-## Superseded by
-
-Later decision(s) that replace this one, once they exist.
-
-## Related Issue
-
-Issue link, or `No historical Issue found`.
-
-## Related PR
-
-PR link, or `No historical PR found`.
-
-## Related commits
-
-SHAs (preserved; history is not rewritten).
-
-## Related data / artifacts
-
-Reference resources, snapshots, locks, fixtures affected.
-
-## Historical source
-
-Only for decisions reconstructed from a historical / staging branch.
-
-```
-Branch:
-Commit(s):
-Historical roadmap reference:   (e.g. B4.3 — secondary metadata only)
-```
+Use when the decision has important scientific, technical, or methodological
+boundaries that a future reader could otherwise overinterpret.
 
 ## Validation
 
-How we know it worked (tests, reproducibility checks, holdout reports,
-verifier runs).
+Use when executed validation or an explicit validation boundary is important to
+the decision.
 
-## Scientific impact
+Never describe planned validation as executed validation.
 
-Did it change a biological interpretation, an ontology field, a label, a
-partition, or a leakage risk? If not, say so.
+## Supersedes
 
-## Data impact
+Use only when this decision actually replaces a specific earlier decision.
+Link the earlier ADR or describe the earlier rule precisely.
 
-Did it change data, labels, partitions, or artifacts?
+## Related records
 
-## Reproducibility impact
+Use only when Issues, PRs, commits, artifacts, reports, or other records
+materially improve traceability.
 
-Did it change what can be reconstructed, and how?
+Do not duplicate repository state merely to maintain a second copy of what Git
+already records.
 
 ## Historical reconstruction note
 
-**Mandatory for retrospective ADRs.** State explicitly:
+Use for retrospective ADRs when it helps preserve the difference between:
 
-- which parts of this record are directly demonstrated by the Git / artifact
-  history;
-- which parts are inferred by the author;
-- which parts could not be recovered (`RATIONALE_NOT_RECOVERABLE`,
-  `HISTORICAL_EVIDENCE_INSUFFICIENT`).
+- what is directly demonstrated by surviving evidence
+- what is inferred
+- what could not be recovered
+
+Do not rewrite historical Git history or silently turn an inference into a
+historical fact.

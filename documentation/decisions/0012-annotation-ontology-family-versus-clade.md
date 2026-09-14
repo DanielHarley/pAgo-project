@@ -1,22 +1,4 @@
-# ADR-0012 — Annotation ontology: `ago_family` vs `pago_clade`; PIWI-RE is a family, never a clade
-
-## Lifecycle status
-
-`CURRENT`
-
-## Integration status
-
-`NOT_INTEGRATED` — the ontology document is staging (see
-`documentation/history/2026-08-31-pago-annotation-ontology-staging.md`).
-
-## Epistemic status
-
-`SUPPORTED` for the semantic separation. The future phylogenetic-placement
-protocol referenced by the ontology is `PROPOSED` and not executed.
-
-## Type
-
-`SCIENTIFIC`
+# ADR-0012 — Separate Argonaute family identity from pAgo phylogenetic clade
 
 ## Date
 
@@ -24,126 +6,84 @@ protocol referenced by the ontology is `PROPOSED` and not executed.
 
 ## Context
 
-pAgo annotations mix several orthogonal dimensions: whether a protein is an
-Argonaute at all, which biological family it belongs to, which phylogenetic
-clade (within the PAGO family), its domain architecture, and its catalytic
-status.
+pAgo annotation mixes several distinct concepts: whether a protein is an
+Argonaute at all, which family it belongs to, which phylogenetic clade applies
+within PAGO, its domain architecture, and its catalytic status.
 
-## Problem
-
-A computationally plausible label (a text hit, an architecture, a competitive-
-HMM score) can be silently promoted to biological identity, phylogenetic clade,
-or catalytic activity.
-
-## Evidence
-
-- `documentation/history/2026-08-31-pago-annotation-ontology-staging.md`:
-  `ago_family` has the vocabulary `PAGO`, `PIWI_RE`, `UNRESOLVED`; **"PIWI-RE is
-  a family-level assignment. It is not a pAgo clade."** `pago_clade` has
-  `LONG_A`, `LONG_B`, `SHORT`, `UNRESOLVED`, defined only within PAGO and only
-  by phylogenetic placement against the frozen reference tree plus three
-  calibrated likelihood-weight-ratio thresholds. `catalytic_site_status` is
-  fixed to `UNKNOWN` in pipeline version 1. "An architecture such as `MID_PIWI`
-  does not imply `pago_clade = SHORT`."
-- Staging commit `98e66c6` — *"(test) drop PIWI_RE from allowed clade values;
-  assert PIWI-RE rows are clade=UNRESOLVED"*: the test no longer accepts
-  `"PIWI_RE"` as a `clade` value and asserts every `ago_family == "PIWI_RE"`
-  row has `clade == "UNRESOLVED"`.
-- `documentation/history/2026-08-30-phase-a-audit.md` D5 — separate
-  `ago_family` (`PIWI_RE`) from `pago_clade`.
-- Primary literature: Burroughs, Iyer & Aravind 2013 (*Biology Direct* 8:13,
-  PMC3702460) — the PIWI-RE family; Ryazansky et al. 2018 — the LONG_A /
-  LONG_B / SHORT MID-PIWI clades. PIWI-RE is absent from Ryazansky.
-
-## Previous state
-
-Early fixtures / tests treated `PIWI_RE` as a value of `pago_clade`.
+Collapsing those concepts into one convenient label can turn weak or indirect
+evidence into an unsupported biological claim.
 
 ## Decision
 
-- `ago_family ∈ {PAGO, PIWI_RE, UNRESOLVED}` (biological identity).
-- `pago_clade ∈ {LONG_A, LONG_B, SHORT, UNRESOLVED}` (phylogenetic property,
-  only within PAGO, only by placement + three thresholds).
-- **PIWI-RE is a family, never a pAgo clade.** Every PIWI-RE row carries
-  `pago_clade = UNRESOLVED`.
-- Detection is a separate epistemic axis; a triage-only MID-PIWI / competitive-
-  HMM signal never becomes `DETECTED`; absence of a Pfam PIWI hit never sets
-  `NOT_DETECTED`.
-- Domain architecture does not imply a clade. `catalytic_site_status = UNKNOWN`
-  in v1.
+Keep the annotation dimensions separate:
+
+- `ago_family ∈ {PAGO, PIWI_RE, UNRESOLVED}`
+- `pago_clade ∈ {LONG_A, LONG_B, SHORT, UNRESOLVED}` and only applies within
+  the PAGO family
+- PIWI-RE is a family, never a pAgo clade
+- PIWI-RE references therefore carry `pago_clade = UNRESOLVED`
+- domain architecture does not by itself determine clade
+- a triage-only competitive-HMM signal does not automatically establish
+  Argonaute detection
+- absence of one Pfam PIWI hit does not automatically establish a biological
+  negative
+- catalytic-site annotation remains separate from family, clade, architecture,
+  and experimentally demonstrated catalytic activity
+
+The historical placement protocol described in the staging ontology should not
+be treated as experimentally or computationally validated merely because it was
+written down.
+
+## Evidence
+
+- the historical ontology explicitly defines PIWI-RE as a family-level
+  assignment rather than a pAgo clade
+- historical commit `98e66c6` removes `PIWI_RE` from allowed clade values and
+  requires PIWI-RE rows to use `clade = UNRESOLVED`
+- the Phase A audit records the same family/clade separation
+- Burroughs et al. 2013 describes the PIWI-RE family, while Ryazansky et al.
+  2018 provides the LONG_A/LONG_B/SHORT pAgo clade context
 
 ## Rationale
 
-Stated in the ontology and the audit: PIWI-RE is a divergent *family*
-(Burroughs 2013), not a clade inside the long/short pAgo MID-PIWI tree; keeping
-the axes disjoint prevents a convenient collapse of ambiguous evidence.
-
-## Alternatives considered
-
-`clade = "PIWI_RE"` (the earlier fixture convention, rejected by `98e66c6`);
-ignoring PIWI-RE entirely (rejected — it is a real family in the recall panel).
-`HISTORICAL_EVIDENCE_INSUFFICIENT` for other vocabularies.
+Family identity, phylogenetic clade, architecture, detection evidence, and
+catalytic activity answer different biological questions. Keeping them separate
+prevents one evidence source from silently being promoted into another kind of
+claim.
 
 ## Consequences
 
-- The recall panel selects the PIWI-RE stratum on `ago_family == "PIWI_RE"`,
-  not on `clade`.
-- The placement protocol must distinguish a family error (SHORT → PIWI-RE) from
-  an intra-pAgo error (SHORT → LONG_B).
-
-## Limitations
-
-Not integrated. The placement protocol (three thresholds, reference tree) is
-`PROPOSED`; no placement has been run. The ontology document is preserved under
-`documentation/history/` and is **not** the authoritative current ontology —
-that document will be written when the corresponding work is reintegrated.
+- query-recall stratification for PIWI-RE uses `ago_family`, not `pago_clade`
+- later placement/evaluation must distinguish a family-level error from an
+  intra-pAgo clade error
+- architecture-only evidence cannot be used to force a clade label
 
 ## Supersedes
 
-`PIWI_RE` treated as a value of `pago_clade` (early fixtures / tests).
+The early fixture convention that represented `PIWI_RE` as a value of
+`pago_clade`.
 
-## Superseded by
+## Limitations
 
-None.
-
-## Related Issue
-
-`No historical Issue found`.
-
-## Related PR
-
-`No historical PR found`.
-
-## Related commits
-
-`98e66c6`, `0fd283a`, `21793bc`.
-
-## Related data / artifacts
-
-`documentation/history/2026-08-31-pago-annotation-ontology-staging.md`;
-`tests/fixtures/query_recall_reference_set.csv` (staging).
+The historical staging ontology also describes a future phylogenetic-placement
+procedure and likelihood-weight thresholds. Writing that procedure did not by
+itself validate the reference tree, thresholds, or placement performance.
 
 ## Validation
 
-`test_committed_reference_set_is_well_formed` (staging) — rejects `"PIWI_RE"`
-as a `clade` value; asserts PIWI-RE rows are `clade == "UNRESOLVED"`.
+Historical tests reject `PIWI_RE` as a clade value and assert that PIWI-RE rows
+carry an unresolved pAgo clade.
 
-## Scientific impact
+## Related records
 
-Core of the annotation semantics: identity, clade, architecture and catalysis
-are kept distinct; PIWI-RE is fixed as a family.
-
-## Data impact
-
-Defines the label vocabularies. No candidate-protein label assigned yet.
-
-## Reproducibility impact
-
-None directly — it is a semantic contract.
+- historical `documentation/history/2026-08-31-pago-annotation-ontology-staging.md`
+- historical commit `98e66c6` and related recall-panel commits
+- `documentation/history/2026-08-30-phase-a-audit.md`
+- Burroughs et al. 2013 and Ryazansky et al. 2018
 
 ## Historical reconstruction note
 
-- Directly demonstrated: the ontology text, the `98e66c6` test change, the
-  audit, the primary papers.
-- Inferred: none material.
-- Not recoverable: the full deliberation over the vocabularies.
+- Directly demonstrated: historical ontology, test change, audit, and cited
+  primary literature.
+- Not recoverable: the complete historical deliberation over every ontology
+  vocabulary choice.
