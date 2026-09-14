@@ -505,6 +505,72 @@ Branch: `(docs)-reconstruct-historical-project-decisions`
 Reconstruction commits: `442a442`, `7622986`, `7ef7cbf`, `e0284d6`, `6e58e13`
 Provenance-reconciliation commits: `4ed0462`, `e605c37`, and this commit
 
+## 2026-09-14 — Protect local reference and validation staging files from accidental staging
+
+### Type
+TECHNICAL (process)
+
+### Lifecycle status
+CURRENT
+
+### Integration status
+NOT_INTEGRATED — branch `(chore)-protect-local-reference-validation-staging-files`.
+This entry is written from that branch, before the branch has a PR number and
+before any merge; it must not be read as a claim that this change is in
+`master`.
+
+### Epistemic status
+N/A
+
+### Problem
+Local reference and validation staging files could be accidentally included
+by broad Git staging. Fourteen local, untracked files implementing a
+not-yet-integrated reference-tree and profile/placement validation layer
+(clade-HMM builder, MID-PIWI reference-tree construction, domain/clade
+placement validation, and their tests/notebooks) exist only on local disk —
+absent from `master`, and absent from every branch's history including
+`(feat)-siepe-ready-project` (`git log --all` returns nothing for any of the
+fourteen paths) — and none of them was covered by any `.gitignore` rule. A
+routine `git add -A` run for an unrelated change could stage all fourteen into
+that change's commit.
+
+### Decision
+Protect exactly those local staging paths from ordinary Git staging, while
+preserving the files themselves and a verified external byte-for-byte backup.
+Add fourteen exact-path `.gitignore` entries (no glob pattern, to avoid
+matching any unrelated future file) for the fourteen files. Before touching
+`.gitignore`, copy all fourteen byte-for-byte to
+`%USERPROFILE%\Documents\pAgo-project-backups\2026-09-14-b5b6-pre-reintegration\`
+and confirm 14/14 SHA-256 and size equality between originals and copies (see
+that directory's own `MANIFEST.tsv` and `README.md`). No file was added,
+moved, deleted, executed, or opened for its scientific content. The
+`data/01-raw/**` default-deny rule from PR #29 is untouched, and `.gitattributes`
+is untouched.
+
+### Important
+This is a repository-safety decision, not a scientific decision about this
+reference and validation layer. It does not evaluate, endorse, or reject any
+claim in that code; it does not change any component's lifecycle, integration,
+or epistemic status; and the `.gitignore` rules it adds are not themselves a
+backup — the external copy is the backup, and its own `README.md` states that
+distinction explicitly. When any of these fourteen files is formally
+reintegrated through its own reviewed PR, that PR must remove or deliberately
+replace its `.gitignore` entry.
+
+### Sources
+PR: not yet opened at the time of this commit — see the branch below
+Branch: `(chore)-protect-local-reference-validation-staging-files`
+Commits: `7c9d243` (protection), plus a follow-up documentation commit adding
+the Operation Record below
+Operation Record:
+[`operations/2026-09-14-local-reference-validation-staging-protection.md`](operations/2026-09-14-local-reference-validation-staging-protection.md)
+— full forensic detail: the 14 paths, the old-manifest audit, the hash
+verification, and the backup this entry summarizes
+Historical roadmap reference: B5/B6 — see `SCIENTIFIC_STATE.md` §5 ("B5, B6
+and all final validation are not integrated"). This roadmap label identifies
+which staging milestone these fourteen files belong to; it is not the name of
+this decision, which is a staging-safety change, not a Phase B milestone.
+
 ---
 
 ## Local bibliographic material (not an authority)
