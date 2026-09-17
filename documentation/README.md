@@ -120,6 +120,35 @@ matters.
 
 Most ordinary code changes do not require changes to every documentation layer.
 
+## Documentation impact assessment
+
+Documentation changes are not mandatory for every PR. An explicit
+documentation impact assessment is mandatory before finalizing a substantive
+PR — one that changes scientific interpretation, reproducibility or
+provenance capability, or contains a durable decision or an exceptional
+operational event.
+
+A PR body recording *what changed* does not substitute for this assessment —
+it must also say whether that change shifts scientific interpretation,
+reproducibility capability, project chronology, or a durable decision.
+
+Ask explicitly, every time:
+
+1. Did current scientific interpretation change? → `SCIENTIFIC_STATE.md`
+2. Did the ability to reproduce or audit something change? → the relevant
+   document (often `SCIENTIFIC_STATE.md` or an ADR)
+3. Is this event important for understanding how the project reached its
+   current state? → `PROJECT_LEDGER.md`
+4. Was a durable technical, methodological, scientific, or
+   dataset-construction decision created or changed? → an ADR
+5. Did an exceptional operational event occur (recovery, migration, forensic
+   detail worth preserving)? → an Operation Record under `operations/`
+
+"No" is a valid answer to every question, and "no documentation changes
+required" is a valid outcome — but it must follow from asking, not from
+assuming the PR body already covers it. See
+`.github/pull_request_template.md`.
+
 ## ADRs
 
 ADRs inherit the principles in this README.

@@ -11,12 +11,6 @@ Roadmap identifiers go in "Related roadmap reference" below, as metadata only.
 
 ## Root cause
 
-## Decision type
-
-- [ ] Technical
-- [ ] Scientific
-- [ ] Technical + Scientific
-
 ## Evidence
 
 <!-- Tests, artifacts, manifests, hashes, literature, logs, prior audits. -->
@@ -63,10 +57,27 @@ Roadmap identifiers go in "Related roadmap reference" below, as metadata only.
 
 ## Related ADR
 
-## Documentation updated
+## Documentation impact assessment
 
-- [ ] `documentation/PROJECT_LEDGER.md`
-- [ ] `documentation/SCIENTIFIC_STATE.md`
-- [ ] `documentation/pago_annotation_ontology.md`
-- [ ] ADR added under `documentation/decisions/`
-- [ ] Not a decision event — Git history is sufficient
+Answer explicitly, even when every answer is "No" — see
+`documentation/README.md#documentation-impact-assessment`.
+
+- Current scientific interpretation changed?
+  - [ ] No
+  - [ ] Yes — `SCIENTIFIC_STATE.md` updated
+- Reproducibility or provenance capability changed?
+  - [ ] No
+  - [ ] Yes — relevant documentation updated
+- Important project-chronology event (not just "a PR merged")?
+  - [ ] No
+  - [ ] Yes — `PROJECT_LEDGER.md` updated
+- New or changed durable technical/methodological/scientific/dataset decision?
+  - [ ] No
+  - [ ] Yes — ADR added/updated under `documentation/decisions/`
+  - [ ] Existing ADR already covers it — explain below
+- Exceptional operational event (recovery, migration, forensic detail)?
+  - [ ] No
+  - [ ] Yes — Operation Record added/updated under `documentation/operations/`
+
+Rationale (required for any "Existing ADR already covers it", or any answer
+that is not self-evident from the PR body):
