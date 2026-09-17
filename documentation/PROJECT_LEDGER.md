@@ -279,6 +279,39 @@ Historical roadmap reference: B4.2.
 `experimental_anchor`, `experimental_anchor_name`, and `proposed_partition`
 from the historical catalog schema are not reproduced; see ADR-0015.
 
+## 2026-09-17 — Reintegrate the MID-PIWI high-similarity split groups
+
+### Summary
+The MID-PIWI high-similarity split groups — the second scientific unit of
+the historical `(feat)-siepe-ready-project` branch reintegrated to `master`
+— were rebuilt from the reintegrated Ryazansky catalog's 1,002 MID-PIWI
+regions using MMseqs2 (pinned at 18.8cc5c, bioconda) in the declared WSL/
+conda environment. The per-region and per-group assignments, the diagnostic-
+threshold report, and a provenance manifest are now versioned. The
+reconstruction reproduced every historically documented count exactly (701
+split groups, 697 eligible, 0 resolved cross-clade groups at 90/80, the
+AfAgo/SiAgo manual-review groups, and the 50%-identity diagnostic cross-clade
+observation) and was byte-identical across two independent MMseqs2 runs. The
+connected-component reducer is a small, deliberate, temporary duplicate of
+the historical APAZ reducer, which is not yet reintegrated; no partition
+(BUILD/CALIBRATION/FINAL_HOLDOUT), tree, placement, or HMM work was
+introduced.
+
+### Sources
+ADR-0013.
+PR #37 — `(feat) Reintegrate the MID-PIWI high-similarity split groups`.
+Historical commits `18c35e4`, `49651f1`.
+Historical roadmap reference: B4.3.
+
+### Notes
+The connected-component reducer duplicates (rather than imports) the
+historical `src/pago_pipeline/apaz_split_groups.py` logic, since that module
+is not yet reintegrated; see the module docstring in
+`src/pago_pipeline/clade_midpiwi_split_groups.py`. No new ADR was written for
+this duplication — it is an integration-ordering/engineering detail, not a
+scientific or dataset-construction decision, and ADR-0009/ADR-0013 already
+establish that APAZ and MID-PIWI share one high-similarity grouping method.
+
 ---
 
 ## Local bibliographic material

@@ -201,13 +201,38 @@ See ADR-0011 and ADR-0015.
 
 ### MID-PIWI high-similarity groups
 
-For the 1,002 extracted MID-PIWI regions, the historical 90/80 workflow produced
-701 groups, 697 of them eligible for later partitioning, with no resolved
-cross-clade group at the operational 90/80 threshold.
+The MID-PIWI high-similarity split groups are reintegrated and versioned:
+`src/pago_pipeline/resources/clade_seed/split_groups/midpiwi/` carries the
+per-region group assignment, the per-group labels, the 90/80 qualifying
+edges, a diagnostic-threshold report, and a provenance manifest;
+`scripts/derive_clade_midpiwi_split_groups.py` rebuilds them from the
+reintegrated Ryazansky catalog's MID-PIWI regions using MMseqs2 (pinned at
+18.8cc5c, bioconda) in the declared WSL/conda environment.
 
-A cross-clade component appears at a 50% identity diagnostic threshold. That
-observation is a similarity diagnostic only; it is not a phylogenetic inference
-and is not a reason by itself to relabel or quarantine the affected reference.
+For the 1,002 extracted MID-PIWI regions (984 unique), the 90/80 workflow
+produces 701 split groups (556 singletons, 145 multi-member, maximum group
+size 23), 697 of them eligible for later partitioning (`LONG_A` 165,
+`LONG_B` 139, `SHORT` 393), with no resolved cross-clade group at the
+operational 90/80 threshold. Fourteen groups contain an alias or
+exact-duplicate MID-PIWI region. Four groups contain only `UNRESOLVED`
+members, and two groups require manual review because they contain the
+AfAgo or SiAgo quarantine anchor (ADR-0011); neither is forced into a
+partition label.
+
+A cross-clade component appears only at a 50% identity diagnostic threshold
+(one 38-member group: 37 `LONG_B` members and one `LONG_A` member,
+`WP_076701676.1`). That observation is a similarity diagnostic only; it is
+not a phylogenetic inference, it does not change any `curated_pago_clade` or
+`curation_status`, and it is not a reason by itself to relabel or quarantine
+the affected reference.
+
+The split-group construction was reproduced byte-for-byte across two
+independent MMseqs2 runs on `master`, and its counts and committed file
+hashes match the historically documented values exactly. This reproducibility
+is computational: it demonstrates that the grouping procedure is
+deterministic given the declared tool/environment, not that the 90/80 rule
+defines homology, proves statistical independence between groups, or
+validates any clade label.
 
 See ADR-0013.
 
@@ -283,11 +308,12 @@ claims:
 - The 52,473-record acquisition execution remains local rather than versioned;
   that execution is not reproduced by a clean clone without rerunning external
   data or tools. The Ryazansky pAgo catalog and MID-PIWI extraction are
-  versioned and reproducible offline from frozen sources (see above); other
+  versioned and reproducible offline from frozen sources with no external
+  tool (see above); the MID-PIWI high-similarity split groups are versioned
+  and were reproduced deterministically, but rebuilding them from scratch
+  requires the declared MMseqs2/WSL environment contract below. Other
   historical reference-layer components (the Pfam HMM bundle, APAZ references
-  and profile HMMs, MID-PIWI high-similarity grouping) remain either not yet
-  reintegrated to `master` or dependent on external tools/data not distributed
-  with the repository.
+  and profile HMMs) remain not yet reintegrated to `master`.
 - SWeeP is not distributed with the repository, and later tools such as MMseqs2
   or EPA-ng require external environments. Reproducibility of those stages is
   conditional on the declared tool/environment contract.
