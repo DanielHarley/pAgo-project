@@ -185,6 +185,14 @@ other sections:
 
 Do not wrap the PR description in code fences unless explicitly asked to.
 
+This document is the structural authority for PR descriptions.
+`.github/pull_request_template.md` must reflect exactly the seven sections
+above and must not introduce additional `##` headings or a competing
+structure. The documentation impact assessment required by
+`documentation/README.md` remains mandatory for a substantive PR; its result
+belongs inside one of the seven sections above (typically `Notable
+implementation details`), not in a section of its own.
+
 ## Issues
 
 An Issue body uses exactly this section order and heading style, with no
