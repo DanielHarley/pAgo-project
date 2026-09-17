@@ -250,6 +250,35 @@ Operation Record:
 [`operations/2026-09-14-local-reference-validation-staging-protection.md`](operations/2026-09-14-local-reference-validation-staging-protection.md).
 Historical roadmap reference: B5/B6.
 
+## 2026-09-17 — Reintegrate the Ryazansky pAgo catalog and MID-PIWI extraction
+
+### Summary
+The Ryazansky 1,010-pAgo catalog and its MID-PIWI region extraction — the
+first scientific unit of the historical `(feat)-siepe-ready-project` branch
+reintegrated to `master` through the semantic-reintegration plan — were
+rebuilt on current `master`. The catalog's frozen sources, the resolved NCBI
+record-status snapshot, the frozen sequence FASTA, the provenance manifest,
+and the reconstruction script are now versioned, and the build was
+demonstrated to be reproducible offline from those frozen sources. The
+historical dependency on the (not-yet-reintegrated) query-recall reference
+panel was deliberately removed; the catalog's schema no longer carries the
+panel-dependent `experimental_anchor`/`experimental_anchor_name` columns — see
+ADR-0015. Remaining reference-layer work, including MID-PIWI high-similarity
+grouping, stays separate.
+
+### Sources
+ADRs: [0011](decisions/0011-ryazansky-1010-pago-catalog-and-mid-piwi-reference-extraction.md),
+[0015](decisions/0015-decouple-the-ryazansky-reference-catalog-from-the-query-recall-panel.md).
+PR #35 — `(feat) Reconcile the Ryazansky pAgo catalog and extract MID-PIWI
+regions`.
+Merge commit: `c6e3562fd4877ba023de24728e174e8b9114b121`.
+Historical commits `b7490e4`, `481d0c2`.
+Historical roadmap reference: B4.2.
+
+### Notes
+`experimental_anchor`, `experimental_anchor_name`, and `proposed_partition`
+from the historical catalog schema are not reproduced; see ADR-0015.
+
 ---
 
 ## Local bibliographic material
