@@ -178,3 +178,4 @@ normal merge.
 | [0012](0012-annotation-ontology-family-versus-clade.md) | Separate Argonaute family identity from pAgo phylogenetic clade |
 | [0013](0013-mid-piwi-high-similarity-split-groups.md) | Use MID-PIWI high-similarity split groups as future partition units |
 | [0014](0014-independent-piwi-re-reference-arm.md) | Require an independent PIWI-RE reference arm for detector validation |
+| [0015](0015-decouple-the-ryazansky-reference-catalog-from-the-query-recall-panel.md) | Decouple the Ryazansky reference catalog from the query-recall panel |

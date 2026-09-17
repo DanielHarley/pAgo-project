@@ -165,23 +165,39 @@ See ADR-0009 and ADR-0010.
 ### Ryazansky pAgo catalog and MID-PIWI regions
 
 Ryazansky Table S1 contains a 1,010-pAgo catalog before the paper's reported
-90%-identity redundancy reduction.
+90%-identity redundancy reduction. The catalog is reintegrated and versioned:
+`src/pago_pipeline/resources/clade_seed/` carries the frozen Table S1
+workbook, the Data Set S1/S2 diagnostic alignments, the PMC metadata, the
+resolved NCBI record-status snapshot, the frozen sequence FASTA, a source
+manifest with per-file md5/sha256, the built catalog CSV, and its summary;
+`scripts/build_clade_reference_catalog.py` rebuilds the catalog offline and
+deterministically from those frozen sources (`--reuse-frozen`).
 
-The historical reconstruction recovered sequences for all 1,010 accessions and
-extracted MID-PIWI regions for 1,002 of them after proving the coordinate
-convention from the table data.
+The reconstruction recovers sequences for all 1,010 accessions (1,010/1,010)
+and extracts MID-PIWI regions for 1,002 of them (984 unique regions; 972
+canonical and 38 truncated architectures) after proving the coordinate
+convention from the table data. This reproducibility is computational: it
+demonstrates that the catalog can be rebuilt bit-for-bit from its declared
+sources, not that any clade or curation label it carries has been
+phylogenetically, classifier-, or HMM-validated.
 
 The reusable mapping of the reported 721 nonredundant tree representatives, the
 MID-PIWI tree alignment, and the original Newick tree are not available as
 published supplementary artifacts. The project's own validated reference-tree
-construction and placement calibration therefore remain separate work.
+construction and placement calibration therefore remain separate, unresolved
+work (see Open scientific question 3); this catalog does not build or imply a
+tree.
 
-AfAgo and SiAgo are retained as unresolved where source clade and architecture
-conflict. NgAgo follows the Ryazansky `longA` source label; the older recall
-panel's LONG_B label is treated as a probable curation error rather than as a
-reason to rewrite the source catalog.
+AfAgo and SiAgo are retained as unresolved (`curated_pago_clade=UNRESOLVED`,
+`curation_status=QUARANTINE`) where source clade and architecture conflict.
+NgAgo follows the Ryazansky `longA` source label (`LONG_A`/`OK`); the older
+query-recall-panel LONG_B label is treated as a probable curation error rather
+than as a reason to rewrite the source catalog. These three outcomes are
+implemented as a small, explicit, ADR-0011-cited exception table rather than a
+live cross-check against the query-recall panel, which belongs to a separate,
+not-yet-reintegrated unit — see ADR-0015.
 
-See ADR-0011.
+See ADR-0011 and ADR-0015.
 
 ### MID-PIWI high-similarity groups
 
@@ -264,10 +280,14 @@ claims:
 
 ## Standing limitations
 
-- The 52,473-record acquisition execution and several reference-layer build
-  artifacts were local rather than versioned; exact historical executions are
-  therefore not reproduced by a clean clone without rerunning external data or
-  tools.
+- The 52,473-record acquisition execution remains local rather than versioned;
+  that execution is not reproduced by a clean clone without rerunning external
+  data or tools. The Ryazansky pAgo catalog and MID-PIWI extraction are
+  versioned and reproducible offline from frozen sources (see above); other
+  historical reference-layer components (the Pfam HMM bundle, APAZ references
+  and profile HMMs, MID-PIWI high-similarity grouping) remain either not yet
+  reintegrated to `master` or dependent on external tools/data not distributed
+  with the repository.
 - SWeeP is not distributed with the repository, and later tools such as MMseqs2
   or EPA-ng require external environments. Reproducibility of those stages is
   conditional on the declared tool/environment contract.
