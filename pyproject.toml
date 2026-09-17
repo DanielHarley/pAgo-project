@@ -18,3 +18,12 @@ dependencies = [
     "scipy",
     "tqdm",
 ]
+
+[project.optional-dependencies]
+# Curation / development only: not imported by the pipeline at runtime and
+# deliberately kept out of requirements.lock.txt.
+curation = [
+    # scripts/build_clade_reference_catalog.py: reads the Ryazansky 2018
+    # Table S1 .xls workbook.
+    "xlrd==2.0.2",
+]
