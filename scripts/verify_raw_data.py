@@ -12,6 +12,40 @@ if str(PROJECT_ROOT) not in sys.path:
 from src.pago_pipeline.storage import sha256_of_file, sha256_of_lines
 
 
+LFS_POINTER_VERSION_LINE = "version https://git-lfs.github.com/spec/v1"
+LFS_POINTER_MAX_BYTES = 1024
+
+
+def _read_lfs_pointer_sha256(path: Path) -> str | None:
+    if path.stat().st_size > LFS_POINTER_MAX_BYTES:
+        return None
+
+    try:
+        pointer_text = path.read_text(encoding="utf-8")
+    except UnicodeDecodeError:
+        return None
+
+    pointer_lines = [
+        line.strip() for line in pointer_text.splitlines() if line.strip()
+    ]
+    if not pointer_lines or pointer_lines[0] != LFS_POINTER_VERSION_LINE:
+        return None
+
+    oid_prefix = "oid sha256:"
+    for line in pointer_lines[1:]:
+        if not line.startswith(oid_prefix):
+            continue
+
+        candidate_sha256 = line[len(oid_prefix) :].strip().lower()
+        if len(candidate_sha256) != 64:
+            return None
+        if any(character not in "0123456789abcdef" for character in candidate_sha256):
+            return None
+        return candidate_sha256
+
+    return None
+
+
 def _read_nonempty_lines(path: Path) -> list[str]:
     return [line.strip() for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
 
@@ -51,6 +85,15 @@ def _verify_xml_file(snapshot_directory: Path, manifest: dict[str, object]) -> l
     xml_file_path = snapshot_directory / xml_file_name
     if not xml_file_path.exists():
         return [f"Missing XML file: {xml_file_path}"]
+
+    lfs_pointer_sha256 = _read_lfs_pointer_sha256(xml_file_path)
+    if lfs_pointer_sha256 is not None:
+        if lfs_pointer_sha256 != expected_sha256:
+            return [
+                "XML LFS pointer SHA-256 mismatch: "
+                f"{xml_file_path} expected {expected_sha256}, got {lfs_pointer_sha256}"
+            ]
+        return []
 
     actual_sha256 = sha256_of_file(input_file_path=xml_file_path)
     if actual_sha256 != expected_sha256:
@@ -93,7 +136,7 @@ def verify_raw_data(raw_data_root: Path) -> int:
         return 1
 
     print(
-        f"Verified {checked_file_count} raw data file hashes "
+        f"Verified {checked_file_count} raw data identities "
         f"from {len(manifest_file_paths)} manifests."
     )
     return 0

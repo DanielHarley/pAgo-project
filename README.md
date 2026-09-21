@@ -22,9 +22,11 @@ git clone <repo-url>
 cd pAgo-project
 ```
 
-### 2. Enable Git LFS
+### 2. Materialize raw XML snapshots only when needed
 
-Raw NCBI XML snapshots are tracked with Git LFS.
+Raw NCBI XML snapshots are tracked with Git LFS. Routine code development,
+tests, and CI can operate with the small LFS pointer files. Materialize the
+full raw XML bytes only when a workflow needs to inspect or reprocess them:
 
 ```powershell
 git lfs install
@@ -76,8 +78,11 @@ python scripts/verify_raw_data.py
 python -m unittest discover -s tests -q
 ```
 
-The raw-data verification checks local `data/01-raw` files against the SHA-256
-values recorded in snapshot manifests.
+The raw-data verification checks local `data/01-raw` identities against the
+SHA-256 values recorded in snapshot manifests. For a materialized XML file it
+hashes the file bytes. For an unmaterialized Git LFS pointer it compares the
+pointer's content-addressed SHA-256 OID with the manifest hash, so routine CI
+does not need to download the 363 MB raw XML object.
 
 ## Project configuration
 
