@@ -27,19 +27,27 @@ data/01-raw/
 
 ## Restoring data from a fresh clone
 
-Install Git LFS before cloning or pulling the repository data:
+A normal checkout may leave `protein_records.xml` as a Git LFS pointer. That
+is sufficient for repository-level identity verification because the pointer
+contains the SHA-256 OID of the exact raw object.
 
-```powershell
-git lfs install
-git lfs pull
-```
-
-Then verify that the local files match the recorded manifests:
+Verify the checked-out identities against the recorded manifests:
 
 ```powershell
 python scripts/verify_raw_data.py
 ```
 
-The verification checks the recorded SHA-256 values for `protein_uids.txt` and
-`protein_records.xml` wherever those files are referenced by a raw snapshot
+For an unmaterialized XML pointer, the verifier compares the LFS OID with the
+manifest's `xml_file_sha256`. To inspect, parse, or perform a full byte-level
+verification of the raw XML itself, materialize the object explicitly and run
+the same verifier again:
+
+```powershell
+git lfs install
+git lfs pull
+python scripts/verify_raw_data.py
+```
+
+The verification covers the recorded SHA-256 identities for `protein_uids.txt`
+and `protein_records.xml` wherever those files are referenced by a raw snapshot
 manifest.

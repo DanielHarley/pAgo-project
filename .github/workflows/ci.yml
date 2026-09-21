@@ -4,13 +4,16 @@ on:
   push:
   pull_request:
 
+env:
+  GIT_LFS_SKIP_SMUDGE: "1"
+
 jobs:
   environment:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
-          lfs: true
+          lfs: false
 
       - uses: actions/setup-python@v5
         with:
@@ -28,7 +31,7 @@ jobs:
         run: |
           python scripts/print_environment.py
 
-      - name: Verify raw data hashes
+      - name: Verify raw data identities
         run: |
           python scripts/verify_raw_data.py
 
@@ -41,7 +44,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          lfs: true
+          lfs: false
 
       - uses: actions/setup-python@v5
         with:
