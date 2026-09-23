@@ -342,6 +342,45 @@ byte-for-byte: the historical file had grown speculative verifiers for
 `apaz`/`clade`/`tree` scopes whose backing modules did not exist even at the
 commit that added them; only the `pfam` scope is implemented here.
 
+## 2026-09-23 — Reintegrate the APAZ reference set and partitions
+
+### Summary
+The APAZ reference-curation layer — historical commits `4d8aa99`, `620ff85`,
+and `45cc637`, reintegrated as one coherent unit because they share a single
+lock/schema (`apaz_partitions.csv`, `seeds_lock.json`) — was reinstated to
+`master`. The frozen Ryazansky Data Set S3 source (481 representatives),
+the HisG/EIIB Pfam hard-negative seed alignments, the canonical 90%
+identity/80% coverage split-group reducer, the 460/509/517 frozen split
+groups, and the deterministic FINAL_HOLDOUT-then-CALIBRATION-then-BUILD
+partition (positives 337/72/72; HisG 0/255/254; EIIB 0/259/258) were ported
+byte-for-byte and verified SHA-256-identical to the historical freeze. Two
+independent offline regenerations from the frozen sources (including the
+PyFAMSA 0.7.0 global BUILD alignment) reproduced every derived artifact
+byte-for-byte, both against each other and against the committed resources.
+Whole 90/80 groups never cross a partition, and HisG/EIIB never enter BUILD.
+No APAZ profile HMM was built and no predictive claim is made; that
+construction step (B3) remains separate and not yet reintegrated.
+
+### Sources
+ADR-0009.
+Historical commits `4d8aa99`, `620ff85`, `45cc637`.
+Historical roadmap reference: B2.
+
+### Notes
+Independent regeneration of the MMseqs2 90/80 split-group edges themselves
+(`scripts/derive_apaz_split_groups.py`, which needs MMseqs2 18.8cc5c in the
+declared WSL/conda environment) was not executed in this reintegration: no
+MMseqs2 installation was available in the session's environment. This does
+not affect the acceptance evidence, since the committed `split_groups/`
+resources are verified byte-identical to the historical commit and the
+frozen edge list is independently proven, by the ported test suite, to
+reproduce the committed `split_groups.csv` through the pure-Python reducer.
+The full historical procedure that enumerated every one of the eight
+reported v1 cross-partition leaks is not recoverable beyond the one worked
+example already in `curation_notes.md`; this is treated as an informational
+historical limitation, not a reintegration blocker, since v1 was never used
+for predictive evaluation and v2 is independently reproducible.
+
 ---
 
 ## Local bibliographic material
