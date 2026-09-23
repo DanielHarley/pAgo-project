@@ -381,6 +381,35 @@ example already in `curation_notes.md`; this is treated as an informational
 historical limitation, not a reintegration blocker, since v1 was never used
 for predictive evaluation and v2 is independently reproducible.
 
+## 2026-09-23 — Add deterministic APAZ profile HMM construction
+
+### Summary
+The repository gained the ability to deterministically construct, structurally
+validate, and snapshot the six APAZ profile HMMs (global, Ia, Ib, IIa, IIb,
+III) exclusively from the frozen BUILD seed alignments, under the pinned
+`pyhmmer==0.12.3` / `pyhmmer.plan7.Builder.build_msa` contract. Every written
+model is reopened from disk and structurally proven (single model, amino
+alphabet, expected name) before its SHA-256 is recorded, and CALIBRATION/
+FINAL_HOLDOUT accessions are rejected if found in a seed alignment. Two
+independent real builds from the committed BUILD seeds produced
+byte-identical output for all six models. The generated `.hmm` files are
+derived build artifacts, not versioned source-of-truth resources. No
+calibration, threshold selection, or final-holdout evaluation was performed.
+
+### Sources
+ADR-0010.
+PR — `(feat) Add deterministic APAZ profile HMM construction`.
+Historical commits `9e76e78`, `c11732a` (secondary provenance only — this
+capability is documented and named by what it currently adds to `master`,
+not by its historical roadmap step).
+
+### Notes
+`src/pago_pipeline/apaz_hmm_build.py` and `src/pago_pipeline/apaz_hmm_build_snapshot.py`
+ported from that historical evidence with no code adaptation required: both
+already matched the current APAZ reference schema (`apaz_partitions.csv`,
+`seeds_lock.json` format 2.0) and the current shared snapshot-directory
+helpers in `src/pago_pipeline/ncbi_snapshot.py`.
+
 ---
 
 ## Local bibliographic material
