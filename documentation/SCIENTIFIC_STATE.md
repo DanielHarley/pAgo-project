@@ -111,8 +111,14 @@ See ADR-0006.
 
 ### Pfam 38.2 bundle
 
-The selected Pfam 38.2 reference bundle contains ten version-pinned profiles:
-PIWI, PAZ, ArgoN, ArgoL1, ArgoL2, ArgoMid, SIR2, TIR_2, TIR, and Mrr_cat.
+The Pfam 38.2 reference bundle is reintegrated and versioned:
+`src/pago_pipeline/resources/pfam_hmm/` carries the ten version-pinned
+profiles — PIWI, PAZ, ArgoN, ArgoL1, ArgoL2, ArgoMid, SIR2, TIR_2, TIR, and
+Mrr_cat — and `pfam_hmm_bundle_lock.json` pins each profile's versioned
+accession and SHA-256 hash; `scripts/verify_reference_data.py --scope pfam`
+validates the lock, the accession/hash identity, and the structural HMM
+shape (single model, amino alphabet, expected accession/name) fully offline
+via PyHMMER 0.12.3, with no network access.
 
 Pinned accession versions and SHA-256 hashes establish reference identity and
 support reproducible integrity checks. Structural parsing or byte-level
@@ -311,9 +317,10 @@ claims:
   versioned and reproducible offline from frozen sources with no external
   tool (see above); the MID-PIWI high-similarity split groups are versioned
   and were reproduced deterministically, but rebuilding them from scratch
-  requires the declared MMseqs2/WSL environment contract below. Other
-  historical reference-layer components (the Pfam HMM bundle, APAZ references
-  and profile HMMs) remain not yet reintegrated to `master`.
+  requires the declared MMseqs2/WSL environment contract below. The Pfam 38.2
+  HMM bundle is versioned and verifiable offline from its committed lock (see
+  above). The APAZ reference set and profile HMMs remain not yet reintegrated
+  to `master`.
 - SWeeP is not distributed with the repository, and later tools such as MMseqs2
   or EPA-ng require external environments. Reproducibility of those stages is
   conditional on the declared tool/environment contract.
