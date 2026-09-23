@@ -149,24 +149,65 @@ requirement appears operational.
 
 See ADR-0009 and ADR-0013.
 
-### APAZ references and profile HMMs
+### APAZ reference set and partitions
+
+The APAZ reference set and its high-similarity partitions are reintegrated and
+versioned: `src/pago_pipeline/resources/apaz_seed/` carries the frozen
+Ryazansky Data Set S3 source, the HisG/EIIB Pfam hard-negative seed
+alignments, the per-dataset split-group resources, the five subgroup BUILD
+seeds and the PyFAMSA-reconstructed global BUILD alignment, the partition
+table, the validation FASTA, curation notes, and the `seeds_lock.json`
+provenance manifest; `src/pago_pipeline/apaz_split_groups.py` is the canonical
+connected-component reducer and partitioner, and
+`scripts/verify_reference_data.py --scope apaz` validates the whole chain
+offline.
 
 Ryazansky Data Set S3 contains 481 representative APAZ domains derived from 632
-sequences by a reported UCLUST 90% reduction.
+sequences by a reported UCLUST 90% reduction — a paper-reported reduction
+step, distinct from the project's own grouping below.
 
-The project's later high-similarity grouping of those 481 representatives
-produced 460 split groups. Whole groups are kept together when partitioning the
-reference set. HisG (`PF01634`) and EIIB (`PF00367`) are used as hard-negative
-families and do not enter the HMM BUILD references.
+The project's own high-similarity grouping of those 481 representatives, under
+the same 90% identity / 80% coverage rule described above, produced 460 split
+groups (440 singletons, 19 pairs, 1 triple). Whole split groups are assigned,
+never split, to FINAL_HOLDOUT first, then CALIBRATION, then BUILD (337 / 72 /
+72 positives, stratified by subgroup Ia/Ib/IIa/IIb/III). HisG (`PF01634`, 509
+sequences) and EIIB (`PF00367`, 517 sequences) are hard-negative Pfam
+families, each entirely singleton under the same 90/80 rule, and are
+partitioned only between CALIBRATION and FINAL_HOLDOUT (HisG 255/254, EIIB
+259/258) — they never enter BUILD.
 
-Six APAZ profile HMMs — global plus Ia, Ib, IIa, IIb, and III — are constructed
-from BUILD references only. Their deterministic construction and byte-level
-reproducibility do not constitute a performance evaluation.
+Whole-group partitioning reduces a specific near-duplicate leakage mechanism
+(near-identical sequences appearing on both sides of a development/evaluation
+split). It does not prove statistical independence between partitions, and it
+does not, by itself, establish HMM sensitivity or specificity. The
+FINAL_HOLDOUT partition is frozen; this reintegration verifies its membership,
+counts, and hashes, and does not redistribute or otherwise use its content for
+method development.
+
+The reconstruction was reproduced byte-for-byte from the frozen sources: two
+independent offline runs of `scripts/regenerate_apaz_reference.py` (including
+the PyFAMSA 0.7.0 global BUILD alignment) produced partitions, subgroup seeds,
+validation FASTA, and `seeds_lock.json` identical to the committed resources
+and to each other. The full historical procedure that enumerated every
+reported v1 cross-partition leak is not recoverable beyond the one documented
+worked example in `curation_notes.md`; v1 was never used for predictive
+evaluation, and v2 is independently reproducible and verifiable, so this gap
+is informational rather than a reintegration blocker.
+
+See ADR-0009.
+
+### APAZ profile HMMs
+
+Six APAZ profile HMMs — global plus Ia, Ib, IIa, IIb, and III — would be
+constructed from BUILD references only, per ADR-0010. This construction step
+is **not yet reintegrated** to `master`; only the reference set and partitions
+above are. Their eventual deterministic construction and byte-level
+reproducibility would not by themselves constitute a performance evaluation.
 
 No sensitivity, specificity, F1, or frozen predictive threshold result should
 be claimed from HMM construction alone.
 
-See ADR-0009 and ADR-0010.
+See ADR-0010.
 
 ### Ryazansky pAgo catalog and MID-PIWI regions
 
@@ -319,8 +360,13 @@ claims:
   and were reproduced deterministically, but rebuilding them from scratch
   requires the declared MMseqs2/WSL environment contract below. The Pfam 38.2
   HMM bundle is versioned and verifiable offline from its committed lock (see
-  above). The APAZ reference set and profile HMMs remain not yet reintegrated
-  to `master`.
+  above). The APAZ reference set and its high-similarity partitions are
+  versioned and were reproduced byte-for-byte from frozen sources, but
+  rebuilding the underlying split-group edges from scratch requires the
+  declared MMseqs2 18.8cc5c/WSL environment contract, and reconstructing the
+  global BUILD alignment requires the optional PyFAMSA 0.7.0
+  curation dependency. APAZ profile HMM construction remains not yet
+  reintegrated to `master`.
 - SWeeP is not distributed with the repository, and later tools such as MMseqs2
   or EPA-ng require external environments. Reproducibility of those stages is
   conditional on the declared tool/environment contract.
