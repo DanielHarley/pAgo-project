@@ -38,25 +38,49 @@ See ADR-0004 and the Phase A historical audit.
 
 ## Query-recall panel
 
-The query-recall panel contains 21 curated references: 14 pAgo references across
-LONG_A, LONG_B, and SHORT, plus 7 PIWI-RE references.
+The 21-reference query-recall panel is versioned under
+`src/pago_pipeline/resources/query_recall/` and can be verified offline from
+its lock: `query_recall_reference_panel.csv` carries the 14 PAGO and 7
+PIWI-RE references with their evidence tiers and sequence identities,
+`curation_notes.md` records provenance and the current/historical label
+reconciliation, and `panel_lock.json` pins file hashes and a
+machine-readable usage restriction; `scripts/verify_reference_data.py
+--scope query_recall` validates the whole chain, and
+`src/pago_pipeline/query_recall_reference_panel.py` is the canonical loader
+and invariant validator.
 
-It is a **query-coverage instrument**, not a classifier gold standard and not a
-final holdout.
+It is a **query-coverage instrument only** — not a classifier gold standard,
+not a detector benchmark, not a detector CALIBRATION set, and not a detector
+FINAL_HOLDOUT. This restriction is enforced by the lock's `intended_use`
+(`NCBI_QUERY_COVERAGE_AUDIT`) and `detector_validation_eligible` (`false`)
+fields, not only by prose.
 
-Reference matching keeps three distinct possibilities:
-
-1. exact `accession.version`
-2. the same base accession
-3. normalized-sequence SHA-256 equivalence
-
-Sequence-hash equivalence means that the same normalized protein sequence was
-retrieved under another accession. It does not by itself establish identical
-locus identity, record provenance, or biological context.
+Reference matching (exact `accession.version`, then the same base accession,
+then normalized-sequence SHA-256 equivalence) is **not** implemented by this
+resource; the panel currently versions only the reference data and its
+provenance. Sequence-hash equivalence, when that matching is implemented,
+means that the same normalized protein sequence was retrieved under another
+accession — it does not by itself establish identical locus identity,
+record provenance, or biological context.
 
 Six of the seven PIWI-RE panel references were selected using PIWI-RE profile
 models. They therefore cannot be reused uncritically as an independent
 validation set for a profile-based PIWI-RE detector; that would be circular.
+This restriction was already present in the panel's own historical curation
+notes ("not a validation holdout") and is now additionally enforced by the
+panel-wide `panel_lock.json` restriction above.
+
+The panel's current family/clade labels were reconciled against ADR-0011 and
+ADR-0012 rather than ported unchanged: AfAgo (`WP_010878815.1`) and SiAgo
+(`WP_012735993.1`) carry `pago_clade = UNRESOLVED` (quarantined, architecture
+conflicts with the Ryazansky phylogenetic clade), and NgAgo
+(`WP_005580376.1`) carries `pago_clade = LONG_A` (the historical panel's
+`LONG_B` label is treated as a probable curation error). TtAgo's
+`WP_011174533.1` accession-identity question remains open — see below. This
+is tracked by a dedicated `accession_curation_status = UNRESOLVED` field,
+independent of `verification_status`, which stays at its historical
+`verified` value: the open question is which accession is canonical, not the
+strength of evidence for TtAgo's biology.
 
 See ADR-0005 and ADR-0014.
 
@@ -257,8 +281,10 @@ NgAgo follows the Ryazansky `longA` source label (`LONG_A`/`OK`); the older
 query-recall-panel LONG_B label is treated as a probable curation error rather
 than as a reason to rewrite the source catalog. These three outcomes are
 implemented as a small, explicit, ADR-0011-cited exception table rather than a
-live cross-check against the query-recall panel, which belongs to a separate,
-not-yet-reintegrated unit — see ADR-0015.
+live cross-check against the query-recall panel. The panel is now itself
+versioned (see "Query-recall panel" above), but the catalog remains
+deliberately decoupled from it — see ADR-0015, which requires this decoupling
+to remain explicit in the current reference resource.
 
 See ADR-0011 and ADR-0015.
 
@@ -385,6 +411,13 @@ claims:
   constructed from those BUILD seeds under the pinned `pyhmmer==0.12.3`
   contract and were reproduced byte-for-byte across independent builds; model
   calibration and final-holdout predictive evaluation are not yet available.
+  The query-recall reference panel is versioned and verifiable offline from
+  its lock, but its 21 sequence hashes are historically derived and frozen,
+  not independently re-derived when this reference resource was added, and
+  the query-recall
+  *computation* itself (matching retrieved records against the panel,
+  recall metrics) is not yet implemented — only the reference data and its
+  provenance are currently versioned.
 - SWeeP is not distributed with the repository, and later tools such as MMseqs2
   or EPA-ng require external environments. Reproducibility of those stages is
   conditional on the declared tool/environment contract.
