@@ -6,6 +6,7 @@ numpy
 pandas
 plotly
 psutil
+pyhmmer==0.12.3
 python-dotenv
 requests
 scikit-learn
