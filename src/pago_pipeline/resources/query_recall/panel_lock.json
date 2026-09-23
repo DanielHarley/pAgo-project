@@ -1,0 +1,86 @@
+{
+  "artifact_type": "query_recall_reference_panel_lock",
+  "format_version": "1.0",
+  "panel_file": "query_recall_reference_panel.csv",
+  "panel_file_sha256": "3143c36ca2ba95812840654e6cd4069cb570854d073aba871f4257b115d2ab40",
+  "curation_notes_file": "curation_notes.md",
+  "curation_notes_sha256": "2444faa1a9adfa2d88337ebd00f6eb1d10708b983272ee8d18eedc84b7c90728",
+  "reference_count": 21,
+  "counts_by_ago_family": {
+    "PAGO": 14,
+    "PIWI_RE": 7
+  },
+  "counts_by_evidence_tier": {
+    "EXPERIMENTAL": 12,
+    "LITERATURE_PHYLOGENETIC": 3,
+    "CURATED_COMPUTATIONAL": 6,
+    "DATABASE_ANNOTATION": 0
+  },
+  "counts_by_verification_status": {
+    "verified": 16,
+    "provisional": 5
+  },
+  "counts_by_accession_curation_status": {
+    "RESOLVED": 20,
+    "UNRESOLVED": 1
+  },
+  "intended_use": "NCBI_QUERY_COVERAGE_AUDIT",
+  "forbidden_uses": [
+    "DETECTOR_VALIDATION",
+    "DETECTOR_CALIBRATION",
+    "DETECTOR_FINAL_HOLDOUT",
+    "CLASSIFIER_GOLD_STANDARD"
+  ],
+  "detector_validation_eligible": false,
+  "piwi_re_circularity_note": "6 of 7 PIWI_RE references were selected using PIWI-RE-specific profile/CDD evidence (pPIWI_RE_X PF13111, MID_pPIWI_RE PF18157, RNaseH_pPIWI_RE PF13032); scoring a profile-based PIWI-RE detector against them would be circular (ADR-0014). This restriction is pre-existing in the historical panel curation notes, not new to this lock.",
+  "schema_fields": [
+    "accession",
+    "protein_short_name",
+    "organism",
+    "ago_family",
+    "pago_clade",
+    "historical_query_recall_clade",
+    "sequence_sha256",
+    "sequence_length",
+    "uniprot_accession",
+    "reference_label_source",
+    "reference_label_evidence",
+    "verification_status",
+    "accession_curation_status",
+    "notes"
+  ],
+  "allowed_ago_family_values": [
+    "PAGO",
+    "PIWI_RE"
+  ],
+  "allowed_pago_clade_values": [
+    "LONG_A",
+    "LONG_B",
+    "SHORT",
+    "UNRESOLVED"
+  ],
+  "allowed_evidence_tier_values": [
+    "EXPERIMENTAL",
+    "LITERATURE_PHYLOGENETIC",
+    "CURATED_COMPUTATIONAL",
+    "DATABASE_ANNOTATION"
+  ],
+  "allowed_verification_status_values": [
+    "verified",
+    "provisional"
+  ],
+  "allowed_accession_curation_status_values": [
+    "RESOLVED",
+    "UNRESOLVED"
+  ],
+  "historical_source_branch": "(feat)-siepe-ready-project",
+  "historical_source_commit": "0013c6d24d90070ee297ba6af7d12d125ebd1732",
+  "historical_source_paths": [
+    "tests/fixtures/query_recall_reference_set.csv",
+    "tests/fixtures/query_recall_reference_set_curation_notes.md"
+  ],
+  "historical_source_sha256": {
+    "tests/fixtures/query_recall_reference_set.csv": "f16c2a136e362ee2f6483249af34ebf613be22b5f7fafe9297c91ec9be3885d6",
+    "tests/fixtures/query_recall_reference_set_curation_notes.md": "34eead28aad2628c3dc7583cd9d8c52af137a030312af85ab6f84060c0704ffc"
+  }
+}
