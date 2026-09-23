@@ -198,14 +198,30 @@ See ADR-0009.
 
 ### APAZ profile HMMs
 
-Six APAZ profile HMMs — global plus Ia, Ib, IIa, IIb, and III — would be
-constructed from BUILD references only, per ADR-0010. This construction step
-is **not yet reintegrated** to `master`; only the reference set and partitions
-above are. Their eventual deterministic construction and byte-level
-reproducibility would not by themselves constitute a performance evaluation.
+The repository provides deterministic construction of six APAZ profile HMMs —
+global plus Ia, Ib, IIa, IIb, and III — exclusively from the frozen BUILD seed
+alignments, per ADR-0010: `src/pago_pipeline/apaz_hmm_build.py` validates the
+full reference contract (seed-lock identity, partition-table hash, BUILD-only
+membership, global/subgroup consistency) via the existing APAZ partition and
+seed-consistency validators, builds each model with
+`pyhmmer.plan7.Builder.build_msa` under the pinned `pyhmmer==0.12.3` contract,
+strips volatile `COM`/`DATE` provenance, and reopens every written artifact
+from disk to prove it is a single, structurally valid, amino-alphabet model
+before recording its SHA-256; `src/pago_pipeline/apaz_hmm_build_snapshot.py`
+publishes the six models as an immutable, provenance-tracked snapshot only
+after every model is built and validated.
+
+The generated `.hmm` files are derived build artifacts, not versioned
+source-of-truth resources; the frozen BUILD seed alignments, partition table,
+and seed lock remain the reference of record. Deterministic construction and
+structural validity do not by themselves constitute a performance evaluation.
 
 No sensitivity, specificity, F1, or frozen predictive threshold result should
-be claimed from HMM construction alone.
+be claimed from HMM construction alone. Subgroup III has only 8 BUILD
+references; being able to construct its HMM says nothing about
+subgroup-specific performance. Calibration (model-strategy and threshold
+selection) and final-holdout evaluation remain separate, not-yet-established
+future work.
 
 See ADR-0010.
 
@@ -365,8 +381,10 @@ claims:
   rebuilding the underlying split-group edges from scratch requires the
   declared MMseqs2 18.8cc5c/WSL environment contract, and reconstructing the
   global BUILD alignment requires the optional PyFAMSA 0.7.0
-  curation dependency. APAZ profile HMM construction remains not yet
-  reintegrated to `master`.
+  curation dependency. The six APAZ profile HMMs are deterministically
+  constructed from those BUILD seeds under the pinned `pyhmmer==0.12.3`
+  contract and were reproduced byte-for-byte across independent builds; model
+  calibration and final-holdout predictive evaluation are not yet available.
 - SWeeP is not distributed with the repository, and later tools such as MMseqs2
   or EPA-ng require external environments. Reproducibility of those stages is
   conditional on the declared tool/environment contract.
