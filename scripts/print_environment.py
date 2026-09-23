@@ -7,6 +7,7 @@ import Bio
 import numpy
 import pandas
 import plotly
+import pyhmmer
 import scipy
 import sklearn
 
@@ -21,6 +22,7 @@ def main() -> None:
     print("scipy:", scipy.__version__)
     print("biopython:", Bio.__version__)
     print("plotly:", plotly.__version__)
+    print("pyhmmer:", pyhmmer.__version__)
 
 
 if __name__ == "__main__":

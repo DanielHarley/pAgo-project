@@ -312,6 +312,36 @@ this duplication — it is an integration-ordering/engineering detail, not a
 scientific or dataset-construction decision, and ADR-0009/ADR-0013 already
 establish that APAZ and MID-PIWI share one high-similarity grouping method.
 
+## 2026-09-23 — Reintegrate the Pfam 38.2 reference bundle
+
+### Summary
+The Pfam 38.2 HMM reference bundle — a third, independent scientific unit of
+the historical `(feat)-siepe-ready-project` branch, with no code or data
+dependency on the APAZ reference lineage — was reinstated to `master`. The ten
+version-pinned profiles (PIWI, PAZ, ArgoN, ArgoL1, ArgoL2, ArgoMid, SIR2,
+TIR_2, TIR, Mrr_cat) and their SHA-256 lock were ported byte-for-byte from the
+historical bundle and verified SHA-256-identical to it. `pyhmmer==0.12.3` was
+restored as a pinned runtime dependency, and `scripts/verify_reference_data.py
+--scope pfam` validates accession versioning, hash identity, and structural
+HMM shape fully offline. No claim of predictive sensitivity, specificity, or
+biological validity is made; the APAZ reference set and profile HMMs remain
+not yet reintegrated.
+
+### Sources
+ADR-0008.
+Historical commits `3de5f1b`, `69ca40e`.
+Historical roadmap reference: B0 (partial: the `pyhmmer` pin only), B1.
+
+### Notes
+Historical commit `3de5f1b` (B0) also touched unrelated `.gitignore` scratch-
+directory rules and other housekeeping not needed by any module currently on
+`master`; only its `pyhmmer==0.12.3` dependency pin was reinstated, since
+that is the only part of B0 with a real consumer in this reintegration.
+`scripts/verify_reference_data.py` was rewritten rather than ported
+byte-for-byte: the historical file had grown speculative verifiers for
+`apaz`/`clade`/`tree` scopes whose backing modules did not exist even at the
+commit that added them; only the `pfam` scope is implemented here.
+
 ---
 
 ## Local bibliographic material
