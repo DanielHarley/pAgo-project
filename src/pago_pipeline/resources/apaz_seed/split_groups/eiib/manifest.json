@@ -1,0 +1,43 @@
+{
+  "canonical_library": "src/pago_pipeline/apaz_split_groups.py",
+  "canonical_library_sha256": "0a535100cab7807d84be57492f3afbf5a70a4820e8f8452792a6f6ac74789ba0",
+  "connected_components_definition": "single-linkage union-find over 90/80 edges plus exact sequence_sha256 edges; component id = <prefix>_<sha256 of the newline-joined sorted member ids>[:16]",
+  "coverage_definition": "comparable_residue_columns / min(query_ungapped_len, target_ungapped_len)",
+  "coverage_threshold": 0.8,
+  "dataset": "eiib",
+  "derivation_script": "scripts/derive_apaz_split_groups.py",
+  "derivation_script_sha256": "390782fead990c1b91a634c2814d9637e305fc74247cb469f848d4ccb732e88c",
+  "duplicate_rule": "sequences sharing sequence_sha256 are unioned regardless of alignment",
+  "edges_90_80": 0,
+  "environment": {
+    "conda": "26.3.2",
+    "conda_env": "pago-linux",
+    "pago_linux_env_locked_yml_sha256": "8a52c5f27d8c7eff016f90ccf5d08502b67b3ed234f8224b5e8ac809add04375",
+    "pago_linux_explicit_lock_sha256": "aa362f3eabfadf86445061a2e01c6f903015138b4434b10aa18b18b2fe98ffcc",
+    "ubuntu": "24.04.4",
+    "wsl": "2.7.12.0"
+  },
+  "identity_definition": "identical_residue_columns / comparable_residue_columns",
+  "identity_threshold": 0.9,
+  "input_fasta_construction": "deterministic ungapped FASTA from the frozen source: id order sorted, 60-col wrap, LF, trailing newline",
+  "input_fasta_sha256": "e695867ebae13d800ad838420180df1850cd705dca4349a8552e9fa75b751500",
+  "max_group_size": 1,
+  "mmseqs2": {
+    "build": "hd6d6fdc_0",
+    "channel": "bioconda",
+    "version": "18.8cc5c"
+  },
+  "mmseqs_command": "mmseqs createdb in.fasta DB ; mmseqs search DB DB alnDB tmp --prefilter-mode 2 --max-seqs 100000 -e 1e100 --min-seq-id 0 -c 0 -a --alignment-mode 3 ; mmseqs convertalis DB DB alnDB pairs.raw.tsv --format-output \"query,target,qaln,taln,qlen,tlen,alnlen,nident,pident,fident,qstart,qend,tstart,tend,evalue,bits\"",
+  "mmseqs_search_log_sha256": "41b10826014874c7145103e62748c907f159169dc6609fd9238161a22557b500",
+  "multi_member_groups": 0,
+  "n_sequences": 517,
+  "n_split_groups": 517,
+  "pairs_filtered_tsv_sha256": "becfeba043504fe974a3e6805d05650ee2c7eb9fa299fc6101100fd1526bbd8e",
+  "pairs_raw_tsv_canonical_sha256": "48d02e0c8bac8c5d0290398670dc15e523021f6b3355d8a812c8349861c5bedd",
+  "pairs_raw_tsv_row_count": 267289,
+  "size_distribution": {
+    "1": 517
+  },
+  "split_group_method": "mmseqs2_all_vs_all_then_explicit_90_80_connected_components",
+  "split_groups_csv_sha256": "b5d4688c7bc5ff2938bc9ae43dc7a2ec963a4b51d433a24e889388d046a50bdb"
+}

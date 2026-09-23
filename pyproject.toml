@@ -24,6 +24,10 @@ dependencies = [
 # Curation / development only: not imported by the pipeline at runtime and
 # deliberately kept out of requirements.lock.txt.
 curation = [
+    # scripts/regenerate_apaz_reference.py: reconstructs apaz_global.sto from
+    # the frozen BUILD sequences. Reconstruction-only, never imported at
+    # runtime, and deliberately kept out of requirements.lock.txt.
+    "pyfamsa==0.7.0",
     # scripts/build_clade_reference_catalog.py: reads the Ryazansky 2018
     # Table S1 .xls workbook.
     "xlrd==2.0.2",

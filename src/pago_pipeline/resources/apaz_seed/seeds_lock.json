@@ -1,0 +1,268 @@
+{
+  "artifact_type": "apaz_seed_lock",
+  "canonical_library": {
+    "module": "src/pago_pipeline/apaz_split_groups.py",
+    "sha256": "0a535100cab7807d84be57492f3afbf5a70a4820e8f8452792a6f6ac74789ba0"
+  },
+  "connected_components_definition": "single-linkage union-find over 90/80 edges plus exact sequence_sha256 edges; component id = <prefix>_<sha256 of the newline-joined sorted member ids>[:16]",
+  "coverage_definition": "comparable_residue_columns / min(query_ungapped_len, target_ungapped_len)",
+  "coverage_threshold": 0.8,
+  "curation_notes": {
+    "path": "curation_notes.md",
+    "sha256": "f2f70953cc2a8cf5af125acb62dc1bf661b8ec1be78843283a0fe18b3ac6902d"
+  },
+  "curation_protocol_version": "apaz_reference_curation_v2",
+  "duplicate_sha256_rule": "sequences sharing sequence_sha256 are unioned regardless of alignment",
+  "environment": {
+    "conda": "26.3.2",
+    "conda_env": "pago-linux",
+    "pago_linux_env_locked_yml_sha256": "8a52c5f27d8c7eff016f90ccf5d08502b67b3ed234f8224b5e8ac809add04375",
+    "pago_linux_explicit_lock_sha256": "aa362f3eabfadf86445061a2e01c6f903015138b4434b10aa18b18b2fe98ffcc",
+    "ubuntu": "24.04.4",
+    "wsl": "2.7.12.0"
+  },
+  "files": [
+    {
+      "alignment_length": 173,
+      "alphabet": "amino",
+      "path": "apaz_III.sto",
+      "sequence_count": 8,
+      "sha256": "656f3f61cf35bbc140a5a89805318aade0a7262a2dfe1c9280abe1809a0be1da",
+      "subgroup": "III"
+    },
+    {
+      "alignment_length": 173,
+      "alphabet": "amino",
+      "path": "apaz_IIa.sto",
+      "sequence_count": 68,
+      "sha256": "120babc38869802220cc757a18fabcc9920d80ed7fc1e7ee33fc8bbe26110dac",
+      "subgroup": "IIA"
+    },
+    {
+      "alignment_length": 173,
+      "alphabet": "amino",
+      "path": "apaz_IIb.sto",
+      "sequence_count": 125,
+      "sha256": "ebe0d1dc3fb698d07078a790a812addf2b510484adf1b094c1c7195ddb800ea3",
+      "subgroup": "IIB"
+    },
+    {
+      "alignment_length": 173,
+      "alphabet": "amino",
+      "path": "apaz_Ia.sto",
+      "sequence_count": 59,
+      "sha256": "33f19b2c091e4ff59c7d8e35c6aa0361318db0482082053d4bc9499189afb287",
+      "subgroup": "IA"
+    },
+    {
+      "alignment_length": 173,
+      "alphabet": "amino",
+      "path": "apaz_Ib.sto",
+      "sequence_count": 77,
+      "sha256": "e95849a6776734e92ca5a8e29b897b00c4ae65fdcbcc50b251f65f4254086bbd",
+      "subgroup": "IB"
+    },
+    {
+      "alignment_length": 269,
+      "alphabet": "amino",
+      "path": "apaz_global.sto",
+      "sequence_count": 337,
+      "sha256": "258d3d4ee7593c3de85741f733b5dadc2a155faec6f10b616d938c3b3698c637",
+      "subgroup": "GLOBAL"
+    }
+  ],
+  "global_alignment_builder": {
+    "algorithm": "FAMSA 2 through PyFAMSA",
+    "guide_tree": "upgma",
+    "pyfamsa_version": "0.7.0"
+  },
+  "high_similarity_control_note": "A 90/80 split group is a high-similarity / redundancy control unit, NOT a claim that homology is absent below 90% identity.",
+  "identity_definition": "identical_residue_columns / comparable_residue_columns",
+  "identity_threshold": 0.9,
+  "lock_format_version": "2.0",
+  "mmseqs2": {
+    "build": "hd6d6fdc_0",
+    "channel": "bioconda",
+    "version": "18.8cc5c"
+  },
+  "mmseqs_command": "mmseqs createdb in.fasta DB ; mmseqs search DB DB alnDB tmp --prefilter-mode 2 --max-seqs 100000 -e 1e100 --min-seq-id 0 -c 0 -a --alignment-mode 3 ; mmseqs convertalis DB DB alnDB pairs.raw.tsv --format-output query,target,qaln,taln,qlen,tlen,alnlen,nident,pident,fident,qstart,qend,tstart,tend,evalue,bits",
+  "negative_source_files": [
+    {
+      "family_accession": "PF01634",
+      "family_name": "HisG",
+      "path": "source_data/PF01634.seed.sto",
+      "pfam_seed_name": "HisG",
+      "sequence_count": 509,
+      "sha256": "246c681a3461ab27936bd361477e38bad647c6e13d8cbc1db8fd5bb851844a5b",
+      "versioned_family_accession": "PF01634.24"
+    },
+    {
+      "family_accession": "PF00367",
+      "family_name": "EIIB",
+      "path": "source_data/PF00367.seed.sto",
+      "pfam_seed_name": "PTS_EIIB",
+      "sequence_count": 517,
+      "sha256": "48509a1416e1aa1edc85b30d6b66697f0052baa0ed95dcf344f9414be54a2867",
+      "versioned_family_accession": "PF00367.26"
+    }
+  ],
+  "partition_counts": {
+    "APAZ": {
+      "BUILD": 337,
+      "CALIBRATION": 72,
+      "FINAL_HOLDOUT": 72
+    },
+    "HARD_NEGATIVE": {
+      "CALIBRATION": 514,
+      "FINAL_HOLDOUT": 512
+    }
+  },
+  "partition_policy": {
+    "duplicate_grouping": "sequence_sha256 union applied before any alignment edge",
+    "fill_order": [
+      "FINAL_HOLDOUT",
+      "CALIBRATION",
+      "BUILD"
+    ],
+    "negative_target_counts_by_family": {
+      "PF00367": {
+        "BUILD": 0,
+        "CALIBRATION": 259,
+        "FINAL_HOLDOUT": 258
+      },
+      "PF01634": {
+        "BUILD": 0,
+        "CALIBRATION": 255,
+        "FINAL_HOLDOUT": 254
+      }
+    },
+    "positive_partition_fractions": {
+      "BUILD": 0.7,
+      "CALIBRATION": 0.15,
+      "FINAL_HOLDOUT": 0.15
+    },
+    "positive_partition_unit": "mmseqs2_90_80_split_group",
+    "positive_source_alignment_columns": "subgroup seeds keep the Ryazansky S3 columns; the global BUILD MSA is independently reconstructed with PyFAMSA",
+    "positive_target_counts_by_subgroup": {
+      "III": {
+        "BUILD": 8,
+        "CALIBRATION": 2,
+        "FINAL_HOLDOUT": 2
+      },
+      "IIa": {
+        "BUILD": 68,
+        "CALIBRATION": 15,
+        "FINAL_HOLDOUT": 15
+      },
+      "IIb": {
+        "BUILD": 125,
+        "CALIBRATION": 27,
+        "FINAL_HOLDOUT": 27
+      },
+      "Ia": {
+        "BUILD": 59,
+        "CALIBRATION": 12,
+        "FINAL_HOLDOUT": 12
+      },
+      "Ib": {
+        "BUILD": 77,
+        "CALIBRATION": 16,
+        "FINAL_HOLDOUT": 16
+      }
+    },
+    "row_order_independence": "build_split_groups and partition_split_groups are invariant to input order",
+    "selection_order_key": "sha256(PARTITION_SALT | stratum | split_group_id | partition)",
+    "stratification": "positives by Ryazansky APAZ subgroup Ia/Ib/IIa/IIb/III; negatives by Pfam family",
+    "subset_sum_policy": "deterministic DFS over whole split groups in selection-order, INCLUDE-before-EXCLUDE, prune on overshoot and on insufficient suffix sum; first exact hit wins; abort (no silent adjustment) if no exact combination exists",
+    "tie_break": "lexicographic on the selection_order_key sha256"
+  },
+  "partition_protocol": "apaz_partition_v2_mmseqs90_80",
+  "partition_salt": "pago-phase-b-apaz-partitions-v2-mmseqs90_80",
+  "partitions_file": {
+    "path": "apaz_partitions.csv",
+    "sha256": "e3fb33c1afa7cf601f282177c62a75c9eda6702017af0840c94478a1d60560bb"
+  },
+  "pfam_release": "38.2",
+  "regeneration_script": {
+    "script": "scripts/regenerate_apaz_reference.py",
+    "sha256": "360525f303c389df9a571500d3a258d06fb2d4f727b857d178080b04c00a74f4"
+  },
+  "source_alignment": {
+    "article_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6299218/",
+    "license": "CC-BY-4.0",
+    "md5": "ac30768ca799feb85165cea9d11aa3e2",
+    "path": "source_data/mbo006184236sd3.txt",
+    "sha256": "a591e80ba5ea79eec0d7f8736122b8cfb67592496e0033196d8381766c151247"
+  },
+  "source_metadata": {
+    "path": "source_data/PMC6299218.1.metadata.json",
+    "sha256": "89aa43f27ebb729d388abfe6e6098f8e02d7dc9095cb63b4f6e5e3bc3f8385cb"
+  },
+  "split_group_method": "mmseqs2_all_vs_all_then_explicit_90_80_connected_components",
+  "split_group_resources": {
+    "apaz": {
+      "manifest_json": {
+        "path": "split_groups/apaz/manifest.json",
+        "sha256": "a332cb36feec9a6e4991cc67ac568fd36ed9b5be928a75a917328736fb259f32"
+      },
+      "mmseqs_search_log": {
+        "path": "split_groups/apaz/mmseqs_search.log",
+        "sha256": "b292facefd170436c8a767f4de6e834d845880bd5c31e814ce9508050e3fc02f"
+      },
+      "pairs_filtered_tsv": {
+        "path": "split_groups/apaz/pairs.filtered.tsv",
+        "sha256": "1e1fe9e0fb2c377465e2194a974525f8dbb33ec1fde2cb54866bf72241cf5c07"
+      },
+      "split_groups_csv": {
+        "path": "split_groups/apaz/split_groups.csv",
+        "sha256": "9d4ac0edce305e8d99c9bd791d0b14c2d389fd38e0e0ae55bd89f68e5ce3d868"
+      }
+    },
+    "eiib": {
+      "manifest_json": {
+        "path": "split_groups/eiib/manifest.json",
+        "sha256": "98226f01b8d2f7451534012d37d8ae92346b1dd3a7d1ccd56a987414abb2cd93"
+      },
+      "mmseqs_search_log": {
+        "path": "split_groups/eiib/mmseqs_search.log",
+        "sha256": "41b10826014874c7145103e62748c907f159169dc6609fd9238161a22557b500"
+      },
+      "pairs_filtered_tsv": {
+        "path": "split_groups/eiib/pairs.filtered.tsv",
+        "sha256": "becfeba043504fe974a3e6805d05650ee2c7eb9fa299fc6101100fd1526bbd8e"
+      },
+      "split_groups_csv": {
+        "path": "split_groups/eiib/split_groups.csv",
+        "sha256": "b5d4688c7bc5ff2938bc9ae43dc7a2ec963a4b51d433a24e889388d046a50bdb"
+      }
+    },
+    "hisg": {
+      "manifest_json": {
+        "path": "split_groups/hisg/manifest.json",
+        "sha256": "4e8ee174ea76f52b0c797ec971e378bb437134135cd5f09e484b35ac717fce65"
+      },
+      "mmseqs_search_log": {
+        "path": "split_groups/hisg/mmseqs_search.log",
+        "sha256": "f8471dcf7e4cb99ee352bc2313f7b1e0c31be8e33048e30fb6c7af24a6a72168"
+      },
+      "pairs_filtered_tsv": {
+        "path": "split_groups/hisg/pairs.filtered.tsv",
+        "sha256": "becfeba043504fe974a3e6805d05650ee2c7eb9fa299fc6101100fd1526bbd8e"
+      },
+      "split_groups_csv": {
+        "path": "split_groups/hisg/split_groups.csv",
+        "sha256": "9b6865a8f2ba5f38bd8ab2a9144dfd020a05bf727c2f2646983715e306a92dfd"
+      }
+    }
+  },
+  "supersedes": {
+    "curation_protocol_version": "apaz_reference_curation_v1",
+    "note": "v1 keyed the split unit on a hash of the accession and was never used for predictive evaluation; superseded by the MMseqs2 90/80 split-group unit.",
+    "partition_protocol": "apaz_partition_v1"
+  },
+  "validation_sequences_file": {
+    "path": "apaz_validation_sequences.fasta",
+    "sequence_count": 1170,
+    "sha256": "42440a6837e14952252a5332f1f9c9a4541e2b173e04c61409eab256df00daa1"
+  }
+}
