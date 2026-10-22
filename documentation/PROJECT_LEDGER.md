@@ -454,6 +454,44 @@ fully offline. RsAgo's reference accession (`ABP72561.1`) was kept as-is,
 not swapped to its byte-identical alias (`A4WYU7.1`); computing that
 equivalence is the responsibility of the future query-recall-computation PR.
 
+## 2026-10-22 — Compute NCBI query recall against the curated reference panel
+
+### Summary
+The repository gained the ability to measure how many rows of the versioned
+query-recall panel an NCBI retrieval recovers, and to pin each measurement as
+an immutable snapshot. Each panel row is resolved by exact `accession.version`,
+the same base accession, or normalized-sequence SHA-256 equivalence, and two
+readings are reported per stratum: `same_accession_recall` (the two accession
+tiers) and `retrieval_equivalent_recall` (the union of all three). Recall is
+stratified over `LONG_A`, `LONG_B`, `SHORT`, `PAGO_UNRESOLVED_CLADE` and
+`PIWI_RE`, which partition the panel exhaustively and without overlap, plus an
+`overall` stratum covering the complete panel. The denominator is the number of
+panel rows. No panel resource was changed, no
+sequence hash was re-derived, and no network access was added.
+
+### Sources
+ADR-0005, ADR-0011, ADR-0012, ADR-0014, ADR-0017.
+PR — `(feat) Compute NCBI query recall against the curated reference panel`.
+Historical commits `599a111`, `d21f25a`, `0fd283a`, `21793bc`, `98e66c6`,
+`34c0ca6`, `0013c6d` (secondary provenance only — this capability is documented
+and named by what it currently adds to `master`).
+
+### Notes
+The historical implementation was adapted rather than ported. It required an
+overloaded `clade` column that the current panel does not have, and its single
+clade filter could not express the family-and-clade predicate the current
+ontology requires, which would have left the two quarantined PAGO references
+outside every stratum. Four defects were corrected: a retrieved accession that
+had lost its version suffix was counted as same-accession recovery; a missing
+sequence column produced an unevaluated equivalent reading marked `EVALUABLE`;
+the reported protein UID depended on row order; and a `pandas.NA` cell
+stringified into a five-character "sequence" that was hashed and counted as
+evidence. ADR-0017 records the resulting evidence-admissibility and
+incomplete-evidence policies. Output serialization uses
+`storage.write_csv_rows_atomic` rather than `DataFrame.to_csv`, whose line
+terminator follows the platform and whose missing-value rendering would make a
+hashed artifact differ between Linux and Windows.
+
 ---
 
 ## Local bibliographic material

@@ -55,13 +55,75 @@ FINAL_HOLDOUT. This restriction is enforced by the lock's `intended_use`
 (`NCBI_QUERY_COVERAGE_AUDIT`) and `detector_validation_eligible` (`false`)
 fields, not only by prose.
 
-Reference matching (exact `accession.version`, then the same base accession,
-then normalized-sequence SHA-256 equivalence) is **not** implemented by this
-resource; the panel currently versions only the reference data and its
-provenance. Sequence-hash equivalence, when that matching is implemented,
-means that the same normalized protein sequence was retrieved under another
-accession — it does not by itself establish identical locus identity,
-record provenance, or biological context.
+Reference matching and recall computation are implemented in
+`src/pago_pipeline/query_reference_recall.py`, with
+`src/pago_pipeline/query_reference_recall_snapshot.py` pinning each measurement
+as an immutable snapshot. Each panel row is resolved by one of exact
+`accession.version`, the same base accession, or normalized-sequence SHA-256
+equivalence. Sequence-hash equivalence means that the same normalized protein
+sequence was retrieved under another accession — it does not by itself
+establish identical locus identity, record provenance, or biological context.
+
+Two readings are reported, and they answer different questions:
+
+- `same_accession_recall` is the fraction of panel rows in the stratum whose
+  recovery is demonstrated by the **admissible identifiers available** in the
+  retrieved metadata. It counts the two accession tiers, so it means "the
+  retrieval returned the same accession", deliberately allowing a different
+  version of that accession — not literal `accession.version` equality. A
+  negative is **not** proof that the record was absent from the retrieval: an
+  identifier that is missing, unversioned or malformed is excluded from the
+  accession tiers, and the recorded count of such rows is what qualifies the
+  reading.
+- `retrieval_equivalent_recall` is the **union** of all three admitted tiers. A
+  value of 1.0 does **not** establish that the retrieved sequences are
+  identical to the reference sequences: a row may be counted through accession
+  identity alone, under a different record version, carrying a different
+  sequence. The per-reference `match_method` is the only field that states how a
+  row was recovered.
+
+The denominator is the number of **panel rows** in the stratum — not distinct
+accessions and not distinct protein sequences. Two rows may legitimately share
+one protein sequence, in which case one retrieved sequence recovers both; such
+groups are reported rather than rejected, so the figure is not read as several
+distinct proteins.
+
+Recall is reported over six strata: `overall`, plus `LONG_A`, `LONG_B`,
+`SHORT` and `PAGO_UNRESOLVED_CLADE` selected on `ago_family = PAGO` together
+with `pago_clade`, plus `PIWI_RE` selected on `ago_family` (ADR-0012). The
+five non-`overall` strata partition the panel exhaustively, and the current
+composition is 9 LONG_A, 1 LONG_B, 2 SHORT, 2 PAGO with an unresolved clade,
+and 7 PIWI-RE. ADR-0005 describes the panel as 14 pAgo references across
+LONG_A, LONG_B and SHORT; that was the composition before ADR-0011's
+quarantine and ADR-0012's family/clade separation re-partitioned those 14 rows,
+and two of them now carry no resolved clade. Because `LONG_B` holds exactly one
+reference, its recall takes only the values 0.0 and 1.0 and is not comparable
+to recall figures computed over the earlier partition.
+
+Sequence evidence is measured, not assumed. A missing required metadata column
+is an error; a present column with missing values is recorded, and the
+equivalent reading is marked a lower bound for a stratum when the evidence is
+incomplete **and** that stratum is not already fully recovered. A stratum whose
+references are all recovered has a determined value regardless of evidence
+missing elsewhere. See ADR-0017 for what counts as admissible evidence.
+
+A verified snapshot establishes file integrity, reproducibility of the written
+measurement, and that the matching methodology is unchanged. It does **not**
+establish that the panel's 21 frozen sequence hashes are the true hashes of the
+true NCBI sequences: those are historically derived and not re-derived here, so
+a wrong stored hash would produce a false sequence-equivalence match that no
+integrity check can detect. RsAgo's hash in particular was derived from the
+sequence of its byte-identical alias `A4WYU7.1` in the original retrieval, so
+its sequence-equivalent recovery against that same source is not independent
+confirmation of the panel's sequence identity.
+
+The convenience `latest/` copy of a snapshot is published by populating a
+temporary directory, removing the existing copy and renaming. That guarantees
+`latest/` is never partially populated; it is **not** atomic, so a failure in
+that window leaves `latest/` absent. The immutable snapshot under
+`snapshots/<name>/` is complete, hashed and manifested before `latest/` is
+touched, so it remains the source of truth and the next run recreates the
+convenience copy.
 
 Six of the seven PIWI-RE panel references were selected using PIWI-RE profile
 models. They therefore cannot be reused uncritically as an independent
@@ -82,7 +144,7 @@ independent of `verification_status`, which stays at its historical
 `verified` value: the open question is which accession is canonical, not the
 strength of evidence for TtAgo's biology.
 
-See ADR-0005 and ADR-0014.
+See ADR-0005, ADR-0014 and ADR-0017.
 
 ## Legacy metadata-derived QC
 
@@ -412,12 +474,11 @@ claims:
   contract and were reproduced byte-for-byte across independent builds; model
   calibration and final-holdout predictive evaluation are not yet available.
   The query-recall reference panel is versioned and verifiable offline from
-  its lock, but its 21 sequence hashes are historically derived and frozen,
-  not independently re-derived when this reference resource was added, and
-  the query-recall
-  *computation* itself (matching retrieved records against the panel,
-  recall metrics) is not yet implemented — only the reference data and its
-  provenance are currently versioned.
+  its lock, and query recall against it is now computed and pinned as an
+  immutable snapshot. Its 21 sequence hashes remain historically derived and
+  frozen, not independently re-derived, so a sequence-equivalent match is only
+  as good as the stored reference hash; a measurement is reproducible and
+  integrity-checked without that hash being independently confirmed.
 - SWeeP is not distributed with the repository, and later tools such as MMseqs2
   or EPA-ng require external environments. Reproducibility of those stages is
   conditional on the declared tool/environment contract.
