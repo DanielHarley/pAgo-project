@@ -86,4 +86,4 @@ jobs:
 
       - name: Run Windows snapshot reuse and PyHMMER tests
         run: |
-          python -m unittest tests.test_sweep_genes_snapshot tests.test_pca_kmeans_snapshot tests.test_pfam_hmm_bundle tests.test_pfam_hmm_bundle_snapshot tests.test_apaz_split_groups tests.test_apaz_hmm_build tests.test_apaz_hmm_build_snapshot tests.test_query_recall_reference_panel
+          python -m unittest tests.test_sweep_genes_snapshot tests.test_pca_kmeans_snapshot tests.test_pfam_hmm_bundle tests.test_pfam_hmm_bundle_snapshot tests.test_apaz_split_groups tests.test_apaz_hmm_build tests.test_apaz_hmm_build_snapshot tests.test_query_recall_reference_panel tests.test_query_reference_recall tests.test_query_reference_recall_snapshot
