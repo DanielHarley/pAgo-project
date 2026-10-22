@@ -180,3 +180,4 @@ normal merge.
 | [0014](0014-independent-piwi-re-reference-arm.md) | Require an independent PIWI-RE reference arm for detector validation |
 | [0015](0015-decouple-the-ryazansky-reference-catalog-from-the-query-recall-panel.md) | Decouple the Ryazansky reference catalog from the query-recall panel |
 | [0016](0016-keep-large-raw-xml-lfs-objects-out-of-routine-ci-checkouts.md) | Keep large raw XML LFS objects out of routine CI checkouts |
+| [0017](0017-admissible-evidence-and-incomplete-evidence-in-query-recall-measurement.md) | Define admissible evidence and incomplete-evidence reporting for query-recall measurement |
