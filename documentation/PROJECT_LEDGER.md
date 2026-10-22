@@ -410,6 +410,50 @@ already matched the current APAZ reference schema (`apaz_partitions.csv`,
 `seeds_lock.json` format 2.0) and the current shared snapshot-directory
 helpers in `src/pago_pipeline/ncbi_snapshot.py`.
 
+## 2026-09-23 — Add curated references for NCBI query-recall auditing
+
+### Summary
+The repository gained a versioned, offline-verifiable 21-reference panel
+(14 PAGO, 7 PIWI-RE) for auditing how well an NCBI text query recovers known
+pAgo/PIWI-RE proteins, under `src/pago_pipeline/resources/query_recall/`.
+The panel's current family/clade labels were reconciled against ADR-0011 and
+ADR-0012 rather than ported unchanged: AfAgo and SiAgo now carry
+`pago_clade = UNRESOLVED` (architecture/Ryazansky-clade conflict,
+quarantined), NgAgo carries `pago_clade = LONG_A` (the historical `LONG_B`
+label is a probable curation error), and TtAgo's still-open accession-identity
+question (`SCIENTIFIC_STATE.md`) is now tracked by a dedicated
+`accession_curation_status = UNRESOLVED` field, independent of
+`verification_status`, which stays at its historical `verified` value. The
+panel's lock encodes a machine-verifiable
+restriction (`intended_use = NCBI_QUERY_COVERAGE_AUDIT`,
+`detector_validation_eligible = false`): it is a query-coverage instrument
+only, never a classifier gold standard or a detector CALIBRATION/
+FINAL_HOLDOUT set — a restriction already present in the panel's own
+historical curation notes, not a new one invented for this PR. No
+query-recall computation (matching retrieved records, recall metrics) was
+implemented; that remains separate, future work. The Ryazansky reference
+catalog remains decoupled from this panel, per ADR-0015.
+
+### Sources
+ADR-0005, ADR-0011, ADR-0012, ADR-0014, ADR-0015.
+PR — `(feat) Add curated references for NCBI query-recall auditing`.
+Historical commits `599a111`, `d21f25a`, `0fd283a`, `21793bc`, `98e66c6`,
+`34c0ca6`, `0013c6d` (secondary provenance only — this capability is
+documented and named by what it currently adds to `master`, not by its
+historical "Phase A" roadmap step).
+
+### Notes
+The historical panel CSV and curation notes were not ported unchanged: the
+single `clade` column was replaced by the current `pago_clade` field plus an
+optional `historical_query_recall_clade` provenance field, populated only
+for the three accessions (AfAgo, SiAgo, NgAgo) whose current label diverges
+from the historical one. The 21 sequence hashes are historically derived and
+frozen, not independently re-derived in this PR — no local Phase A
+acquisition run exists on `master` to re-derive them from, and this PR is
+fully offline. RsAgo's reference accession (`ABP72561.1`) was kept as-is,
+not swapped to its byte-identical alias (`A4WYU7.1`); computing that
+equivalence is the responsibility of the future query-recall-computation PR.
+
 ---
 
 ## Local bibliographic material

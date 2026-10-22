@@ -160,9 +160,41 @@ def verify_apaz_reference_data() -> VerificationSummary:
     )
 
 
+def verify_query_recall_reference_panel_data() -> VerificationSummary:
+    from src.pago_pipeline.query_recall_reference_panel import (
+        validate_query_recall_reference_panel,
+    )
+
+    result = validate_query_recall_reference_panel()
+    family_counts = Counter(row.ago_family for row in result.rows)
+    formatted_families = ",".join(
+        f"{family}={family_counts[family]}" for family in sorted(family_counts)
+    )
+    accession_curation_counts = Counter(
+        row.accession_curation_status for row in result.rows
+    )
+    formatted_accession_curation = ",".join(
+        f"{status}={accession_curation_counts[status]}"
+        for status in sorted(accession_curation_counts)
+    )
+    return VerificationSummary(
+        reference_layer="query_recall_reference_panel",
+        details=(
+            f"references={len(result.rows)}",
+            f"families={formatted_families}",
+            f"accession_curation_status={formatted_accession_curation}",
+            f"intended_use={result.lock_payload.get('intended_use')}",
+            f"detector_validation_eligible={result.lock_payload.get('detector_validation_eligible')}",
+            f"panel_sha256={result.panel_sha256}",
+            f"curation_notes_sha256={result.curation_notes_sha256}",
+        ),
+    )
+
+
 VERIFIERS: dict[str, Verifier] = {
     "pfam": verify_pfam_reference_data,
     "apaz": verify_apaz_reference_data,
+    "query_recall": verify_query_recall_reference_panel_data,
 }
 
 
