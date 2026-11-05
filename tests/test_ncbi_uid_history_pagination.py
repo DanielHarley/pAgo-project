@@ -148,5 +148,177 @@ class TestNCBIHistoryPagination(unittest.TestCase):
                 call.kwargs["WebEnv"],
                 "TEST_WEBENV",
             )
+
+    @patch("src.pago_pipeline.ncbi_api.time.sleep")
+    @patch("src.pago_pipeline.ncbi_api.Entrez.read")
+    @patch("src.pago_pipeline.ncbi_api.Entrez.esearch")
+    def test_reject_incomplete_normalized_uid_list(
+            self,
+            mock_esearch,
+            mock_read,
+            mock_sleep,
+    ):
+        query = "PIWI[All Fields] AND Bacteria[Organism]"
+
+        # NCBI initially reports four protein UIDs.
+        initial_response = {
+            "Count": "4",
+            "WebEnv": "TEST_WEBENV",
+            "QueryKey": "1",
+            "QueryTranslation": query,
+        }
+
+        # Four entries are retrieved, but one UID is duplicated.
+        # Therefore, only three unique UIDs are present.
+        mock_read.side_effect = [
+            initial_response,
+            {"IdList": ["101", "102"]},
+            {"IdList": ["102", "104"]},
+        ]
+
+        # An incomplete normalized result must be rejected.
+        with self.assertRaisesRegex(
+                RuntimeError,
+                "UID completeness validation failed",
+        ):
+            fetch_ncbi_protein_uid_snapshot(
+                ncbi_email="test@example.org",
+                ncbi_api_key=None,
+                query=query,
+                page_size=2,
+                max_retry_attempts=1,
+                request_delay_seconds=0.0,
+                deduplicate_uids=True,
+                sort_uids=True,
+            )
+
+    @patch("src.pago_pipeline.ncbi_api.time.sleep")
+    @patch("src.pago_pipeline.ncbi_api.Entrez.read")
+    @patch("src.pago_pipeline.ncbi_api.Entrez.esearch")
+    def test_accept_complete_unique_uid_list(
+        self,
+        mock_esearch,
+        mock_read,
+        mock_sleep,
+    ):
+        query = "PIWI[All Fields] AND Bacteria[Organism]"
+
+        mock_read.side_effect = [
+            {
+                "Count": "4",
+                "WebEnv": "TEST_WEBENV",
+                "QueryKey": "1",
+                "QueryTranslation": query,
+            },
+            {"IdList": ["101", "102"]},
+            {"IdList": ["103", "104"]},
+        ]
+
+        result = fetch_ncbi_protein_uid_snapshot(
+            ncbi_email="test@example.org",
+            ncbi_api_key=None,
+            query=query,
+            page_size=2,
+            max_retry_attempts=1,
+            request_delay_seconds=0.0,
+            deduplicate_uids=True,
+            sort_uids=True,
+        )
+
+        self.assertEqual(
+            result.ncbi_reported_result_count, 4
+        )
+        self.assertEqual(
+            result.raw_protein_uid_count, 4
+        )
+        self.assertEqual(
+            result.normalized_protein_uid_count, 4
+        )
+        self.assertEqual(
+            result.protein_uids,
+            ["101", "102", "103", "104"],
+        )
+
+    @patch("src.pago_pipeline.ncbi_api.time.sleep")
+    @patch("src.pago_pipeline.ncbi_api.Entrez.read")
+    @patch("src.pago_pipeline.ncbi_api.Entrez.esearch")
+    def test_reject_duplicates_when_deduplication_disabled(
+        self,
+        mock_esearch,
+        mock_read,
+        mock_sleep,
+    ):
+        query = "PIWI[All Fields] AND Bacteria[Organism]"
+
+        mock_read.side_effect = [
+            {
+                "Count": "4",
+                "WebEnv": "TEST_WEBENV",
+                "QueryKey": "1",
+                "QueryTranslation": query,
+            },
+            {"IdList": ["101", "102"]},
+            {"IdList": ["102", "104"]},
+        ]
+
+        with self.assertRaisesRegex(
+            RuntimeError,
+            "UID completeness validation failed",
+        ):
+            fetch_ncbi_protein_uid_snapshot(
+                ncbi_email="test@example.org",
+                ncbi_api_key=None,
+                query=query,
+                page_size=2,
+                max_retry_attempts=1,
+                request_delay_seconds=0.0,
+                deduplicate_uids=False,
+                sort_uids=True,
+            )
+
+    @patch("src.pago_pipeline.ncbi_api.time.sleep")
+    @patch("src.pago_pipeline.ncbi_api.Entrez.read")
+    @patch("src.pago_pipeline.ncbi_api.Entrez.esearch")
+    def test_reject_raw_uid_count_exceeding_ncbi_count(
+                self,
+                mock_esearch,
+                mock_read,
+                mock_sleep,
+        ):
+            query = "PIWI[All Fields] AND Bacteria[Organism]"
+
+            # NCBI initially reports four protein UIDs.
+            initial_response = {
+                "Count": "4",
+                "WebEnv": "TEST_WEBENV",
+                "QueryKey": "1",
+                "QueryTranslation": query,
+            }
+
+            # Simulate an anomalous second page returning
+            # three UIDs despite a requested page size of two.
+            mock_read.side_effect = [
+                initial_response,
+                {"IdList": ["101", "102"]},
+                {"IdList": ["103", "104", "105"]},
+            ]
+
+            # Five unique UIDs must not be accepted when
+            # the original NCBI result count was four.
+            with self.assertRaisesRegex(
+                    RuntimeError,
+                    "UID completeness validation failed",
+            ):
+                fetch_ncbi_protein_uid_snapshot(
+                    ncbi_email="test@example.org",
+                    ncbi_api_key=None,
+                    query=query,
+                    page_size=2,
+                    max_retry_attempts=1,
+                    request_delay_seconds=0.0,
+                    deduplicate_uids=True,
+                    sort_uids=True,
+                )
+
 if __name__ == "__main__":
     unittest.main()
