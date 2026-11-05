@@ -1130,14 +1130,46 @@ def resolve_ncbi_protein_uid_snapshot(
             snapshot_root_directory=resolved_snapshot_root_directory,
         )
 
-    if (
-        resolved_snapshot_mode == SnapshotMode.reuse_latest_or_create
-        and latest_is_available
-    ):
-        print("Latest snapshot is available. Reusing frozen snapshot.")
-        return load_latest_snapshot(
-            snapshot_root_directory=resolved_snapshot_root_directory,
+
+    if resolved_snapshot_mode == SnapshotMode.reuse_latest_or_create:
+        latest_directory = (
+            resolved_snapshot_root_directory / "latest"
         )
+
+        # Only a genuinely absent latest snapshot permits a new fetch.
+        if latest_directory.exists() or latest_directory.is_symlink():
+
+            required_files = (
+                "manifest.json",
+                "protein_uids.txt",
+            )
+
+            missing_or_invalid_files = [
+                file_name
+                for file_name in required_files
+                if not (latest_directory / file_name).is_file()
+            ]
+
+            if (
+                not latest_directory.is_dir()
+                or missing_or_invalid_files
+            ):
+                raise RuntimeError(
+                    "Incomplete latest UID snapshot: "
+                    f"{latest_directory}. "
+                    "Missing or invalid required files: "
+                    f"{missing_or_invalid_files}. "
+                    "Refusing to create a replacement automatically."
+                )
+
+            print(
+                "Latest snapshot is available. "
+                "Reusing frozen snapshot."
+            )
+
+            return load_latest_snapshot(
+                snapshot_root_directory=resolved_snapshot_root_directory,
+            )
 
     if resolved_snapshot_mode not in {
         SnapshotMode.create_new,
