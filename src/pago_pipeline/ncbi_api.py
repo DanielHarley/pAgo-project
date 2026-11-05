@@ -554,7 +554,8 @@ def fetch_ncbi_protein_uid_snapshot(
                 try:
                     paginated_search_handle = Entrez.esearch(
                         db=database_name,
-                        term=query,
+                        term=f"#{history_query_key}",
+                        WebEnv=history_web_env,
                         usehistory="y",
                         retmax=page_size,
                         retstart=page_start_index,
@@ -625,6 +626,23 @@ def fetch_ncbi_protein_uid_snapshot(
             deduplicate_uids=deduplicate_uids,
             sort_uids=sort_uids,
         )
+
+        raw_count = len(raw_protein_uids)
+        normalized_count = len(normalized_protein_uids)
+        unique_count = len(set(normalized_protein_uids))
+
+        if (
+                raw_count != ncbi_reported_result_count
+                or normalized_count != ncbi_reported_result_count
+                or unique_count != ncbi_reported_result_count
+        ):
+            raise RuntimeError(
+                "UID completeness validation failed: "
+                f"NCBI reported {ncbi_reported_result_count} UIDs, "
+                f"but retrieved {raw_count} raw entries, "
+                f"{normalized_count} normalized entries, "
+                f"and {unique_count} unique UIDs."
+            )
 
         protein_uids_sha256 = sha256_of_lines(
             text_lines=normalized_protein_uids,
