@@ -13,6 +13,7 @@ from contextlib import contextmanager
 from contextvars import ContextVar, copy_context
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
+from enum import StrEnum
 from pathlib import Path
 from typing import Any, List, Optional
 from urllib.error import HTTPError, URLError
@@ -47,6 +48,144 @@ _default_ncbi_xml_circuit_breakers: dict[
     tuple[int, float],
     "NCBIXmlCircuitBreaker",
 ] = {}
+
+
+class NCBIProteinIdentifierType(StrEnum):
+    """
+    Supported NCBI protein identifier domains.
+    """
+    uid = "uid"
+    accession_version = "accession.version"
+
+
+def coerce_ncbi_protein_identifier_type(
+    identifier_type: NCBIProteinIdentifierType | str | None = None,
+) -> NCBIProteinIdentifierType:
+    """
+    Normalize an explicit identifier_type value.
+
+    UID remains the default for compatibility with existing callers and saved
+    manifests that predate the explicit identifier contract.
+    """
+    if identifier_type is None:
+        return NCBIProteinIdentifierType.uid
+
+    if isinstance(identifier_type, NCBIProteinIdentifierType):
+        return identifier_type
+
+    try:
+        return NCBIProteinIdentifierType(str(identifier_type))
+    except ValueError as error:
+        supported_identifier_types = ", ".join(
+            identifier_type.value for identifier_type in NCBIProteinIdentifierType
+        )
+        raise ValueError(
+            "Invalid NCBI protein identifier_type. Expected one of: "
+            f"{supported_identifier_types}."
+        ) from error
+
+
+def _identifier_matches_type(
+    *,
+    protein_identifier: str,
+    identifier_type: NCBIProteinIdentifierType,
+) -> bool:
+    if identifier_type == NCBIProteinIdentifierType.uid:
+        return protein_identifier.isdecimal()
+
+    if identifier_type == NCBIProteinIdentifierType.accession_version:
+        if "." not in protein_identifier:
+            return False
+
+        accession, version = protein_identifier.rsplit(".", 1)
+        if not version.isdecimal() or int(version) <= 0:
+            return False
+
+        return (
+            bool(accession)
+            and any(character.isalpha() for character in accession)
+            and all(
+                character.isalnum() or character == "_"
+                for character in accession
+            )
+        )
+
+    raise AssertionError(f"Unhandled identifier_type: {identifier_type}")
+
+
+def validate_ncbi_protein_identifiers(
+    *,
+    protein_identifiers: List[str],
+    identifier_type: NCBIProteinIdentifierType | str | None = None,
+    parameter_name: str = "protein_identifiers",
+) -> None:
+    """
+    Validate that every protein identifier matches one explicit identifier type.
+
+    The function validates against the declared type; it does not infer type from
+    values. This rejects mixed UID/accession.version lists at the boundary.
+    """
+    resolved_identifier_type = coerce_ncbi_protein_identifier_type(identifier_type)
+    invalid_identifiers = [
+        protein_identifier
+        for protein_identifier in protein_identifiers
+        if not _identifier_matches_type(
+            protein_identifier=protein_identifier,
+            identifier_type=resolved_identifier_type,
+        )
+    ]
+
+    if invalid_identifiers:
+        invalid_preview = invalid_identifiers[:5]
+        raise ValueError(
+            f"{parameter_name} must contain only "
+            f"{resolved_identifier_type.value} identifiers. Mixed or invalid "
+            "identifier lists are not supported. "
+            f"Invalid examples: {invalid_preview}."
+        )
+
+
+def _normalize_protein_identifier_list(
+    *,
+    protein_identifiers: List[Any],
+    identifier_type: NCBIProteinIdentifierType | str | None = None,
+    deduplicate_identifiers: bool,
+    sort_identifiers: bool,
+) -> List[str]:
+    """
+    Normalize and validate protein identifiers for one explicit identifier domain.
+
+    The function strips empty values but does not infer identifier_type from the
+    remaining values. Callers must declare the domain, with UID as the legacy
+    default when no type is supplied.
+    """
+    resolved_identifier_type = coerce_ncbi_protein_identifier_type(identifier_type)
+    normalized_protein_identifiers = [
+        str(protein_identifier).strip()
+        for protein_identifier in protein_identifiers
+        if str(protein_identifier).strip()
+    ]
+
+    validate_ncbi_protein_identifiers(
+        protein_identifiers=normalized_protein_identifiers,
+        identifier_type=resolved_identifier_type,
+    )
+
+    if deduplicate_identifiers:
+        unique_protein_identifiers: List[str] = []
+        seen_protein_identifiers = set()
+
+        for protein_identifier in normalized_protein_identifiers:
+            if protein_identifier not in seen_protein_identifiers:
+                seen_protein_identifiers.add(protein_identifier)
+                unique_protein_identifiers.append(protein_identifier)
+
+        normalized_protein_identifiers = unique_protein_identifiers
+
+    if sort_identifiers:
+        normalized_protein_identifiers = sorted(normalized_protein_identifiers)
+
+    return normalized_protein_identifiers
 
 
 def _first_configured_environment_variable(
@@ -356,6 +495,10 @@ class NCBIProteinUidFetchResult:
     Immutable payload representing one NCBI protein-UID retrieval event.
 
     This object is designed to become the basis of a reproducible local snapshot.
+    The class and constructor field names are retained for compatibility.
+    Identifier values, counts and hashes belong to identifier_type, including
+    when that domain is not UID. ESearch itself continues to produce UIDs.
+    Generic properties are aliases, not separately stored dataclass fields.
     """
     database_name: str
     search_query: str
@@ -377,6 +520,26 @@ class NCBIProteinUidFetchResult:
     python_version: str
     biopython_version: str
 
+    @property
+    def protein_identifiers(self) -> List[str]:
+        return self.protein_uids
+
+    @property
+    def raw_protein_identifier_count(self) -> int:
+        return self.raw_protein_uid_count
+
+    @property
+    def normalized_protein_identifier_count(self) -> int:
+        return self.normalized_protein_uid_count
+
+    @property
+    def protein_identifier_count(self) -> int:
+        return self.normalized_protein_uid_count
+
+    @property
+    def protein_identifiers_sha256(self) -> str:
+        return self.protein_uids_sha256
+
 
 def _normalize_protein_uid_list(
     *,
@@ -385,34 +548,14 @@ def _normalize_protein_uid_list(
     sort_uids: bool,
 ) -> List[str]:
     """
-    Normalize protein UIDs by:
-    - casting to str
-    - stripping surrounding whitespace
-    - removing empty values
-    - optionally deduplicating while preserving first occurrence order
-    - optionally sorting canonically
+    Legacy UID-specific wrapper around the generic protein identifier normalizer.
     """
-    normalized_protein_uids = [
-        str(protein_uid).strip()
-        for protein_uid in protein_uids
-        if str(protein_uid).strip()
-    ]
-
-    if deduplicate_uids:
-        unique_protein_uids: List[str] = []
-        seen_protein_uids = set()
-
-        for protein_uid in normalized_protein_uids:
-            if protein_uid not in seen_protein_uids:
-                seen_protein_uids.add(protein_uid)
-                unique_protein_uids.append(protein_uid)
-
-        normalized_protein_uids = unique_protein_uids
-
-    if sort_uids:
-        normalized_protein_uids = sorted(normalized_protein_uids)
-
-    return normalized_protein_uids
+    return _normalize_protein_identifier_list(
+        protein_identifiers=protein_uids,
+        identifier_type=NCBIProteinIdentifierType.uid,
+        deduplicate_identifiers=deduplicate_uids,
+        sort_identifiers=sort_uids,
+    )
 
 
 def fetch_ncbi_protein_uid_snapshot(
@@ -486,7 +629,7 @@ def fetch_ncbi_protein_uid_snapshot(
     Entrez.api_key = ncbi_api_key
 
     database_name = "protein"
-    identifier_type = "uid"
+    identifier_type = NCBIProteinIdentifierType.uid.value
 
     resolved_request_delay_seconds: float
     if request_delay_seconds is None:
@@ -668,6 +811,10 @@ def fetch_ncbi_protein_uid_snapshot(
 class NCBIProteinXmlBatchFetchResult:
     """
     Immutable payload representing one XML batch fetched from NCBI Entrez.
+
+    protein_uids and protein_uid_count are legacy constructor field names for
+    identifiers in the enclosing NCBIProteinXmlFetchResult.identifier_type
+    domain. Generic properties expose the same data without duplicating state.
     """
     batch_index: int
     batch_start_index: int
@@ -676,6 +823,14 @@ class NCBIProteinXmlBatchFetchResult:
     protein_uid_count: int
     xml_payload_bytes: bytes
     xml_payload_sha256: str
+
+    @property
+    def protein_identifiers(self) -> List[str]:
+        return self.protein_uids
+
+    @property
+    def protein_identifier_count(self) -> int:
+        return self.protein_uid_count
 
 
 class NCBITransientFetchError(RuntimeError):
@@ -803,6 +958,9 @@ class NCBIProteinXmlFetchResult:
     Important:
     This object describes the API retrieval step only.
     It does not persist any local snapshot by itself.
+    Legacy UID-named counts and hashes describe identifiers in identifier_type,
+    including accession.version. Generic properties are read-only aliases;
+    constructor fields and dataclass serialization remain compatible.
     """
     database_name: str
     identifier_type: str
@@ -825,6 +983,22 @@ class NCBIProteinXmlFetchResult:
     retry_backoff_max_seconds: Optional[float] = None
     circuit_breaker_failure_threshold: Optional[int] = None
     circuit_breaker_cooldown_seconds: Optional[float] = None
+
+    @property
+    def requested_protein_identifier_count(self) -> int:
+        return self.requested_protein_uid_count
+
+    @property
+    def normalized_protein_identifier_count(self) -> int:
+        return self.normalized_protein_uid_count
+
+    @property
+    def protein_identifier_count(self) -> int:
+        return self.normalized_protein_uid_count
+
+    @property
+    def protein_identifiers_sha256(self) -> str:
+        return self.protein_uids_sha256
 
 
 def _coerce_payload_to_bytes(
@@ -1150,6 +1324,7 @@ def fetch_ncbi_protein_xml_batches(
     ncbi_email: str,
     ncbi_api_key: Optional[str],
     protein_uids: List[str],
+    identifier_type: str = "uid",
     ssl_ca_file: Optional[str] = None,
     ssl_ca_directory: Optional[str] = None,
     batch_size: int = 100,
@@ -1165,9 +1340,9 @@ def fetch_ncbi_protein_xml_batches(
     circuit_breaker: Optional[NCBIXmlCircuitBreaker] = None,
 ) -> NCBIProteinXmlFetchResult:
     """
-    Fetch raw protein XML batches from NCBI Entrez using a frozen list of protein UIDs.
+    Fetch raw protein XML batches from NCBI Entrez using a frozen list of protein identifiers.
 
-    This function is intended to run downstream of a previously frozen UID snapshot.
+    This function is intended to run downstream of a previously frozen identifier snapshot.
     It performs remote retrieval only and returns in-memory batch payloads as raw bytes.
 
     Args:
@@ -1176,7 +1351,15 @@ def fetch_ncbi_protein_xml_batches(
         ncbi_api_key:
             Optional NCBI API key. If provided, a higher request rate is allowed.
         protein_uids:
-            Frozen list of protein UIDs that should be fetched as XML.
+            Frozen list of protein identifiers that should be fetched as XML.
+            The legacy parameter name is retained for compatibility with callers.
+            Normalization removes surrounding whitespace and empty values while
+            preserving order and duplicates. Both domains use EFetch's id parameter.
+        identifier_type:
+            Explicit identifier domain for protein_uids. Defaults to "uid" for
+            compatibility. Supported values are "uid" and "accession.version".
+            Mixed lists and identifiers incompatible with the declared domain
+            raise ValueError before any network request; no type is inferred.
         ssl_ca_file:
             Optional CA bundle file used to validate HTTPS connections to NCBI.
             If omitted, NCBI_SSL_CERT_FILE and then SSL_CERT_FILE are checked.
@@ -1184,7 +1367,7 @@ def fetch_ncbi_protein_xml_batches(
             Optional CA directory used to validate HTTPS connections to NCBI.
             If omitted, NCBI_SSL_CERT_DIR and then SSL_CERT_DIR are checked.
         batch_size:
-            Number of protein UIDs requested per EFetch call.
+            Number of protein identifiers requested per EFetch call.
         max_retry_attempts:
             Maximum retry attempts for each failed batch request.
         request_delay_seconds:
@@ -1216,11 +1399,11 @@ def fetch_ncbi_protein_xml_batches(
             cooldown is reused automatically across calls.
 
     Partial responses:
-        NCBI may omit an invalid, removed, or otherwise unavailable UID while
+        NCBI may omit an invalid, removed, or otherwise unavailable identifier while
         returning syntactically valid XML. A batch with fewer or more direct
-        XML records than requested UIDs is treated as a permanent response
+        XML records than requested identifiers is treated as a permanent response
         validation failure and is not retried because retrying cannot establish
-        which UID was omitted.
+        which identifier was omitted.
 
     Returns:
         NCBIProteinXmlFetchResult:
@@ -1242,20 +1425,23 @@ def fetch_ncbi_protein_xml_batches(
         parameter_value=max_retry_attempts,
     )
 
-    normalized_protein_uids = _normalize_protein_uid_list(
-        protein_uids=protein_uids,
-        deduplicate_uids=False,
-        sort_uids=False,
+    resolved_identifier_type = coerce_ncbi_protein_identifier_type(identifier_type)
+    normalized_protein_uids = _normalize_protein_identifier_list(
+        protein_identifiers=protein_uids,
+        identifier_type=resolved_identifier_type,
+        deduplicate_identifiers=False,
+        sort_identifiers=False,
     )
 
     if not normalized_protein_uids:
-        raise ValueError("protein_uids must contain at least one non-empty UID.")
+        raise ValueError(
+            "protein_uids must contain at least one non-empty protein identifier."
+        )
 
     Entrez.email = ncbi_email
     Entrez.api_key = ncbi_api_key
 
     database_name = "protein"
-    identifier_type = "uid"
     retmode = "xml"
 
     resolved_request_delay_seconds: float
@@ -1354,7 +1540,7 @@ def fetch_ncbi_protein_xml_batches(
                     print(
                         f"Starting XML request for batch {batch_index}/{total_batch_count} "
                         f"(attempt {retry_attempt_index + 1}/{max_retry_attempts}) "
-                        f"with {len(current_batch_protein_uids)} protein UIDs."
+                        f"with {len(current_batch_protein_uids)} protein identifiers."
                     )
 
                     request_started_at = time.perf_counter()
@@ -1430,7 +1616,7 @@ def fetch_ncbi_protein_xml_batches(
                         raise NCBIXmlResponseValidationError(
                             "NCBI returned a partial or mismatched XML batch; "
                             "the direct XML record count does not match the "
-                            "requested protein UID count. "
+                            "requested protein identifier count. "
                             f"Expected {len(current_batch_protein_uids)}, "
                             f"got {record_count}; {batch_context}."
                         )
@@ -1450,7 +1636,7 @@ def fetch_ncbi_protein_xml_batches(
 
                     print(
                         f"Fetched XML batch {batch_index}/{total_batch_count} "
-                        f"with {len(current_batch_protein_uids)} protein UIDs."
+                        f"with {len(current_batch_protein_uids)} protein identifiers."
                     )
 
                     jitter_seconds = random.uniform(0.01, 0.05)
@@ -1525,7 +1711,7 @@ def fetch_ncbi_protein_xml_batches(
 
         fetch_result = NCBIProteinXmlFetchResult(
             database_name=database_name,
-            identifier_type=identifier_type,
+            identifier_type=resolved_identifier_type.value,
             retrieved_at_utc=retrieved_at_utc,
             requested_protein_uid_count=len(protein_uids),
             normalized_protein_uid_count=len(normalized_protein_uids),
@@ -1549,7 +1735,7 @@ def fetch_ncbi_protein_xml_batches(
 
         print(
             f"Fetched {fetch_result.batch_count} XML batches for "
-            f"{fetch_result.normalized_protein_uid_count} protein UIDs."
+            f"{fetch_result.normalized_protein_uid_count} protein identifiers."
         )
 
         return fetch_result
