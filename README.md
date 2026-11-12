@@ -1,10 +1,53 @@
 # pAgo Project
 
-This repository contains a reproducible pipeline for collecting NCBI protein
-records related to pAgo candidates, materializing raw XML snapshots, extracting
-protein metadata, curating pAgo evidence and labels, materializing filtered
-datasets, generating sequence embeddings, and running exploratory PCA and
-KMeans analyses.
+**Reproducible research software for prokaryotic Argonaute (pAgo) candidate discovery, evidence curation, and exploratory sequence analysis.**
+
+This project investigates how to construct scientifically defensible protein candidate and reference datasets before attempting functional prediction. It combines NCBI protein retrieval, sequence and metadata processing, curated reference resources, similarity-aware data partitioning, exploratory protein embeddings, and reproducible computational workflows. A final validated functional or catalytic-activity predictor is **not** provided.
+
+## Project at a glance
+
+| Area | Implemented in this repository | Scientific boundary |
+| --- | --- | --- |
+| Acquisition | NCBI protein UID and XML retrieval, metadata extraction, and FASTA materialization with immutable snapshots | Text-query hits are candidates, not confirmed pAgos |
+| Curation | Metadata-based evidence inventory and conservative filtered datasets; pinned Pfam and APAZ reference resources | Legacy QC labels are audit features, not ground-truth classes |
+| Reference analysis | Reconstructed 1,010-entry literature pAgo catalog, MID-PIWI extraction, similarity-group resources, and a 21-entry query-recall panel | Query recall measures retrieval coverage, not detector accuracy |
+| Exploratory ML | SWeeP sequence embeddings, PCA, and KMeans analysis | Clusters and silhouette scores do not establish functional classes |
+| Software engineering | Versioned manifests, SHA-256 integrity checks, reusable Python modules, regression tests, and Linux/Windows CI | Computational reproducibility does not establish biological validity |
+
+The audited annotation-enriched NCBI search described in the scientific documentation retrieved **52,473 records**; that execution dataset remains local and is not committed as a complete public artifact. The frozen Ryazansky reference reconstruction includes **1,010 entries**, with MID-PIWI regions extracted for **1,002**. These counts describe distinct datasets and should not be combined as a classifier benchmark.
+
+## What a reviewer can inspect
+
+1. **Problem framing and scientific limitations:** [`documentation/SCIENTIFIC_STATE.md`](documentation/SCIENTIFIC_STATE.md) describes dataset meaning, evidence boundaries, unresolved questions, and where predictive validation remains pending.
+2. **Reusable implementation:** [`src/pago_pipeline/`](src/pago_pipeline/) contains the Python modules for retrieval, snapshots, curation, references, and exploratory analysis.
+3. **Tests and continuous integration:** [`tests/`](tests/) and [`.github/workflows/ci.yml`](.github/workflows/ci.yml) show automated checks and the declared Linux/Windows test environments.
+4. **Traceability:** [`documentation/decisions/`](documentation/decisions/) records methodological and engineering choices, while [`documentation/PROJECT_LEDGER.md`](documentation/PROJECT_LEDGER.md) records major decision events.
+5. **Notebook execution order:** [`notebooks/`](notebooks/) contains the numbered orchestration notebooks; reusable logic is implemented in Python modules rather than duplicated across notebooks.
+
+## Pipeline architecture
+
+~~~text
+NCBI search / protein UIDs
+  -> XML snapshots and metadata
+  -> sequence FASTA and QC evidence
+  -> conservative candidate subsets
+  -> exploratory embeddings -> PCA / KMeans / visualization
+
+Independent reference/evaluation instruments:
+  Pfam / APAZ resources -> profile-HMM construction and split-group controls
+  literature pAgo catalog -> MID-PIWI regions and similarity groups
+  curated query-recall panel -> retrieval-coverage measurement
+~~~
+
+Each arrow represents a data-processing relationship, not a claim that the complete sequence is runnable without external dependencies or that exploratory outputs provide validated biological labels.
+
+## Research status and attribution
+
+**Implemented and inspectable:** the acquisition, data-quality, reference-resource, snapshot/provenance, query-recall, and exploratory-analysis components described above. **Pending as validated research outputs:** a final supervised pAgo functional classifier, calibrated catalytic-activity prediction, experimentally validated guide/target specificity, and a validated wet-lab activity result.
+
+This repository is maintained by **Daniel Harley** in the context of research at the **Federal University of Paraná (UFPR)**, supervised by **Roberto Tadeu Raittz**, with scientific collaboration involving **Diego Bonatto (UFRGS)**. Git commit and pull-request history provide evidence of repository changes, but commit authorship alone does not establish individual authorship of every scientific idea or experimental contribution. Additional contributor-specific responsibilities should be attributed from verified project records.
+
+The source code is publicly readable. No license file is currently included, so redistribution or reuse permissions should not be assumed. The SWeeP dependency is intentionally absent from Git because of intellectual-property restrictions; the limitations of public reproduction are detailed below.
 
 ## Recreating the environment
 
@@ -18,7 +61,7 @@ used to generate `requirements.lock.txt`.
 ### 1. Clone the repository
 
 ```powershell
-git clone <repo-url>
+git clone https://github.com/DanielHarley/pAgo-project.git
 cd pAgo-project
 ```
 
