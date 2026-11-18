@@ -554,7 +554,8 @@ def fetch_ncbi_protein_uid_snapshot(
                 try:
                     paginated_search_handle = Entrez.esearch(
                         db=database_name,
-                        term=query,
+                        term=f"#{history_query_key}",
+                        WebEnv=history_web_env,
                         usehistory="y",
                         retmax=page_size,
                         retstart=page_start_index,
