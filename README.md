@@ -152,6 +152,15 @@ Notebooks are orchestration layers only. Reusable logic lives under
 `src/pago_pipeline/`, where each snapshot-producing stage owns its validation,
 manifest, and reuse behavior.
 
+The import cell of notebooks `01` to `09` removes every cached
+`src.pago_pipeline` module before importing, so rerunning that cell in a
+running kernel picks up edits to any file under `src/pago_pipeline/`, including
+modules that are only imported transitively. Objects created before the rerun
+keep the old code, so restart the kernel after changing a class, dataclass
+fields, or `Enum` members, after editing
+`src/pago_pipeline/notebook_reload.py` itself, or whenever a notebook raises an
+unexpected `ImportError` or `AttributeError` after a code change.
+
 ## pAgo QC curation
 
 The pAgo QC workflow separates observation, interpretation, and operational
