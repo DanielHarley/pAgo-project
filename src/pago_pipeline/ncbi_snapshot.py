@@ -445,6 +445,335 @@ def _build_xml_snapshot_manifest(
     }
 
 
+_PROTEIN_UID_PATTERN = re.compile(r"[0-9]+")
+_UID_SNAPSHOT_FORMAT_VERSION = "1.0"
+_MAX_REPORTED_INVALID_UIDS = 5
+_REQUIRED_UID_SNAPSHOT_MANIFEST_KEYS = (
+    "snapshot_format_version",
+    "ncbi_reported_result_count",
+    "raw_protein_uid_count",
+    "normalized_protein_uid_count",
+    "deduplicate_uids",
+    "sort_uids",
+    "protein_uids_sha256",
+)
+
+
+class SnapshotValidationError(RuntimeError):
+    """
+    Raised when a protein UID snapshot fails content validation before promotion.
+    """
+
+
+def _build_uid_validation_error(
+    *,
+    stage: str,
+    check_name: str,
+    observed: object,
+    expected: object,
+) -> SnapshotValidationError:
+    """
+    Build the failure raised by UID snapshot validation.
+
+    The message names the failed check with observed and expected values, states
+    that no snapshot was published and any existing latest/ snapshot was kept,
+    lists possible causes without asserting one, and suggests a next step.
+    """
+    return SnapshotValidationError(
+        f"UID snapshot validation failed in {stage} on check '{check_name}': "
+        f"observed {observed}, expected {expected}. "
+        "No snapshot was published and any existing latest/ snapshot was kept "
+        "unchanged. "
+        "Possible causes include a search query that matched no records, or "
+        "collected UIDs that do not match the count reported by NCBI. "
+        "Next step: review the search query and rerun with "
+        "snapshot_mode='create_new'."
+    )
+
+
+def _is_valid_protein_uid(protein_uid: object) -> bool:
+    """
+    Return True for a non-empty string made only of ASCII digits.
+    """
+    return (
+        isinstance(protein_uid, str)
+        and _PROTEIN_UID_PATTERN.fullmatch(protein_uid) is not None
+    )
+
+
+def _check_uid_list_content(
+    *,
+    stage: str,
+    protein_uids: list[str],
+    deduplicate_uids: bool,
+    sort_uids: bool,
+) -> None:
+    """
+    Validate identifier format, uniqueness, and ordering of a UID list.
+
+    Ordering is lexicographic string order, matching how the UIDs are sorted
+    when the snapshot is built, not numeric order.
+    """
+    invalid_protein_uids = [
+        protein_uid
+        for protein_uid in protein_uids
+        if not _is_valid_protein_uid(protein_uid)
+    ]
+    if invalid_protein_uids:
+        raise _build_uid_validation_error(
+            stage=stage,
+            check_name="protein_uid_format",
+            observed=(
+                f"{len(invalid_protein_uids)} invalid identifier(s), first: "
+                f"{invalid_protein_uids[:_MAX_REPORTED_INVALID_UIDS]!r}"
+            ),
+            expected="every UID matches ^[0-9]+$",
+        )
+
+    if deduplicate_uids and len(set(protein_uids)) != len(protein_uids):
+        raise _build_uid_validation_error(
+            stage=stage,
+            check_name="unique_uids",
+            observed=(
+                f"{len(protein_uids) - len(set(protein_uids))} duplicated UID(s)"
+            ),
+            expected="no duplicated UIDs when deduplicate_uids is true",
+        )
+
+    if sort_uids and protein_uids != sorted(protein_uids):
+        raise _build_uid_validation_error(
+            stage=stage,
+            check_name="lexicographic_uid_order",
+            observed="UIDs are not in lexicographic string order",
+            expected="UIDs in lexicographic string order when sort_uids is true",
+        )
+
+
+def _check_uid_count_relations(
+    *,
+    stage: str,
+    ncbi_reported_result_count: int,
+    raw_protein_uid_count: int,
+    normalized_protein_uid_count: int,
+) -> None:
+    """
+    Validate the count relations that must hold for any UID snapshot.
+    """
+    if raw_protein_uid_count != ncbi_reported_result_count:
+        raise _build_uid_validation_error(
+            stage=stage,
+            check_name="raw_count_matches_ncbi_reported_count",
+            observed=f"raw_protein_uid_count={raw_protein_uid_count}",
+            expected=f"ncbi_reported_result_count={ncbi_reported_result_count}",
+        )
+
+    if normalized_protein_uid_count > raw_protein_uid_count:
+        raise _build_uid_validation_error(
+            stage=stage,
+            check_name="normalized_count_not_above_raw_count",
+            observed=f"normalized_protein_uid_count={normalized_protein_uid_count}",
+            expected=f"at most raw_protein_uid_count={raw_protein_uid_count}",
+        )
+
+
+def _validate_uid_fetch_result(
+    *,
+    fetch_result: NCBIProteinUidFetchResult,
+) -> None:
+    """
+    Stage 1: validate the fetched result before any snapshot directory is created.
+
+    This is structural validation of the UID list and its recorded counts and
+    hash. It does not establish that the UID set is scientifically correct for
+    the query.
+    """
+    stage = "stage 1 (fetched result)"
+    protein_uids = fetch_result.protein_uids
+
+    if not protein_uids:
+        raise _build_uid_validation_error(
+            stage=stage,
+            check_name="non_empty_uid_list",
+            observed=(
+                "0 UIDs (NCBI reported "
+                f"{fetch_result.ncbi_reported_result_count})"
+            ),
+            expected="at least one protein UID",
+        )
+
+    _check_uid_list_content(
+        stage=stage,
+        protein_uids=protein_uids,
+        deduplicate_uids=fetch_result.deduplicate_uids,
+        sort_uids=fetch_result.sort_uids,
+    )
+
+    _check_uid_count_relations(
+        stage=stage,
+        ncbi_reported_result_count=fetch_result.ncbi_reported_result_count,
+        raw_protein_uid_count=fetch_result.raw_protein_uid_count,
+        normalized_protein_uid_count=fetch_result.normalized_protein_uid_count,
+    )
+
+    if fetch_result.normalized_protein_uid_count != len(protein_uids):
+        raise _build_uid_validation_error(
+            stage=stage,
+            check_name="normalized_count_matches_uid_list",
+            observed=(
+                f"normalized_protein_uid_count="
+                f"{fetch_result.normalized_protein_uid_count}"
+            ),
+            expected=f"len(protein_uids)={len(protein_uids)}",
+        )
+
+    recomputed_sha256 = sha256_of_lines(
+        text_lines=protein_uids,
+        deduplicate_lines_preserving_order=False,
+        sort_lines=False,
+    )
+    if recomputed_sha256 != fetch_result.protein_uids_sha256:
+        raise _build_uid_validation_error(
+            stage=stage,
+            check_name="uid_list_sha256",
+            observed=f"recomputed {recomputed_sha256}",
+            expected=f"protein_uids_sha256={fetch_result.protein_uids_sha256}",
+        )
+
+
+def _validate_persisted_uid_snapshot(
+    *,
+    snapshot_directory: PathLike,
+) -> None:
+    """
+    Stage 2: re-read a persisted UID snapshot and validate it against its manifest.
+
+    Runs after the snapshot files are written and before the snapshot is
+    promoted to latest/. The hash is the SHA-256 over the lines joined by a
+    newline without a trailing newline, not a hash of the file bytes.
+    """
+    stage = "stage 2 (persisted snapshot)"
+    resolved_snapshot_directory = _as_path(snapshot_directory)
+
+    try:
+        manifest_payload = read_json_file(
+            input_file_path=resolved_snapshot_directory / "manifest.json",
+        )
+        protein_uids = read_text_lines_from_file(
+            input_file_path=resolved_snapshot_directory / "protein_uids.txt",
+            strip_lines=False,
+            skip_empty_lines=False,
+        )
+    except (OSError, ValueError) as error:
+        raise _build_uid_validation_error(
+            stage=stage,
+            check_name="persisted_files_readable",
+            observed=repr(error),
+            expected="readable manifest.json and protein_uids.txt",
+        ) from error
+
+    if not isinstance(manifest_payload, dict):
+        raise _build_uid_validation_error(
+            stage=stage,
+            check_name="manifest_is_json_object",
+            observed=type(manifest_payload).__name__,
+            expected="a JSON object",
+        )
+
+    missing_manifest_keys = [
+        key
+        for key in _REQUIRED_UID_SNAPSHOT_MANIFEST_KEYS
+        if key not in manifest_payload
+    ]
+    if missing_manifest_keys:
+        raise _build_uid_validation_error(
+            stage=stage,
+            check_name="manifest_required_keys",
+            observed=f"missing keys {missing_manifest_keys}",
+            expected=f"keys {list(_REQUIRED_UID_SNAPSHOT_MANIFEST_KEYS)}",
+        )
+
+    format_version = manifest_payload["snapshot_format_version"]
+    if format_version != _UID_SNAPSHOT_FORMAT_VERSION:
+        raise _build_uid_validation_error(
+            stage=stage,
+            check_name="snapshot_format_version",
+            observed=repr(format_version),
+            expected=repr(_UID_SNAPSHOT_FORMAT_VERSION),
+        )
+
+    count_keys = (
+        "ncbi_reported_result_count",
+        "raw_protein_uid_count",
+        "normalized_protein_uid_count",
+    )
+    for count_key in count_keys:
+        count_value = manifest_payload[count_key]
+        if isinstance(count_value, bool) or not isinstance(count_value, int):
+            raise _build_uid_validation_error(
+                stage=stage,
+                check_name="manifest_count_type",
+                observed=f"{count_key}={count_value!r}",
+                expected="an integer",
+            )
+
+    for flag_key in ("deduplicate_uids", "sort_uids"):
+        if not isinstance(manifest_payload[flag_key], bool):
+            raise _build_uid_validation_error(
+                stage=stage,
+                check_name="manifest_flag_type",
+                observed=f"{flag_key}={manifest_payload[flag_key]!r}",
+                expected="a boolean",
+            )
+
+    if not protein_uids:
+        raise _build_uid_validation_error(
+            stage=stage,
+            check_name="non_empty_uid_file",
+            observed="protein_uids.txt has 0 lines",
+            expected="at least one protein UID",
+        )
+
+    _check_uid_list_content(
+        stage=stage,
+        protein_uids=protein_uids,
+        deduplicate_uids=manifest_payload["deduplicate_uids"],
+        sort_uids=manifest_payload["sort_uids"],
+    )
+
+    if len(protein_uids) != manifest_payload["normalized_protein_uid_count"]:
+        raise _build_uid_validation_error(
+            stage=stage,
+            check_name="line_count_matches_manifest",
+            observed=f"{len(protein_uids)} lines in protein_uids.txt",
+            expected=(
+                "normalized_protein_uid_count="
+                f"{manifest_payload['normalized_protein_uid_count']}"
+            ),
+        )
+
+    recomputed_sha256 = sha256_of_lines(
+        text_lines=protein_uids,
+        deduplicate_lines_preserving_order=False,
+        sort_lines=False,
+    )
+    if recomputed_sha256 != manifest_payload["protein_uids_sha256"]:
+        raise _build_uid_validation_error(
+            stage=stage,
+            check_name="uid_file_sha256",
+            observed=f"recomputed {recomputed_sha256}",
+            expected=f"protein_uids_sha256={manifest_payload['protein_uids_sha256']}",
+        )
+
+    _check_uid_count_relations(
+        stage=stage,
+        ncbi_reported_result_count=manifest_payload["ncbi_reported_result_count"],
+        raw_protein_uid_count=manifest_payload["raw_protein_uid_count"],
+        normalized_protein_uid_count=manifest_payload[
+            "normalized_protein_uid_count"
+        ],
+    )
+
+
 def save_ncbi_protein_uid_snapshot(
     *,
     fetch_result: NCBIProteinUidFetchResult,
@@ -453,7 +782,14 @@ def save_ncbi_protein_uid_snapshot(
 ) -> Path:
     """
     Persist one immutable local snapshot of an NCBI protein-UID retrieval event.
+
+    The fetched result is validated before any snapshot directory is created,
+    and the persisted files are validated again before the snapshot is promoted
+    to latest/. A validation failure raises SnapshotValidationError, leaves any
+    existing latest/ directory unchanged, and leaves no new snapshot directory.
     """
+    _validate_uid_fetch_result(fetch_result=fetch_result)
+
     resolved_snapshot_root_directory = _as_path(snapshot_root_directory)
 
     snapshot_directory_name = build_snapshot_directory_name(
@@ -488,6 +824,9 @@ def save_ncbi_protein_uid_snapshot(
         write_json_atomic(
             payload=manifest_payload,
             output_file_path=manifest_file_path,
+        )
+        _validate_persisted_uid_snapshot(
+            snapshot_directory=immutable_snapshot_directory,
         )
         immutable_snapshot_complete = True
 
