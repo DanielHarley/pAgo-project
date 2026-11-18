@@ -677,25 +677,101 @@ def load_snapshot_protein_uids(
     """
     return read_text_lines_from_file(input_file_path=protein_uids_file_path)
 
+def _validate_loaded_uid_snapshot(
+    *,
+    manifest_payload: Dict[str, Any],
+    protein_uids: list[str],
+) -> None:
+    """
+    Validate UID count and canonical SHA-256 against the manifest.
+
+    Reject missing, malformed, or inconsistent snapshot metadata.
+    """
+    error_prefix = "UID snapshot integrity validation failed"
+
+    if not isinstance(manifest_payload, dict):
+        raise RuntimeError(
+            f"{error_prefix}: manifest must be a JSON object."
+        )
+
+    expected_count = manifest_payload.get(
+        "normalized_protein_uid_count"
+    )
+    expected_sha256 = manifest_payload.get(
+        "protein_uids_sha256"
+    )
+
+    # Validate required manifest fields.
+    if type(expected_count) is not int or expected_count < 0:
+        raise RuntimeError(
+            f"{error_prefix}: normalized_protein_uid_count "
+            "must be a non-negative integer."
+        )
+
+    if (
+        not isinstance(expected_sha256, str)
+        or re.fullmatch(r"[0-9a-f]{64}", expected_sha256) is None
+    ):
+        raise RuntimeError(
+            f"{error_prefix}: protein_uids_sha256 "
+            "must be a 64-character lowercase hexadecimal string."
+        )
+
+    # Validate the number of loaded UIDs.
+    actual_count = len(protein_uids)
+
+    if actual_count != expected_count:
+        raise RuntimeError(
+            f"{error_prefix}: UID count mismatch. "
+            f"Expected {expected_count}, got {actual_count}."
+        )
+
+    # Use the same canonical hash representation as snapshot creation.
+    actual_sha256 = sha256_of_lines(
+        text_lines=protein_uids,
+        deduplicate_lines_preserving_order=False,
+        sort_lines=False,
+    )
+
+    if actual_sha256 != expected_sha256:
+        raise RuntimeError(
+            f"{error_prefix}: SHA-256 mismatch. "
+            f"Expected {expected_sha256}, got {actual_sha256}."
+        )
+
 
 def load_snapshot_by_directory(
     *,
     snapshot_directory: PathLike,
+    validate_uid_integrity: bool = True,
 ) -> Dict[str, Any]:
     """
-    Load both manifest metadata and protein UIDs from a snapshot directory.
+    Load snapshot metadata and protein UIDs.
+
+    Validate UID snapshot integrity before returning the payload.
     """
     resolved_snapshot_directory = _as_path(snapshot_directory)
 
-    manifest_file_path = resolved_snapshot_directory / "manifest.json"
-    protein_uids_file_path = resolved_snapshot_directory / "protein_uids.txt"
+    manifest_file_path = (
+        resolved_snapshot_directory / "manifest.json"
+    )
+    protein_uids_file_path = (
+        resolved_snapshot_directory / "protein_uids.txt"
+    )
 
     manifest_payload = load_snapshot_manifest(
         manifest_file_path=manifest_file_path,
     )
+
     protein_uids = load_snapshot_protein_uids(
         protein_uids_file_path=protein_uids_file_path,
     )
+
+    if validate_uid_integrity:
+        _validate_loaded_uid_snapshot(
+            manifest_payload=manifest_payload,
+            protein_uids=protein_uids,
+        )
 
     return {
         "snapshot_directory": resolved_snapshot_directory,
@@ -704,6 +780,7 @@ def load_snapshot_by_directory(
         "manifest": manifest_payload,
         "protein_uids": protein_uids,
     }
+
 
 
 def _validate_loaded_xml_snapshot_payload(
@@ -811,6 +888,7 @@ def load_xml_snapshot_by_directory(
     """
     snapshot_payload = load_snapshot_by_directory(
         snapshot_directory=snapshot_directory,
+        validate_uid_integrity=False,
     )
     xml_file_path = _validate_loaded_xml_snapshot_payload(
         snapshot_directory=snapshot_directory,
@@ -1052,14 +1130,46 @@ def resolve_ncbi_protein_uid_snapshot(
             snapshot_root_directory=resolved_snapshot_root_directory,
         )
 
-    if (
-        resolved_snapshot_mode == SnapshotMode.reuse_latest_or_create
-        and latest_is_available
-    ):
-        print("Latest snapshot is available. Reusing frozen snapshot.")
-        return load_latest_snapshot(
-            snapshot_root_directory=resolved_snapshot_root_directory,
+
+    if resolved_snapshot_mode == SnapshotMode.reuse_latest_or_create:
+        latest_directory = (
+            resolved_snapshot_root_directory / "latest"
         )
+
+        # Only a genuinely absent latest snapshot permits a new fetch.
+        if latest_directory.exists() or latest_directory.is_symlink():
+
+            required_files = (
+                "manifest.json",
+                "protein_uids.txt",
+            )
+
+            missing_or_invalid_files = [
+                file_name
+                for file_name in required_files
+                if not (latest_directory / file_name).is_file()
+            ]
+
+            if (
+                not latest_directory.is_dir()
+                or missing_or_invalid_files
+            ):
+                raise RuntimeError(
+                    "Incomplete latest UID snapshot: "
+                    f"{latest_directory}. "
+                    "Missing or invalid required files: "
+                    f"{missing_or_invalid_files}. "
+                    "Refusing to create a replacement automatically."
+                )
+
+            print(
+                "Latest snapshot is available. "
+                "Reusing frozen snapshot."
+            )
+
+            return load_latest_snapshot(
+                snapshot_root_directory=resolved_snapshot_root_directory,
+            )
 
     if resolved_snapshot_mode not in {
         SnapshotMode.create_new,
