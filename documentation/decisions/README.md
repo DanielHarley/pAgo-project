@@ -181,3 +181,4 @@ normal merge.
 | [0015](0015-decouple-the-ryazansky-reference-catalog-from-the-query-recall-panel.md) | Decouple the Ryazansky reference catalog from the query-recall panel |
 | [0016](0016-keep-large-raw-xml-lfs-objects-out-of-routine-ci-checkouts.md) | Keep large raw XML LFS objects out of routine CI checkouts |
 | [0017](0017-admissible-evidence-and-incomplete-evidence-in-query-recall-measurement.md) | Define admissible evidence and incomplete-evidence reporting for query-recall measurement |
+| [0018](0018-support-explicit-uid-and-accession-version-domains-in-ncbi-acquisition.md) | Support explicit UID and accession.version domains in NCBI acquisition |
